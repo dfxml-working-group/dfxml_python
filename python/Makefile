@@ -24,6 +24,7 @@ all: \
   check-Objects \
   clean-Objects
 
+# Export the directories to use
 check: export DEMO_DIR = demos
 check: export TEST_DIR = tests
 check: \
@@ -44,13 +45,13 @@ Objects.html: \
 	python3 -m pydoc -w Objects
 
 check-cat_fileobjects:
-	./tests/test_cat_fileobjects.sh
+	$(TEST_DIR)/test_cat_fileobjects.sh
 
 check-dfxml_tool:
-	./tests/test_dfxml_tool.sh
+	$(TEST_DIR)/test_dfxml_tool.sh
 
 check-idifference-dfxml:
-	./tests/test_idifference_to_dfxml.sh
+	$(TEST_DIR)/test_idifference_to_dfxml.sh
 
 # TODO: Investigate cause of state transition exception
 #
