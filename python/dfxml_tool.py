@@ -41,15 +41,15 @@ class xml:
         self.outfilename = fn
     
     def open(self,f):
-        if type(f)==file:
+        if hasattr(f, 'seek'):
             self.f = f
-        if type(f)==str or type(f)==unicode:
+        if isinstance(f, str):
             self.f = open(f,'w')
         self.write("<?xml version='1.0' encoding='UTF-8'?>\n")
         
     def dublin_core(self,dc_record):
         self.push('metadata',dfxml_ns,attrib_delim='\n  ')
-        for (n,v) in dc_record.iteritems():
+        for (n,v) in dc_record.items():
             if v!=None:
                 self.xmlout(n,v)
         self.pop('metadata')
@@ -90,7 +90,7 @@ class xml:
         if attribs:
             self.f.write(" ")
             count = len(attribs)
-            for (n,v) in attribs.iteritems():
+            for (n,v) in attribs.items():
                 self.f.write("%s='%s'" % (n,escape(v)))
                 count -= 1
                 if count>0: self.f.write(attrib_delim)
@@ -214,6 +214,7 @@ def hash_file(fn,x,partno=None):
             sys.stderr.write("%s  File: %r\n" % (warning, fn))
             buf = ""
         if buf=="": break
+        buf = buf.encode('utf-8')
 
         if args.md5:    md5_all.update(buf)
         if args.sha1:   sha1_all.update(buf)

@@ -13,7 +13,7 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
-. _pick_pythons.sh
+. ${TEST_DIR}/_pick_pythons.sh
 
 #Halt on error
 set -e
@@ -38,7 +38,7 @@ DT_OPTIONS[12]="--stripprefix .."
 iter=0
 for x in "${DT_OPTIONS[@]}"; do
   echo "Iteration $iter: Testing $x" >&2
-  "$PYTHON2" dfxml_tool.py $x ../src > dfxml_tool_p2_${iter}.dfxml
-#  "$PYTHON3" dfxml_tool.py "--$x" .. > dfxml_tool_p3_${iter}.dfxml
+#  "$PYTHON2" ../dfxml_tool.py $x ../src > dfxml_tool_p2_${iter}.dfxml
+  "$PYTHON3" dfxml_tool.py $x -- ../samples > dfxml_tool_p3_${iter}.dfxml
   iter=$(($iter+1))
 done

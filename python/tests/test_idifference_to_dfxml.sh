@@ -13,7 +13,7 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
-. _pick_pythons.sh
+. ${TEST_DIR}/_pick_pythons.sh
 
 XMLLINT=`which xmllint`
 
