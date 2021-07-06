@@ -29,16 +29,15 @@ jobs:
           if [ -r requirements.txt ];     then pip install -r requirements.txt ;     fi
           if [ -r requirements-dev.txt ]; then pip install -r requirements-dev.txt ; fi
 
-      - name: Test with pytest
-        run: pytest --cov=./ --cov-report=xml python
-
       - name:  Install xmllint on ubuntu
         if: runner.os == 'Linux'
         run: sudo apt install libxml2-utils
 
-      - name: Make checkx
-        if: runner.os == 'Linux'
+      - name: Make check
         run: make check
+
+      - name: Test with pytest
+        run: pytest --cov=./ --cov-report=xml python
 
       - name: schema test
         run: |
