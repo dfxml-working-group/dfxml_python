@@ -1,3 +1,3 @@
-source _pick_pythons.sh
+source tests/_pick_pythons.sh
 
-DEMO_DIR=../demos
+#DEMO_DIR=../demos

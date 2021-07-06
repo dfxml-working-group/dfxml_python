@@ -28,7 +28,8 @@ schema/dfxml.xsd: dfxml_schema_commit.txt
 
 clean:
 	find . -name '*~' -exec rm {} \;
+	(cd python;make clean)
 
 check:
-	(cd src;make check)
+	(cd python;make check)
 	@echo performing checks currently in Travis

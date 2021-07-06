@@ -1,9 +1,13 @@
 #!/usr/bin/python
 
-"""This is a small program written with the Python fiwalk framework to
+"""
+Helper to break PE-files in m57-corpus
+
+This is a small program written with the Python fiwalk framework to
 break the Microsoft executables from the m57 corpus. It does this by changing
 characters in the first 4096 bytes of the executable that are over hex 80 to
-hex FF"""
+hex FF
+"""
 
 import os.path,sys
 from subprocess import Popen,call,PIPE

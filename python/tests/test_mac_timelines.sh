@@ -13,7 +13,7 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
-source paths.sh
+source ${TEST_DIR}/_pick_pythons.sh
 
 #Halt on error
 set -e

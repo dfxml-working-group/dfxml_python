@@ -18,7 +18,8 @@
 #
 # This script defines two variables, PYTHON2 and PYTHON3, providing the highest-available Python binary for each major version.
 #
-PYTHON2=`which python`
+
+PYTHON2=`which python2`
 
 PYTHON3=`which python3.6 2>/dev/null || echo`
 if [ -z "$PYTHON3" ]; then

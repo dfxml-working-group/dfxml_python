@@ -4,7 +4,7 @@
 # 2020-06-27 - slg - expanded to G++ for MacOS
 #
 name: CI (python)
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -32,8 +32,17 @@ jobs:
       - name: Test with pytest
         run: pytest --cov=./ --cov-report=xml python
 
+      - name:  Install xmllint on ubuntu
+        if: runner.os == 'Linux'
+        run: sudo apt install libxml2-utils
+
+      - name: Make checkx
+        if: runner.os == 'Linux'
+        run: make check
+
       - name: schema test
         run: |
           make schema-init
           cd python/tests/test_venv
           echo disabled until https://github.com/simsong/dfxml/issues/39 is resolved.
+
