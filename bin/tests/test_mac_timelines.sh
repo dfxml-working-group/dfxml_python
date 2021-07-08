@@ -13,11 +13,19 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
+# Determine script location
+SCRIPT="$(realpath $0)"
+SCRIPT_DIR="$(dirname ${SCRIPT})"
+
+# Guarantee sane defaults
+. ${SCRIPT_DIR}/_sane_defaults.sh ${SCRIPT_DIR}
+
+# Choose python interpreter
 source ${TEST_DIR}/_pick_pythons.sh
 
-#Halt on error
+# Halt on error
 set -e
-#Display all executed commands
+# Display all executed commands
 set -x
 
 "$PYTHON2" $DEMO_DIR/demo_mac_timeline.py ../samples/simple.xml >demo_mac_timeline_simple_p2.txt

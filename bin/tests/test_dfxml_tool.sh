@@ -13,14 +13,23 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
+
+# Determine script location
+SCRIPT="$(realpath $0)"
+SCRIPT_DIR="$(dirname ${SCRIPT})"
+
+# Guarantee sane defaults
+. ${SCRIPT_DIR}/_sane_defaults.sh ${SCRIPT_DIR}
+
+# Choose python interpreter
 . ${TEST_DIR}/_pick_pythons.sh
 
-#Halt on error
+# Halt on error
 set -e
-#Display all executed commands
+# Display all executed commands
 set -x
 
-#Flags listed here in alphabetical order
+# Flags listed here in alphabetical order
 DT_OPTIONS[0]=
 DT_OPTIONS[1]=--allprovenance
 DT_OPTIONS[2]=--commandline
@@ -39,6 +48,6 @@ iter=0
 for x in "${DT_OPTIONS[@]}"; do
   echo "Iteration $iter: Testing $x" >&2
 #  "$PYTHON2" ../dfxml_tool.py $x ../src > dfxml_tool_p2_${iter}.dfxml
-  "$PYTHON3" dfxml_tool.py $x -- ../samples > dfxml_tool_p3_${iter}.dfxml
+  "$PYTHON3" ${TOOL_DIR}/dfxml_tool.py $x -- ../samples > dfxml_tool_p3_${iter}.dfxml
   iter=$(($iter+1))
 done

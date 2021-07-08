@@ -13,19 +13,27 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
+# Determine script location
+SCRIPT="$(realpath $0)"
+SCRIPT_DIR="$(dirname ${SCRIPT})"
+
+# Guarantee sane defaults
+. ${SCRIPT_DIR}/_sane_defaults.sh ${SCRIPT_DIR}
+
+# Choose python interpreter
 . ${TEST_DIR}/_pick_pythons.sh
 
 XMLLINT=`which xmllint`
 
-#Halt on error
+# Halt on error
 set -e
-#Display all executed commands
+# Display all executed commands
 set -x
 
 #NOTE: Python2's ETree does not understand the "unicode" output encoding.
-#"$PYTHON2" cat_fileobjects.py ../samples/simple.xml
-"$PYTHON3" cat_fileobjects.py --debug ../samples/simple.xml >cat_test_nocache.dfxml
-"$PYTHON3" cat_fileobjects.py --debug --cache ../samples/simple.xml >cat_test_cache.dfxml
+#"$PYTHON2" cat_fileobjects.py ../${SAMPLE_DIR}/simple.xml
+"$PYTHON3" ${TOOL_DIR}/cat_fileobjects.py --debug ${SAMPLE_DIR}/simple.xml >cat_test_nocache.dfxml
+"$PYTHON3" ${TOOL_DIR}/cat_fileobjects.py --debug --cache ${SAMPLE_DIR}/simple.xml >cat_test_cache.dfxml
 
 #This checks that the XML structure wasn't changed by cache cleaning.  Only the tail is hashed because the head contains metadata.
 subj0="x$(tail -n 10 cat_test_nocache.dfxml | openssl dgst -sha1)"
@@ -35,10 +43,10 @@ test "$subj1" != "x"
 test "$subj0" == "$subj1"
 
 if [ -x "$XMLLINT" ]; then
-  "$PYTHON3" cat_fileobjects.py ../samples/simple.xml | "$XMLLINT" -
+  "$PYTHON3" ${TOOL_DIR}/cat_fileobjects.py ${SAMPLE_DIR}/simple.xml | "$XMLLINT" -
 else
   echo "Warning: xmllint not found.  Skipped check for if generated DFXML is valid XML." >&2
 fi
 
-test $(grep '<fileobject' ../samples/simple.xml | wc -l) == $(grep '<fileobject' cat_test_nocache.dfxml | wc -l)
-test $(grep '<fileobject' ../samples/simple.xml | wc -l) == $(grep '<fileobject' cat_test_cache.dfxml | wc -l)
+test $(grep '<fileobject' ${SAMPLE_DIR}/simple.xml | wc -l) == $(grep '<fileobject' cat_test_nocache.dfxml | wc -l)
+test $(grep '<fileobject' ${SAMPLE_DIR}/simple.xml | wc -l) == $(grep '<fileobject' cat_test_cache.dfxml | wc -l)

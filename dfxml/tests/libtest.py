@@ -47,7 +47,7 @@ def confirm_schema_conformance(dfxml_path):
         _FileNotFoundError = FileNotFoundError
 
     # Confirm this function is acting from the expected directory relative to the repository root.
-    top_srcdir = os.path.join(os.path.dirname(__file__), "..", "..", "..")
+    top_srcdir = os.path.join(os.path.dirname(__file__), "..", "..")
     if not os.path.exists(os.path.join(top_srcdir, "dfxml_schema_commit.txt")):
         raise _FileNotFoundError("This script (%r) tries to refer to the top Git-tracked DFXML directory, but could not find it based on looking for dfxml_schema_commit.txt." % os.path.basename(__file__))
 
