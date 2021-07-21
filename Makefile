@@ -28,8 +28,12 @@ schema/dfxml.xsd: dfxml_schema_commit.txt
 
 clean:
 	find . -name '*~' -exec rm {} \;
-	(cd python;make clean)
+	(cd bin;make clean)
 
-check:
-	(cd python;make check)
+check-tools:
+	(cd bin;make check)
 	@echo performing checks currently in Travis
+
+check-core:
+	cd dfxml
+	PYTHONPATH=./bin python3 -m pytest dfxml

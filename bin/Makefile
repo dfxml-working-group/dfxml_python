@@ -24,9 +24,15 @@ all: \
   check-Objects \
   clean-Objects
 
+#WORKING_DIR = $(shell pwd)
+
 # Export the directories to use
-check: export DEMO_DIR = demos
+#check: export PYTHONPATH = /home/user01/dfxml_python/
+check: export PYTHONPATH = $(shell dirname $(shell pwd))
+check: export TOOL_DIR = $(shell pwd)
 check: export TEST_DIR = tests
+check: export DEMO_DIR = ../demos
+check: export SAMPLE_DIR = ../samples
 check: \
   check-cat_fileobjects \
   check-dfxml_tool \

@@ -34,14 +34,14 @@ jobs:
         run: sudo apt install libxml2-utils
 
       - name: Make check
-        run: make check
+        run: make check-tools
 
       - name: Test with pytest
-        run: pytest --cov=./ --cov-report=xml python
+        run: PYTHONPATH=./bin pytest --cov=./ --cov-report=xml dfxml
 
       - name: schema test
         run: |
           make schema-init
-          cd python/tests/test_venv
+          cd bin/tests/test_venv
           echo disabled until https://github.com/simsong/dfxml/issues/39 is resolved.
 
