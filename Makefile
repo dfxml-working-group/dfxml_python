@@ -35,6 +35,12 @@ clean:
 	find . -name '*~' -exec rm {} \;
 	(cd bin;make clean)
 
+check:
+	$(MAKE) \
+	  SHELL=$(SHELL) \
+	  --directory tests \
+	  check
+
 check-tools:
 	(cd bin;make check)
 	@echo performing checks currently in Travis

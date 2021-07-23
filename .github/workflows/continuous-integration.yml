@@ -34,6 +34,9 @@ jobs:
         run: sudo apt install libxml2-utils
 
       - name: Make check
+        run: make check
+
+      - name: Make check-tools
         run: make check-tools
 
       - name: Test with pytest
@@ -42,6 +45,3 @@ jobs:
       - name: schema test
         run: |
           make schema-init
-          cd bin/tests/test_venv
-          echo disabled until https://github.com/simsong/dfxml/issues/39 is resolved.
-

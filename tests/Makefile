@@ -16,35 +16,44 @@ ifeq ($(shell basename $(SHELL)),sh)
 SHELL := $(shell which /bin/bash 2>/dev/null || which /usr/local/bin/bash)
 endif
 
-# The PYTHON variable is written to be provided primarily by a Travis virtual environment.  Local tests should provide their own python binary by calling 'make PYTHON=python3.7 [...]'
-PYTHON ?= $(shell which python 2>/dev/null || which python3 2>/dev/null || which python3.7 2>/dev/null || which python3.6 2>/dev/null)
-ifeq ($(PYTHON),)
-$(error PYTHON not defined)
+top_srcdir := $(shell cd .. ; pwd)
+
+PYTHON3 ?= $(shell which python3.9 2>/dev/null || which python3.8 2>/dev/null || which python3.7 2>/dev/null || which python3.6 2>/dev/null || which python3)
+ifeq ($(PYTHON3),)
+$(error python3 not found)
 endif
 
-VIRTUALENV ?= $(shell which virtualenv 2>/dev/null || which virtualenv-3.7 2>/dev/null || which virtualenv-3.6 2>/dev/null)
-ifeq ($(VIRTUALENV),)
-$(error VIRTUALENV not defined)
-endif
-
-all: \
-  .venv.done.log
+all:
 
 .venv.done.log: \
-  ../../setup.py
+  $(top_srcdir)/setup.py \
+  requirements.txt
 	rm -rf venv
-	$(VIRTUALENV) \
-	  --python=$(PYTHON) \
+	$(PYTHON3) -m venv \
 	  venv
 	source venv/bin/activate \
-	  ; pip install ../..
+	  && pip install \
+	    --upgrade \
+	    pip \
+	    setuptools
+	source venv/bin/activate \
+	  && cd $(top_srcdir) \
+	    && pip install \
+	      --editable \
+	      .
+	source venv/bin/activate \
+	  && pip install \
+	    --requirement requirements.txt
 	touch $@
 
 check: \
-  .venv.done.log \
-  simple_read_dfxml.py
+  .venv.done.log
 	source venv/bin/activate \
-	  ; python simple_read_dfxml.py ../../../samples/difference_test_0.xml
+	  && pytest \
+	    --log-level=DEBUG
 
 clean:
-	@rm -rf .venv.done.log venv
+	@rm -f \
+	  .venv.done.log
+	@rm -rf \
+	  venv

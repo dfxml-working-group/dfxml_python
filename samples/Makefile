@@ -11,10 +11,7 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
-# Bash selection is described in the top-level Makefile.
-ifeq ($(shell basename $(SHELL)),sh)
-SHELL := $(shell which /bin/bash 2>/dev/null || which /usr/local/bin/bash)
-endif
+SHELL ?= /bin/bash
 
 XMLLINT ?= $(shell which xmllint)
 ifeq ($(XMLLINT),)
