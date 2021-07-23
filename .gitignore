@@ -9,4 +9,5 @@ schema
 python/demo.dfxml
 .cache
 .pytest_cache
+*.egg-info
 *.log

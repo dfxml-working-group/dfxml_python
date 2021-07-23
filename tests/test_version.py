@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # This software was developed at the National Institute of Standards
 # and Technology by employees of the Federal Government in the course
@@ -11,20 +11,7 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
-"""
-This script confirms that the DFXML pip-managed packaging exposes the dfxml package and the objects.py module.
-"""
-
-import sys
-
 import dfxml
-import dfxml.objects
 
-def nop(x):
-    pass
-
-with open(sys.argv[1], "rb") as fh:
-    dfxml.read_dfxml(fh, callback=nop)
-
-for (event, obj) in dfxml.objects.iterparse(sys.argv[1]):
-    pass
+def test_version():
+    assert not dfxml.__version__ is None
