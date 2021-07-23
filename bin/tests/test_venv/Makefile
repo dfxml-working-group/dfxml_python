@@ -11,7 +11,10 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
-SHELL = /bin/bash
+# Bash selection is described in the top-level Makefile.
+ifeq ($(shell basename $(SHELL)),sh)
+SHELL := $(shell which /bin/bash 2>/dev/null || which /usr/local/bin/bash)
+endif
 
 # The PYTHON variable is written to be provided primarily by a Travis virtual environment.  Local tests should provide their own python binary by calling 'make PYTHON=python3.7 [...]'
 PYTHON ?= $(shell which python 2>/dev/null || which python3 2>/dev/null || which python3.7 2>/dev/null || which python3.6 2>/dev/null)

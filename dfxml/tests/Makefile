@@ -13,7 +13,11 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
-SHELL = /bin/bash
+# Bash selection is described in the top-level Makefile.
+ifeq ($(shell basename $(SHELL)),sh)
+SHELL := $(shell which /bin/bash 2>/dev/null || which /usr/local/bin/bash)
+endif
+
 PICK_PYTHONS = ../../tests/_pick_pythons.sh
 SAMPLES_DIR=../../../samples
 

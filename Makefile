@@ -11,7 +11,12 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
-SHELL ?= /bin/bash
+# While SHELL would typically be set with ":=" assignment, some
+# environments do not have Bash at /bin/bash (e.g. FreeBSD stores Bash
+# at /usr/local/bin/bash).
+ifeq ($(shell basename $(SHELL)),sh)
+SHELL := $(shell which /bin/bash 2>/dev/null || which /usr/local/bin/bash)
+endif
 
 SCHEMA_REPOSITORY_URL ?= https://github.com/dfxml-working-group/dfxml_schema.git
 
