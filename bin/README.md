@@ -5,7 +5,14 @@ This directory contains scripts that can be run when the `dfxml` module is insta
 
 ## Overview about the provided tools
 
-The following DFXML tools are provided:
+Some tools are provided as command-line programs when the `dfxml` module is installed.
+
+| Program name             | Short description                                                                    |
+|--------------------------+--------------------------------------------------------------------------------------|
+| walk_to_dfxml.py         | Fully walk the current working directory and record all files encountered.           |
+
+The following DFXML tools are provided in this directory:
+
 | Script name              | Short description                                                                    |
 |--------------------------+--------------------------------------------------------------------------------------|
 | allocation_counter       | Produces a cross-tabulation of the allocation state of each file's inode and name.   |
@@ -33,7 +40,6 @@ The following DFXML tools are provided:
 ### Work needed
 
 - dfxml_tool.py 
-- walk_to_dfxml.py 
 - idifference2.py
 - iexport.py
 - exp_slack.py

@@ -84,7 +84,6 @@ check-versioned:
 	$$PY DFXMLObject_program_test.py $(SAMPLES_DIR)/difference_test_0.xml vi 8.0
 	$$PY verify_differential_dfxml_01_test.py
 	$$PY verify_differential_dfxml_23_test.py
-	./walk_ignore_test.sh $$PY
 
 clean:
 	rm -f differential_dfxml_test_??.{xml,txt}
@@ -93,7 +92,6 @@ clean:
 	rm -f cat_partitions_test.sh.dfxml
 	rm -f diff_file_ignore_sample-py[23].dfxml
 	rm -f LibraryObject_py[23]_test.dfxml
-	rm -rf walk_ignore_test/ walk_ignore_*_test.dfxml
 	rm -f *~
 
 
