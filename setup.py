@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 # This software was developed in whole or in part by employees of the
 # Federal Government in the course of their official duties, and with
@@ -13,11 +14,5 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
-from setuptools import setup, find_packages
-setup(
-  name='dfxml',
-  version='1.0.1',
-  url='https://github.com/simsong/dfxml',
-  scripts=['bin/idifference.py','bin/rdifference.py'],
-  packages=find_packages()
-)
+import setuptools
+setuptools.setup()

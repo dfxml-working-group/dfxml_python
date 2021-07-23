@@ -26,6 +26,7 @@ endif
 all:
 
 .venv.done.log: \
+  $(top_srcdir)/setup.cfg \
   $(top_srcdir)/setup.py \
   requirements.txt
 	rm -rf venv
