@@ -18,6 +18,6 @@ setup(
   name='dfxml',
   version='1.0.1',
   url='https://github.com/simsong/dfxml',
-  scripts=['tools/idifference.py','tools/rdifference.py'],
+  scripts=['bin/idifference.py','bin/rdifference.py'],
   packages=find_packages()
 )
