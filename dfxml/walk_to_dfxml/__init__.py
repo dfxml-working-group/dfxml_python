@@ -15,7 +15,7 @@
 
 """Walk current directory, writing DFXML to stdout."""
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 
 import os
 import stat
@@ -167,6 +167,20 @@ def filepath_to_fileobject(filepath, **kwargs):
 
 def main():
     global walk_default_hashes
+
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-d", "--debug", action="store_true")
+    parser.add_argument("-i", "--ignore", action="append", help="Do not track named property on file objects.  E.g. '-i inode' will exclude inode numbers from DFXML manifest.  Can be given multiple times.  To exclude a fileobject property of a specific file type (e.g. regular, directory, device), supply the name_type value in addition; for example, to ignore mtime of a directory, '-i mtime@d'.")
+    parser.add_argument("--ignore-hashes", action="store_true", help="Do not calculate any hashes.  Equivalent to passing -i for each of %s." % (", ".join(sorted(walk_default_hashes))))
+    parser.add_argument("-j", "--jobs", type=int, default=1, help="Number of file-processing threads to run.")
+    args = parser.parse_args()
+
+    logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
+
+    if args.jobs <= 0:
+        raise ValueError("If requesting multiple jobs, please request 1 or more worker threads.")
+
     #Determine whether we're going in threading mode or not.  (Some modules are not available by default.)
     using_threading = False
     if args.jobs > 1:
@@ -271,17 +285,4 @@ def main():
     dobj.print_dfxml()
 
 if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--debug", action="store_true")
-    parser.add_argument("-i", "--ignore", action="append", help="Do not track named property on file objects.  E.g. '-i inode' will exclude inode numbers from DFXML manifest.  Can be given multiple times.  To exclude a fileobject property of a specific file type (e.g. regular, directory, device), supply the name_type value in addition; for example, to ignore mtime of a directory, '-i mtime@d'.")
-    parser.add_argument("--ignore-hashes", action="store_true", help="Do not calculate any hashes.  Equivalent to passing -i for each of %s." % (", ".join(sorted(walk_default_hashes))))
-    parser.add_argument("-j", "--jobs", type=int, default=1, help="Number of file-processing threads to run.")
-    args = parser.parse_args()
-
-    logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
-
-    if args.jobs <= 0:
-        raise ValueError("If requesting multiple jobs, please request 1 or more worker threads.")
-
     main()

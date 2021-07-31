@@ -23,9 +23,19 @@ ifeq ($(PYTHON3),)
 $(error python3 not found)
 endif
 
-all:
+all: \
+  all-walk_to_dfxml
+
+.PHONY: \
+  all-walk_to_dfxml
+
+all-walk_to_dfxml: \
+  .venv.done.log
+	$(MAKE) \
+	  --directory walk_to_dfxml
 
 .venv.done.log: \
+  $(top_srcdir)/setup.cfg \
   $(top_srcdir)/setup.py \
   requirements.txt
 	rm -rf venv
@@ -47,12 +57,15 @@ all:
 	touch $@
 
 check: \
-  .venv.done.log
+  all-walk_to_dfxml
 	source venv/bin/activate \
 	  && pytest \
 	    --log-level=DEBUG
 
 clean:
+	@$(MAKE) \
+	  --directory walk_to_dfxml \
+	  clean
 	@rm -f \
 	  .venv.done.log
 	@rm -rf \

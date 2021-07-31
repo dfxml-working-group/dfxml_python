@@ -10,11 +10,11 @@ DFXML is a file format designed to capture metadata and provenance information a
 This repository contains original DFXML implementations in Python for writing DFXML files, as well as an assortment of tools for reading, generating, and processing DFXML files. The folder layout is as follows:
 
 ```
-python/		- Python source files (dfxml-module and several tools)
-python/dfxml/	   	- The Python DFXML module
-python/dfxml/tests 	- Unit tests for the DFXML modules.
-python/tests	   	- Unit tests for the DFXML tools.
-samples/	   	- Exemplary .dfxml-files
+bin/		- Standalone tools usable when the DFXML package is installed
+dfxml/		- The Python DFXML module
+dfxml/tests/ 	- Unit tests for the DFXML modules.
+tests/		- Unit tests for the DFXML package.
+samples/	- Exemplary .dfxml-files
 schema/		- The DFXML schema.  Not directly tracked; run `make schema-init` to retrieve.
 ```
 
@@ -24,10 +24,10 @@ schema/		- The DFXML schema.  Not directly tracked; run `make schema-init` to re
 In order to install the dfxml-module for using it in your scripts, you can rely on Python's package manager `pip` to call `install` within the directory, where `setup.py` lives:
 
 ```shell
-cd dfxml_python/python
+cd dfxml_python
 pip3 install .
 ```
-For an initial overview about the provided tools, please have a look at `python/README.md`
+For an initial overview about the provided tools, please have a look at `bin/README.md`
 
 ### Using this as a git submodule
 This DFXML module can be used as a submodule inside another git module.
