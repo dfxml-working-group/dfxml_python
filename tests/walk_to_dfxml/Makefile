@@ -80,7 +80,7 @@ walk_ignore_hashes.dfxml: \
 	  _$@
 	source $(tests_srcdir)/venv/bin/activate \
 	  && cd walk_ignore_test \
-	    && walk_to_dfxml \
+	    && dfxml_walk \  # name after installation
 	      --ignore-hashes \
 	      > ../__$@
 	xmllint \
