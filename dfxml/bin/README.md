@@ -1,15 +1,8 @@
 # Tools for working with DFXML-files
 
-This directory contains scripts that can be run when the `dfxml` module is installed.  These tools are not necessarily added to the shell's `PATH` when the `dfxml` package is installed.  Instead, these tools should be called in-place, e.g. with `python $PWD/make_differential_dfxml.py`.
-
+This directory contains scripts that can be run when the `dfxml` module is installed. Not all of these tools are added to the shell's `PATH` when the `dfxml` package is installed. Instead, these tools should be called in-place, e.g. with `python $PWD/make_differential_dfxml.py`.
 
 ## Overview about the provided tools
-
-Some tools are provided as command-line programs when the `dfxml` module is installed.
-
-| Program name             | Short description                                                                    |
-|--------------------------+--------------------------------------------------------------------------------------|
-| walk_to_dfxml.py         | Fully walk the current working directory and record all files encountered.           |
 
 The following DFXML tools are provided in this directory:
 

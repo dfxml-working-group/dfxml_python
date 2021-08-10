@@ -33,8 +33,9 @@ schema/dfxml.xsd: dfxml_schema_commit.txt
 
 clean:
 	find . -name '*~' -exec rm {} \;
-	(cd bin;make clean)
-
+	(cd tests;make clean)
+	(cd dfxml/bin;make clean)
+	(cd dfxml/tests;make clean)
 check:
 	$(MAKE) \
 	  SHELL=$(SHELL) \
@@ -42,7 +43,7 @@ check:
 	  check
 
 check-tools:
-	(cd bin;make check)
+	(cd dfxml/bin;make check)
 	@echo performing checks currently in Travis
 
 check-core:

@@ -28,11 +28,12 @@ all: \
 
 # Export the directories to use
 #check: export PYTHONPATH = /home/user01/dfxml_python/
-check: export PYTHONPATH = $(shell dirname $(shell pwd))
+check: export DFXML_DIR = $(shell cd ../.. ; pwd)
+check: export PYTHONPATH = $(DFXML_DIR)
 check: export TOOL_DIR = $(shell pwd)
-check: export TEST_DIR = tests
-check: export DEMO_DIR = ../demos
-check: export SAMPLE_DIR = ../samples
+check: export TEST_DIR = ./tests
+check: export DEMO_DIR = ../../demos
+check: export SAMPLE_DIR = ../../samples
 check: \
   check-cat_fileobjects \
   check-dfxml_tool \
