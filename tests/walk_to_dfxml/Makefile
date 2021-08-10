@@ -55,7 +55,7 @@ walk_ignore_genprops.dfxml: \
 	  _$@
 	source $(tests_srcdir)/venv/bin/activate \
 	  && cd walk_ignore_test \
-	    && walk_to_dfxml \
+	    && dfxml_cwd \
 	      -i atime \
 	      -i ctime \
 	      -i crtime \
@@ -80,7 +80,7 @@ walk_ignore_hashes.dfxml: \
 	  _$@
 	source $(tests_srcdir)/venv/bin/activate \
 	  && cd walk_ignore_test \
-	    && dfxml_walk \  # name after installation
+	    && dfxml_cwd \
 	      --ignore-hashes \
 	      > ../__$@
 	xmllint \
