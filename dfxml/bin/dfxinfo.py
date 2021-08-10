@@ -99,14 +99,8 @@ def dfxml_info(fn):
             data = times[name]
             print(fmt.format(name, len(data), min(data), statistics.median(data), max(data)))
 
-            
-
-
-
-if __name__=="__main__":
+def main():
     from argparse import ArgumentParser
-    from copy import deepcopy
-
     parser = ArgumentParser(description='Report information about a DFXML file')
     parser.add_argument('xmlfiles',help='XML files to process',nargs='+')
     parser.add_argument("--files", help="Report on file objects that the DFXML file contains", action='store_true')
@@ -123,3 +117,8 @@ if __name__=="__main__":
 
     for fn in args.xmlfiles:
         dfxml_info(fn)
+
+
+if __name__=="__main__":
+    main()
+    
