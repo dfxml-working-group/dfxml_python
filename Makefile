@@ -33,8 +33,9 @@ schema/dfxml.xsd: dfxml_schema_commit.txt
 
 clean:
 	find . -name '*~' -exec rm {} \;
+	(cd tests;make clean)
 	(cd dfxml/bin;make clean)
-
+	(cd dfxml/tests;make clean)
 check:
 	$(MAKE) \
 	  SHELL=$(SHELL) \
