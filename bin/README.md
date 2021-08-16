@@ -7,9 +7,11 @@ This directory contains scripts that can be run when the `dfxml` module is insta
 
 Some tools are provided as command-line programs when the `dfxml` module is installed.
 
-| Program name             | Short description                                                                    |
-|--------------------------+--------------------------------------------------------------------------------------|
-| walk_to_dfxml.py         | Fully walk the current working directory and record all files encountered.           |
+| Program name               | Short description                                                                  |
+|----------------------------+------------------------------------------------------------------------------------|
+| make_differential_dfxml.py | Produce a DFXML file denoting file system changes noted by two input DFXML files.  |
+| walk_to_dfxml.py           | Fully walk the current working directory and record all files encountered.         |
+
 
 The following DFXML tools are provided in this directory:
 
@@ -50,6 +52,5 @@ The following DFXML tools are provided in this directory:
 
 ### Uncategorized
 
-- make_differential_dfxml.py
 - break_out_diffs_by_anno.py
 - mem_info.py (no dependencies)

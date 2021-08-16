@@ -15,14 +15,15 @@
 
 __version__ = "0.8.2"
 
-import os
-import logging
-import dfxml.objects as Objects
-import idifference
-import copy
 import collections
-import make_differential_dfxml
-import operator
+import copy
+import logging
+import os
+
+from dfxml import objects as Objects
+from dfxml import make_differential_dfxml
+
+import idifference
 
 _logger = logging.getLogger(os.path.basename(__file__))
 

@@ -22,15 +22,17 @@ Produces a differential DFXML file as output.
 This program's main purpose is matching files correctly.  It only performs enough analysis to determine that a fileobject has changed at all.  (This is half of the work done by idifference.py.)
 """
 
-__version__ = "0.12.1"
+__version__ = "0.12.2"
 
-import dfxml.objects as Objects
+import argparse
+import collections
 import logging
-import xml.etree.ElementTree as ET
 import os
 import sys
-import collections
+import xml.etree.ElementTree as ET
+
 import dfxml
+import dfxml.objects as Objects
 
 _logger = logging.getLogger(os.path.basename(__file__))
 
@@ -475,8 +477,7 @@ def make_differential_dfxml(pre, post, **kwargs):
         #Output
         return d
 
-if __name__ == "__main__":
-    import argparse
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--debug", action="store_true")
     parser.add_argument("--idifference-diffs", action="store_true", help="Only consider the modifications idifference had considered (names, hashes, timestamps).")
@@ -522,3 +523,6 @@ if __name__ == "__main__":
               rename_requires_hash=args.rename_with_hash
             )
             dobj.print_dfxml()
+
+if __name__ == "__main__":
+    main()
