@@ -16,7 +16,7 @@ The following DFXML tools are provided in this directory:
 
 | Script name              | Short description                                                                    |
 |--------------------------+--------------------------------------------------------------------------------------|
-| allocation_counter       | Produces a cross-tabulation of the allocation state of each file's inode and name.   |
+| allocation_counter.py    | Produces a cross-tabulation of the allocation state of each file's inode and name.   |
 | cat_fileobjects.py       | Prints a new DFXML of all fileobjects in an input DFXML file to stdout.              |
 | cat_partitions.py        | Concatenates dfxml-files containing one partition each and prints result to stdout.  |
 | deidentify_xml.py        | Removes PII from filenames in a DFXML file.                                          |
@@ -33,7 +33,7 @@ The following DFXML tools are provided in this directory:
 | imap.py                  | Map image files and try to find "missing" data by comparing with the other imgs.     |
 | iredact.py               | Image redaction tool using rules described in the file.                              |
 | ireport.py               | Generates stats from a DFXML file(s).                                                |
-| iverify                  | Reads an XML file and image and verifies that the files are present.                 |
+| iverify.py               | Reads an XML file and image and verifies that the files are present.                 |
 | rdifference.py           | Finds and reports differences in two Windows registry hive-files.                    |
 | report_silent_changes.py | Takes a differentially-annotated DFXML file and outputs subtle and 'silent' changes. |
 
