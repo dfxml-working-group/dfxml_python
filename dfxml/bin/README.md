@@ -9,7 +9,7 @@ Some tools are provided as command-line programs when the `dfxml` module is inst
 | Program name            | Short description                                                                  |
 |-------------------------+------------------------------------------------------------------------------------|
 | dfxml_cwd               | Fully walk the current working directory and record all files encountered.         |
-| make_differential_dfxml | Produce a DFXML file denoting file system changes noted by two input DFXML files.  |
+| dfxml_diff              | Produce a DFXML file denoting file system changes noted by two input DFXML files.  |
 
 
 The following DFXML tools are provided in this directory:

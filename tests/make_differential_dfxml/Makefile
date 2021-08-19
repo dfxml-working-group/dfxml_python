@@ -57,7 +57,7 @@ differential_dfxml_test_01.dfxml: \
 	  __$@ \
 	  _$@
 	source $(tests_srcdir)/venv/bin/activate \
-	  && make_differential_dfxml \
+	  && dfxml_diff \
 	    $(top_srcdir)/samples/difference_test_0.xml \
 	    $(top_srcdir)/samples/difference_test_1.xml \
 	    > __$@
@@ -99,7 +99,7 @@ differential_dfxml_test_23.dfxml: \
 	  __$@ \
 	  _$@
 	source $(tests_srcdir)/venv/bin/activate \
-	  && make_differential_dfxml \
+	  && dfxml_diff \
 	    $(top_srcdir)/samples/difference_test_2.xml \
 	    $(top_srcdir)/samples/difference_test_3.xml \
 	    > __$@
