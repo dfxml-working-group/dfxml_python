@@ -69,10 +69,10 @@ differential_dfxml_test_01.dfxml: \
 	mv _$@ $@
 
 differential_dfxml_test_by_path_01.txt: \
-  $(top_srcdir)/bin/summarize_differential_dfxml.py \
+  $(top_srcdir)/dfxml/bin/summarize_differential_dfxml.py \
   differential_dfxml_test_01.dfxml
 	source $(tests_srcdir)/venv/bin/activate \
-	  && python $(top_srcdir)/bin/summarize_differential_dfxml.py \
+	  && python $(top_srcdir)/dfxml/bin/summarize_differential_dfxml.py \
 	    --debug \
 	    --sort-by path \
 	    differential_dfxml_test_01.dfxml \
@@ -80,10 +80,10 @@ differential_dfxml_test_by_path_01.txt: \
 	mv _$@ $@
 
 differential_dfxml_test_by_times_01.txt: \
-  $(top_srcdir)/bin/summarize_differential_dfxml.py \
+  $(top_srcdir)/dfxml/bin/summarize_differential_dfxml.py \
   differential_dfxml_test_01.dfxml
 	source $(tests_srcdir)/venv/bin/activate \
-	  && python $(top_srcdir)/bin/summarize_differential_dfxml.py \
+	  && python $(top_srcdir)/dfxml/bin/summarize_differential_dfxml.py \
 	    --debug \
 	    --sort-by times \
 	    differential_dfxml_test_01.dfxml \
@@ -111,10 +111,10 @@ differential_dfxml_test_23.dfxml: \
 	mv _$@ $@
 
 differential_dfxml_test_by_path_23.txt: \
-  $(top_srcdir)/bin/summarize_differential_dfxml.py \
+  $(top_srcdir)/dfxml/bin/summarize_differential_dfxml.py \
   differential_dfxml_test_23.dfxml
 	source $(tests_srcdir)/venv/bin/activate \
-	  && python $(top_srcdir)/bin/summarize_differential_dfxml.py \
+	  && python $(top_srcdir)/dfxml/bin/summarize_differential_dfxml.py \
 	    --debug \
 	    --sort-by path \
 	    differential_dfxml_test_23.dfxml \
@@ -122,10 +122,10 @@ differential_dfxml_test_by_path_23.txt: \
 	mv _$@ $@
 
 differential_dfxml_test_by_times_23.txt: \
-  $(top_srcdir)/bin/summarize_differential_dfxml.py \
+  $(top_srcdir)/dfxml/bin/summarize_differential_dfxml.py \
   differential_dfxml_test_23.dfxml
 	source $(tests_srcdir)/venv/bin/activate \
-	  && python $(top_srcdir)/bin/summarize_differential_dfxml.py \
+	  && python $(top_srcdir)/dfxml/bin/summarize_differential_dfxml.py \
 	    --debug \
 	    --sort-by times \
 	    differential_dfxml_test_23.dfxml \
