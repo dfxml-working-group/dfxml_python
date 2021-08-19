@@ -11,6 +11,9 @@ Some tools are provided as command-line programs when the `dfxml` module is inst
 | dfxml_cwd               | Fully walk the current working directory and record all files encountered.         |
 | dfxml_diff              | Produce a DFXML file denoting file system changes noted by two input DFXML files.  |
 
+Note that some of these tools were previously known as other names when they were standalone files, e.g. `walk_to_dfxml.py` is now available as `dfxml_cwd`.
+
+Tools in the above table have testing written to confirm their command-line functionality.
 
 The following DFXML tools are provided in this directory:
 
