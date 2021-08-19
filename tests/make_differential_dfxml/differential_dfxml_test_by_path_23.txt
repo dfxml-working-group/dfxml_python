@@ -1,0 +1,46 @@
+
+
+New files:
+==========
+2007-08-09T12:34:58Z	CHANGE___content_and_mtime	        4097
+2007-08-09T12:35:00Z	CHANGE___erased___replaced_by_other_partition_file	        4097
+2007-08-09T12:34:56Z	CHANGE___erased___replaced_by_sibling	        4098
+2007-08-09T12:34:56Z	CHANGE___move_from_P1G_to_P2G	        4097
+2007-08-09T12:34:56Z	CHANGE___move_from_P1M_to_P3G	        4097
+2007-08-09T12:34:57Z	CHANGE___move_from_P1M_to_P3G___change_content___change_mtime	        4097
+2007-08-09T12:34:59Z	CHANGE___new_file	        4097
+2007-08-09T05:34:56-07:00	CHANGE___timestamp_changes_format_only	        4097
+2007-08-09T12:34:56Z	CHANGE___unallocated	        4097
+2007-08-09T12:34:56Z	NO_CHANGE	        4097
+2007-08-09T12:34:56Z	_CHANGE___move_from_P1M_to_P3G___change_name	        4097
+2007-08-09T12:34:56Z	_CHANGE___renamed	        4097
+
+
+Deleted files:
+==============
+2007-08-09T12:34:56Z	CHANGE___content_and_mtime	        4097
+2007-08-09T12:34:56Z	CHANGE___erased	        4097
+2007-08-09T12:34:56Z	CHANGE___erased___replaced_by_other_partition_file	        4097
+2007-08-09T12:34:56Z	CHANGE___erased___replaced_by_sibling	        4097
+2007-08-09T12:34:56Z	CHANGE___move_from_P1G_to_P2G	        4097
+2007-08-09T12:34:56Z	CHANGE___move_from_P1M_to_P3G	        4097
+2007-08-09T12:34:56Z	CHANGE___move_from_P1M_to_P3G___change_content___change_mtime	        4097
+2007-08-09T12:34:56Z	CHANGE___move_from_P1M_to_P3G___change_name	        4097
+2007-08-09T12:34:56Z	CHANGE___moved_to_erased_P1G_file	        4097
+2007-08-09T12:34:56Z	CHANGE___renamed	        4097
+2007-08-09T12:34:56Z	CHANGE___renamed_to_erased_sibling___change_checksum_and_mtime	        4097
+2007-08-09T12:34:56Z	CHANGE___timestamp_changes_format_only	        4097
+2007-08-09T12:34:56Z	CHANGE___unallocated	        4097
+2007-08-09T12:34:56Z	NO_CHANGE	        4097
+
+
+Renamed files:
+==============
+
+
+Files with modified contents:
+=============================
+
+
+Files with changed properties:
+==============================

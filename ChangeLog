@@ -1,3 +1,21 @@
+2021-08-19    <alexander.nelson@nist.gov>
+
+	* Python: Add dfxml_diff to exported tools
+	* Python: Name change - make_differential_dfxml.py is now dfxml_diff
+
+2021-08-16    <j4n6ru@gmail.com>
+
+	* Python: Move tools back to package installation directory tree
+	* Python: Name change - walk_to_dfxml.py is now dfxml_cwd
+
+2021-07-23    <alexander.nelson@nist.gov>
+
+	* Python: Use setup.cfg to define installable package and command-line tools practice
+
+2021-07-02
+
+	* DFXML: Separate C++ and Python code bases on Github.
+
 2020-01-03    <alexander.nelson@nist.gov>
 
 	* Schema: Update schema pointer to 'develop'

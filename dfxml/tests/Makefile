@@ -37,7 +37,6 @@ check: \
   check-py3 \
   check-tcpflow \
 	./cat_partitions_test.sh \
-	./differential_dfxml_test.sh
 
 check-diff_file_ignore-py2: \
   diff_file_ignore_sample-py2.dfxml \
@@ -82,12 +81,8 @@ check-versioned:
 	@echo Testing Python: $$PY >&2
 	$$PY $(OBJECTS)
 	$$PY DFXMLObject_program_test.py $(SAMPLES_DIR)/difference_test_0.xml vi 8.0
-	$$PY verify_differential_dfxml_01_test.py
-	$$PY verify_differential_dfxml_23_test.py
 
 clean:
-	rm -f differential_dfxml_test_??.{xml,txt}
-	rm -f verify_differential_dfxml_{01,23}_test.py-test[12].xml
 	rm -f difference_counts_test.py-d*
 	rm -f cat_partitions_test.sh.dfxml
 	rm -f diff_file_ignore_sample-py[23].dfxml

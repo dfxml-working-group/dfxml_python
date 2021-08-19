@@ -4,11 +4,22 @@ This directory contains scripts that can be run when the `dfxml` module is insta
 
 ## Overview about the provided tools
 
+Some tools are provided as command-line programs when the `dfxml` module is installed.
+
+| Program name            | Short description                                                                  |
+|-------------------------+------------------------------------------------------------------------------------|
+| dfxml_cwd               | Fully walk the current working directory and record all files encountered.         |
+| dfxml_diff              | Produce a DFXML file denoting file system changes noted by two input DFXML files.  |
+
+Note that some of these tools were previously known as other names when they were standalone files, e.g. `walk_to_dfxml.py` is now available as `dfxml_cwd`.
+
+Tools in the above table have testing written to confirm their command-line functionality.
+
 The following DFXML tools are provided in this directory:
 
 | Script name              | Short description                                                                    |
 |--------------------------+--------------------------------------------------------------------------------------|
-| allocation_counter       | Produces a cross-tabulation of the allocation state of each file's inode and name.   |
+| allocation_counter.py    | Produces a cross-tabulation of the allocation state of each file's inode and name.   |
 | cat_fileobjects.py       | Prints a new DFXML of all fileobjects in an input DFXML file to stdout.              |
 | cat_partitions.py        | Concatenates dfxml-files containing one partition each and prints result to stdout.  |
 | deidentify_xml.py        | Removes PII from filenames in a DFXML file.                                          |
@@ -25,7 +36,7 @@ The following DFXML tools are provided in this directory:
 | imap.py                  | Map image files and try to find "missing" data by comparing with the other imgs.     |
 | iredact.py               | Image redaction tool using rules described in the file.                              |
 | ireport.py               | Generates stats from a DFXML file(s).                                                |
-| iverify                  | Reads an XML file and image and verifies that the files are present.                 |
+| iverify.py               | Reads an XML file and image and verifies that the files are present.                 |
 | rdifference.py           | Finds and reports differences in two Windows registry hive-files.                    |
 | report_silent_changes.py | Takes a differentially-annotated DFXML file and outputs subtle and 'silent' changes. |
 
@@ -43,6 +54,5 @@ The following DFXML tools are provided in this directory:
 
 ### Uncategorized
 
-- make_differential_dfxml.py
 - break_out_diffs_by_anno.py
 - mem_info.py (no dependencies)

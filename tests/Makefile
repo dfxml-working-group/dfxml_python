@@ -24,10 +24,17 @@ $(error python3 not found)
 endif
 
 all: \
+  all-make_differential_dfxml \
   all-walk_to_dfxml
 
 .PHONY: \
+  all-make_differential_dfxml \
   all-walk_to_dfxml
+
+all-make_differential_dfxml: \
+  .venv.done.log
+	$(MAKE) \
+	  --directory make_differential_dfxml
 
 all-walk_to_dfxml: \
   .venv.done.log
@@ -57,12 +64,16 @@ all-walk_to_dfxml: \
 	touch $@
 
 check: \
+  all-make_differential_dfxml \
   all-walk_to_dfxml
 	source venv/bin/activate \
 	  && pytest \
 	    --log-level=DEBUG
 
 clean:
+	@$(MAKE) \
+	  --directory make_differential_dfxml \
+	  clean
 	@$(MAKE) \
 	  --directory walk_to_dfxml \
 	  clean
