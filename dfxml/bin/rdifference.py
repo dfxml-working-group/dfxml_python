@@ -34,8 +34,11 @@ import sys,time
 if sys.version_info < (3,1):
     raise RuntimeError("rdifference.py requires Python 3.1 or above")
 
+from optparse import OptionParser
+
 import dfxml
 import dfxml.fiwalk as fiwalk
+
 
 def ptime(t):
     """Print the time in the requested format. T is a dfxml time value"""
@@ -92,7 +95,7 @@ def table(rows,styles=None,break_on_change=False):
         if type(x)==int or alldigits(x):
             return "{0:>12}".format(x)
         return str(x)
-            
+
     if "options" in globals() and options.html:
         print("<table>")
         for row in rows:
@@ -120,7 +123,7 @@ def table(rows,styles=None,break_on_change=False):
 # object called "HiveState". Another way to do that would have been to have
 # the instance built from the XML file and then have another function that compares
 # them.
-#        
+#
 
 class HiveState:
     global options
@@ -129,7 +132,7 @@ class HiveState:
         self.new_cnames = dict() # maps from cell full path -> cell
         self.notimeline = notimeline
         self.next()
-        
+
     def next(self):
         """Called when the next image is processed."""
         self.cnames = self.new_cnames
@@ -144,7 +147,7 @@ class HiveState:
 
     def process_cell(self,cell):
         dprint("processing %s" % str(cell))
-        
+
         # See if the filename changed its hash code
         changed = False
 
@@ -310,10 +313,7 @@ class HiveState:
             sys.stderr.write("\n".join(content_error_log))
             sys.stderr.write("\n")
 
-if __name__=="__main__":
-    from optparse import OptionParser
-    from copy import deepcopy
-
+def main():
     parser = OptionParser()
     parser.usage = '%prog [options] file1 file2 [file3...]  (files can be xml or image files)'
     parser.add_option("-x","--xml",help="specify output file for XML",dest="xmlfilename")
@@ -340,3 +340,7 @@ if __name__=="__main__":
                 s.output_archive(tarname=options.tarfile,zipname=options.zipfile)
             s.report()
         s.next()
+
+
+if __name__=="__main__":
+    main()

@@ -37,9 +37,9 @@ def ignorable_name(fn):
         return False
     return make_differential_dfxml.ignorable_name(fn)
 
-if __name__=="__main__":
-    import argparse
 
+def main():
+    import argparse
     parser = argparse.ArgumentParser(description='%prog [options] file1 file2  (files can be xml or image files)')
     returningsoon = parser.add_argument_group("Returning soon", "Some of the options in idifference were not carried forward in the reimplementation.  Please feel free to request these features be re-implemented if you need them.")
     parser.add_argument("-d","--debug",help="Enable debug printing",action='store_true')
@@ -111,3 +111,7 @@ if __name__=="__main__":
               summary=args.summary,
               timestamp=args.timestamp
             )
+
+
+if __name__=="__main__":
+    main()

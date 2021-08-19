@@ -10,8 +10,8 @@ DFXML is a file format designed to capture metadata and provenance information a
 This repository contains original DFXML implementations in Python for writing DFXML files, as well as an assortment of tools for reading, generating, and processing DFXML files. The folder layout is as follows:
 
 ```
-bin/		- Standalone tools usable when the DFXML package is installed
 dfxml/		- The Python DFXML module
+dfxml/bin/	- Standalone tools usable when the DFXML package is installed
 dfxml/tests/ 	- Unit tests for the DFXML modules.
 tests/		- Unit tests for the DFXML package.
 samples/	- Exemplary .dfxml-files
@@ -27,7 +27,20 @@ In order to install the dfxml-module for using it in your scripts, you can rely 
 cd dfxml_python
 pip3 install .
 ```
-For an initial overview about the provided tools, please have a look at `bin/README.md`
+
+### Installed utilities
+Some tools are provided as command-line programs when the `dfxml` module is installed. Their names follow the convention to start with the prefix `dfxml_`:
+
+| Program name    | Corresponding file                | Short description                                        	    	       	     |
+|-----------------+-----------------------------------+--------------------------------------------------------------------------------------|
+| dfxml_cwd       | `dfxml/walk_to_dfxml/__init__.py` | Fully walk the current working directory and record all files encountered.           |
+| dfxml_info      | `dfxml/bin/dfxinfo.py`	      | Print a summary of a DFXML file - summary of all files, duplicate files, file types. |
+| dfxml_idiff     | `dfxml/bin/idifference2.py`       | Generates a report about what's different between two disk images.                   |
+| dfxml_ireport   | `dfxml/bin/ireport.py`	      | Generates stats from a DFXML file(s).                                                |
+| dfxml_iverify   | `dfxml/bin/iverify.py`	      | Reads an XML file and image and verifies that the files are present.                 |
+| dfxml_rdiff	  | `dfxml/bin/rdifference.py`	      | Finds and reports differences in two Windows registry hive-files.                    |
+
+For an initial overview about the provided tools, which were not installed, have a look at `bin/README.md`
 
 ### Using this as a git submodule
 This DFXML module can be used as a submodule inside another git module.

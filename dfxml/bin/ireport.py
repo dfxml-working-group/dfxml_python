@@ -170,7 +170,8 @@ def process_files(fn):
 
     print(fragmentation_table(all_files))
 
-if(__name__=="__main__"):
+    
+def main():
     from optparse import OptionParser
     from copy import deepcopy
     global options
@@ -181,3 +182,7 @@ if(__name__=="__main__"):
 
     for fn in args:
         process_files(fn)
+
+        
+if(__name__=="__main__"):
+    main()

@@ -1,7 +1,8 @@
 #!/usr/bin/python
 """Reads an fiwalk XML file and reports how many of the files are still in the image..."""
 
-import hashlib, os.path, fiwalk, sys
+import hashlib, os.path, sys
+from dfxml import fiwalk
 
 present = []
 not_present = []
@@ -19,9 +20,8 @@ def process_fi(fi):
     except ValueError(e):
         sys.stderr.write(str(e)+"\n")
 
-
-################################################################
-if __name__=="__main__":
+        
+def main():
     import sys
     from optparse import OptionParser
     from subprocess import Popen,PIPE
@@ -60,3 +60,8 @@ if __name__=="__main__":
     print("=====================")
     for fi in not_present:
         print(fi.filename())
+
+
+################################################################
+if __name__=="__main__":
+    main()
