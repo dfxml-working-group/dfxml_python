@@ -1,6 +1,6 @@
 # `make_differential_dfxml`
 
-*Source*: [`../../bin/make_differential_dfxml.py`](../../bin/make_differential_dfxml.py)
+*Source*: [`../../dfxml/bin/make_differential_dfxml.py`](../../dfxml/bin/make_differential_dfxml.py)
 
 This command takes as input two DFXML files, and outputs a DFXML document showing differential annotations.  Output is sent to `stdout`.
 

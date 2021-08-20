@@ -1,6 +1,6 @@
 # `walk_to_dfxml`
 
-*Source*: [`../../bin/walk_to_dfxml.py`](../../bin/walk_to_dfxml.py)
+*Source*: [`../../dfxml/bin/walk_to_dfxml.py`](../../dfxml/bin/walk_to_dfxml.py)
 
 This command walks a directory, producing a `<fileobject>` for each encountered file and directory, and then recurses into each directory.  Output is sent to `stdout`.
 
