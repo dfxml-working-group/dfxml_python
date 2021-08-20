@@ -8,7 +8,7 @@ This directory contains scripts that can be run when the `dfxml` package is inst
 Some tools are provided as command-line programs when the `dfxml` module is installed.  Their source is in this directory, with the suffix `.py`.  The link in this table goes to the tool's documentation and testing directory.
 
 | Program name | Short description |
-|-------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------|
+|-------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------|
 | [`walk_to_dfxml`](../../tests/walk_to_dfxml/#walk_to_dfxml) | Fully walk the current working directory and record all files encountered. |
 | [`make_differential_dfxml`](../../tests/make_differential_dfxml/#make_differential_dfxml) | Produce a DFXML file denoting file system changes noted by two input DFXML files. |
 
@@ -17,7 +17,7 @@ Some tools are provided as command-line programs when the `dfxml` module is inst
 The following DFXML tools are provided in this directory:
 
 | Script name                | Short description                                                                    |
-|----------------------------+--------------------------------------------------------------------------------------|
+|----------------------------|--------------------------------------------------------------------------------------|
 | `allocation_counter.py`    | Produces a cross-tabulation of the allocation state of each file's inode and name.   |
 | `cat_fileobjects.py`       | Prints a new DFXML of all fileobjects in an input DFXML file to stdout.              |
 | `cat_partitions.py`        | Concatenates dfxml-files containing one partition each and prints result to stdout.  |
