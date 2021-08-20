@@ -46,7 +46,7 @@ def test_walk_ignore_genprops(srcdir):
                 raise
     assert files_encountered > 0, "Encountered no files in walk_ignore_genprops.dfxml."
 
-def test_walk_ignore_nohash(srcdir):
+def test_walk_ignore_hashes(srcdir):
     files_encountered = 0
     for (event, obj) in Objects.iterparse(os.path.join(srcdir, "walk_ignore_hashes.dfxml")):
         if not isinstance(obj, Objects.FileObject):

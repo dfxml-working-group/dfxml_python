@@ -1,3 +1,10 @@
+2021-08-20    <alexander.nelson@nist.gov>
+
+	* Python: Reversion: `dfxml_cwd` is named `walk_to_dfxml` again
+	* Python: Reversion: `dfxml_diff` is named `make_differential_dfxml` again
+	* Policy: Tools are moved to `dfxml/bin/`
+	* Policy: Tools installed to $PATH in setup.cfg now need documentation and unit testing
+
 2021-08-19    <alexander.nelson@nist.gov>
 
 	* Python: Add dfxml_diff to exported tools

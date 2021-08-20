@@ -1,23 +1,22 @@
 # Tools for working with DFXML-files
 
-This directory contains scripts that can be run when the `dfxml` module is installed. Not all of these tools are added to the shell's `PATH` when the `dfxml` package is installed. Instead, these tools should be called in-place, e.g. with `python $PWD/make_differential_dfxml.py`.
+This directory contains scripts that can be run when the `dfxml` package is installed.  Some of these tools are added to the shell's `PATH` when the `dfxml` package is installed.  Others should be called in-place, e.g. with `python3 $PWD/allocation_counter.py`.
 
-## Overview about the provided tools
 
-Some tools are provided as command-line programs when the `dfxml` module is installed.
+## Installed tools
 
-| Program name            | Short description                                                                  |
-|-------------------------+------------------------------------------------------------------------------------|
-| dfxml_cwd               | Fully walk the current working directory and record all files encountered.         |
-| dfxml_diff              | Produce a DFXML file denoting file system changes noted by two input DFXML files.  |
+Some tools are provided as command-line programs when the `dfxml` module is installed.  Their source is in this directory, with the suffix `.py`.  The link in this table goes to the tool's documentation and testing directory.
 
-Note that some of these tools were previously known as other names when they were standalone files, e.g. `walk_to_dfxml.py` is now available as `dfxml_cwd`.
+| Program name | Short description |
+|--------------+-------------------|
+| [`walk_to_dfxml`](../../tests/walk_to_dfxml/#walk_to_dfxml) | Fully walk the current working directory and record all files encountered. |
+| [`make_differential_dfxml`](../../tests/make_differential_dfxml/#make_differential_dfxml) | Produce a DFXML file denoting file system changes noted by two input DFXML files. |
 
-Tools in the above table have testing written to confirm their command-line functionality.
+## In-place scripts
 
 The following DFXML tools are provided in this directory:
 
-| Script name              | Short description                                                                    |
+| Script name                | Short description                                                                    |
 |--------------------------+--------------------------------------------------------------------------------------|
 | allocation_counter.py    | Produces a cross-tabulation of the allocation state of each file's inode and name.   |
 | cat_fileobjects.py       | Prints a new DFXML of all fileobjects in an input DFXML file to stdout.              |

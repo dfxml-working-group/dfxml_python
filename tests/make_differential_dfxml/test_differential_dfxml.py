@@ -23,14 +23,14 @@ This pattern breaks down to:
 * XY: A comparison of sample files /sample/difference_test_X.xml and ..._Y.xml.
 * Z: How the in-memory object was loaded.
   - cli: Parsed from a command-line run of make_differential_dfxml.py
-  - module: Created from a calling dfxml.make_differential_dfxml.make_differential_dfxml().
+  - module: Created from a calling dfxml.bin.make_differential_dfxml.make_differential_dfxml().
   - serialization_1: A round-trip serialization from the "..._from_module" object, writing to a temporary file and calling Objects.parse().
   - serialization_2: A round-trip serialization from the "..._from_serialization" object, writing to a temporary file and calling Objects.parse().
 
 The rounds of serialization are to affirm losslessness.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 import argparse
 import os
@@ -40,7 +40,7 @@ import tempfile
 
 import pytest
 
-import dfxml.make_differential_dfxml
+import dfxml.bin.make_differential_dfxml
 import dfxml.objects as Objects
 
 _logger = logging.getLogger(os.path.basename(__file__))
@@ -69,7 +69,7 @@ def ddo_01_from_cli(srcdir) -> Objects.DFXMLObject:
 
 @pytest.fixture
 def ddo_01_from_module(samples_srcdir) -> Objects.DFXMLObject:
-    retval = dfxml.make_differential_dfxml.make_differential_dfxml(
+    retval = dfxml.bin.make_differential_dfxml.make_differential_dfxml(
       os.path.join(samples_srcdir, "difference_test_0.xml"),
       os.path.join(samples_srcdir, "difference_test_1.xml")
     )
@@ -111,7 +111,7 @@ def ddo_23_from_cli(srcdir) -> Objects.DFXMLObject:
 
 @pytest.fixture
 def ddo_23_from_module(samples_srcdir) -> Objects.DFXMLObject:
-    retval = dfxml.make_differential_dfxml.make_differential_dfxml(
+    retval = dfxml.bin.make_differential_dfxml.make_differential_dfxml(
       os.path.join(samples_srcdir, "difference_test_2.xml"),
       os.path.join(samples_srcdir, "difference_test_3.xml")
     )
