@@ -50,14 +50,14 @@ clean:
 
 differential_dfxml_test_01.dfxml: \
   $(tests_srcdir)/.venv.done.log \
-  $(top_srcdir)/dfxml/make_differential_dfxml/__init__.py \
+  $(top_srcdir)/dfxml/bin/make_differential_dfxml.py \
   $(top_srcdir)/samples/difference_test_0.xml \
   $(top_srcdir)/samples/difference_test_1.xml
 	rm -f \
 	  __$@ \
 	  _$@
 	source $(tests_srcdir)/venv/bin/activate \
-	  && dfxml_diff \
+	  && make_differential_dfxml \
 	    $(top_srcdir)/samples/difference_test_0.xml \
 	    $(top_srcdir)/samples/difference_test_1.xml \
 	    > __$@
@@ -92,14 +92,14 @@ differential_dfxml_test_by_times_01.txt: \
 
 differential_dfxml_test_23.dfxml: \
   $(tests_srcdir)/.venv.done.log \
-  $(top_srcdir)/dfxml/make_differential_dfxml/__init__.py \
+  $(top_srcdir)/dfxml/bin/make_differential_dfxml.py \
   $(top_srcdir)/samples/difference_test_2.xml \
   $(top_srcdir)/samples/difference_test_3.xml
 	rm -f \
 	  __$@ \
 	  _$@
 	source $(tests_srcdir)/venv/bin/activate \
-	  && dfxml_diff \
+	  && make_differential_dfxml \
 	    $(top_srcdir)/samples/difference_test_2.xml \
 	    $(top_srcdir)/samples/difference_test_3.xml \
 	    > __$@

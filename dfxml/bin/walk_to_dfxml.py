@@ -14,11 +14,9 @@
 # We would appreciate acknowledgement if the software is used.
 
 """
-dfxml_cwd
+walk_to_dfxml
 
 Walk current directory, writing DFXML to stdout.
-
-This program was originally developed as walk_to_dfxml.py.
 """
 
 __version__ = "0.4.2"

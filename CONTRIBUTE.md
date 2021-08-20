@@ -1,6 +1,16 @@
 # Contributing to DFXML's Python code base
 
 
+## Installable tools versus in-place scripts
+
+The [`dfxml/bin/`](dfxml/bin/) directory contains scripts for interacting with DFXML.  Some of the tools are installed in the command-line `$PATH` when the `dfxml` package is installed.
+
+If there is a request to add a tool to the package's installed-tools list, the tool should have these implemented:
+1. A unit test suite that exercises the tool's command line features, such as flags, and `pytest` tests to confirm expected output.
+2. A documentation page, preferably a README alongside the unit test suite.  The documentation should include command-line usage.
+3. A row in [`dfxml/bin/README.md`](dfxml/bin/README.md)'s table of installed tools, linking to the documentation.
+
+
 ## Version management
 
 **Note that DFXML 1.0.2 DOES NOT YET follow SEMVER practices.**

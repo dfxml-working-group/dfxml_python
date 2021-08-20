@@ -48,14 +48,14 @@ clean:
 
 walk_ignore_genprops.dfxml: \
   $(tests_srcdir)/.venv.done.log \
-  $(top_srcdir)/dfxml/walk_to_dfxml/__init__.py \
+  $(top_srcdir)/dfxml/bin/walk_to_dfxml.py \
   .scaffolding.done.log
 	rm -f \
 	  __$@ \
 	  _$@
 	source $(tests_srcdir)/venv/bin/activate \
 	  && cd walk_ignore_test \
-	    && dfxml_cwd \
+	    && walk_to_dfxml \
 	      -i atime \
 	      -i ctime \
 	      -i crtime \
@@ -73,14 +73,14 @@ walk_ignore_genprops.dfxml: \
 
 walk_ignore_hashes.dfxml: \
   $(tests_srcdir)/.venv.done.log \
-  $(top_srcdir)/dfxml/walk_to_dfxml/__init__.py \
+  $(top_srcdir)/dfxml/bin/walk_to_dfxml.py \
   .scaffolding.done.log
 	rm -f \
 	  __$@ \
 	  _$@
 	source $(tests_srcdir)/venv/bin/activate \
 	  && cd walk_ignore_test \
-	    && dfxml_cwd \
+	    && walk_to_dfxml \
 	      --ignore-hashes \
 	      > ../__$@
 	xmllint \

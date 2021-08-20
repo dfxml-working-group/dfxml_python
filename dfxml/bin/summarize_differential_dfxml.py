@@ -13,7 +13,7 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
-__version__ = "0.8.2"
+__version__ = "0.8.3"
 
 import collections
 import copy
@@ -21,7 +21,6 @@ import logging
 import os
 
 from dfxml import objects as Objects
-from dfxml import make_differential_dfxml
 
 import idifference
 

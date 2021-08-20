@@ -14,14 +14,12 @@
 # We would appreciate acknowledgement if the software is used.
 
 """
-dfxml_diff
+make_differential_dfxml
 
 Takes two DFXML files as input.
 Produces a differential DFXML file as output.
 
 This program's main purpose is matching files correctly.  It only performs enough analysis to determine that a fileobject has changed at all.  (This is half of the work done by idifference.py.)
-
-This program was originally developed as make_differential_dfxml.py.
 """
 
 __version__ = "0.12.2"
