@@ -29,7 +29,8 @@ all: \
 
 .PHONY: \
   all-make_differential_dfxml \
-  all-walk_to_dfxml
+  all-walk_to_dfxml \
+  check-mypy
 
 all-make_differential_dfxml: \
   .venv.done.log
@@ -65,10 +66,20 @@ all-walk_to_dfxml: \
 
 check: \
   all-make_differential_dfxml \
-  all-walk_to_dfxml
+  all-walk_to_dfxml \
+  check-mypy
 	source venv/bin/activate \
 	  && pytest \
 	    --log-level=DEBUG
+
+#TODO - Type-checking would best be done against all of ../dfxml, when someone finds some time to do so.
+check-mypy:
+	source venv/bin/activate \
+	  && mypy \
+	    ../dfxml/__init__.py \
+	    ../dfxml/objects.py \
+	    .
+	@echo "INFO:tests/Makefile:mypy is currently run against a subset of the dfxml directory." >&2
 
 clean:
 	@$(MAKE) \
