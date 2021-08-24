@@ -24,7 +24,8 @@ if __name__=="__main__":
 
     imagefile = open(args[0],"r")
     annotated_runs = []
-    if options.debug: print("Read %d file objects from %s" % (len(fileobjects),imagefile.name))
+    #TODO - This debug statement needs to moved to somewhere appropriate after an image read.
+    #if options.debug: print("Read %d file objects from %s" % (len(fileobjects),imagefile.name))
 
     def cb(fi):
         if options.debug: print("Read "+str(fi))
