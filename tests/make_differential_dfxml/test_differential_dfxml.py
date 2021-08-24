@@ -37,6 +37,7 @@ import os
 import logging
 import sys
 import tempfile
+import typing
 
 import pytest
 
@@ -121,7 +122,7 @@ def ddo_23_from_module(samples_srcdir) -> Objects.DFXMLObject:
     return retval
 
 @pytest.fixture
-def ddo_23_from_serialization_1(ddo_23_from_module) -> Objects.DFXMLObject:
+def ddo_23_from_serialization_1(ddo_23_from_module) -> typing.Generator[Objects.DFXMLObject, None, None]:
     filename = None
     with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".dfxml") as tmp_fh:
         filename = tmp_fh.name
@@ -138,7 +139,7 @@ def ddo_23_from_serialization_1(ddo_23_from_module) -> Objects.DFXMLObject:
     #os.unlink(filename)
 
 @pytest.fixture
-def ddo_23_from_serialization_2(ddo_23_from_serialization_1) -> Objects.DFXMLObject:
+def ddo_23_from_serialization_2(ddo_23_from_serialization_1) -> typing.Generator[Objects.DFXMLObject, None, None]:
     filename = None
     with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".dfxml") as tmp_fh:
         filename = tmp_fh.name
