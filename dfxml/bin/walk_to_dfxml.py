@@ -30,15 +30,20 @@ import os
 import stat
 import sys
 import traceback
+import typing
 
 import dfxml.objects as Objects
 
 _logger = logging.getLogger(os.path.basename(__file__))
 
 #Exclude md6 from hash list borrowed from Objects.py - hashlib doesn't support md6.
-walk_default_hashes = Objects.FileObject._hash_properties - {"md6"}
+walk_default_hashes : typing.Set[str] = Objects.FileObject._hash_properties - {"md6"}
 
-def filepath_to_fileobject(filepath, **kwargs):
+def filepath_to_fileobject(
+  filepath : str,
+  *,
+  ignore_properties : typing.Dict[str, typing.Set[str]] = dict()
+) -> Objects.FileObject:
     """
     Optional arguments:
     * ignore_properties - dictionary of property names to exclude from FileObject.
@@ -46,9 +51,9 @@ def filepath_to_fileobject(filepath, **kwargs):
     global walk_default_hashes
     fobj = Objects.FileObject()
 
-    ignore_properties = kwargs.get("ignore_properties", dict())
     #_logger.debug("ignore_properties = %r." % ignore_properties)
 
+    name_type : typing.Optional[str]
     #Determine type - done in three steps.
     if os.path.islink(filepath):
         name_type = "l"
@@ -76,12 +81,17 @@ def filepath_to_fileobject(filepath, **kwargs):
             name_type = "p"
         elif stat.S_ISSOCK(sobj.st_mode):
             name_type = "s"
-        elif stat.S_ISWHT(sobj.st_mode):
+        elif stat.S_ISWHT(sobj.st_mode):  # type: ignore
+            #TODO - That ignore-type directive can be removed on mypy importing this typeshed update:
+            # https://github.com/python/typeshed/pull/5955
             name_type = "w"
         else:
             raise NotImplementedError("No reporting check written for file type of %r." % filepath)
 
-    _should_ignore = lambda x: Objects.FileObject._should_ignore_property(ignore_properties, name_type, x)
+    def _should_ignore(
+      x : str
+    ) -> bool:
+        return Objects.FileObject._should_ignore_property(ignore_properties, name_type, x)
 
     if not _should_ignore("name_type"):
         fobj.name_type = name_type
@@ -170,7 +180,7 @@ def filepath_to_fileobject(filepath, **kwargs):
                         fobj.error += "\n" + str(e.args)
     return fobj
 
-def main():
+def main() -> None:
     global walk_default_hashes
 
     parser = argparse.ArgumentParser()
@@ -212,7 +222,7 @@ def main():
 
     # Key: property.
     # Value: set of name_types that should have the property ignored.  "*" indicates all.  No sets should be empty by the end of this setup.
-    ignore_properties = collections.defaultdict(set)
+    ignore_properties : typing.Dict[str, typing.Set[str]] = collections.defaultdict(set)
     if args.ignore:
         for property_descriptor in args.ignore:
             property_descriptor_parts = property_descriptor.split("@")
@@ -239,11 +249,11 @@ def main():
             filepath = os.path.relpath(os.path.join(dirpath, dirent_name))
             filepaths.add(filepath)
 
-    fileobjects_by_filepath = dict()
+    fileobjects_by_filepath : typing.Dict[str, Objects.FileObject] = dict()
 
     if using_threading:
         #Threading syntax c/o: https://docs.python.org/3.5/library/queue.html
-        q = queue.Queue()
+        q : queue.Queue = queue.Queue()
         threads = []
 
         def _worker():

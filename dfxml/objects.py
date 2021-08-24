@@ -2287,7 +2287,7 @@ class ByteRun(object):
       "uncompressed_len"
     ])
 
-    _hash_properties = set([
+    _hash_properties : typing.Set[str] = set([
       "md5",
       "sha1",
       "sha224",
@@ -3795,6 +3795,21 @@ class FileObject(object):
     @libmagic.setter
     def libmagic(self, val):
         self._libmagic = _strcast(val)
+
+    @property
+    def link_target(
+      self
+    ) -> typing.Optional[str]:
+        return self._link_target
+
+    @link_target.setter
+    def link_target(
+      self,
+      val : typing.Optional[str]
+    ) -> None:
+        if not val is None:
+            _typecheck(val, str)
+        self._link_target = val
 
     @property
     def inode_brs(self):
