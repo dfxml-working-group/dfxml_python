@@ -21,18 +21,19 @@ Walk current directory, writing DFXML to stdout.
 
 __version__ = "0.4.2"
 
-import os
-import stat
-import hashlib
-import traceback
-import logging
-import sys
+import argparse
 import collections
 import functools
-
-_logger = logging.getLogger(os.path.basename(__file__))
+import hashlib
+import logging
+import os
+import stat
+import sys
+import traceback
 
 import dfxml.objects as Objects
+
+_logger = logging.getLogger(os.path.basename(__file__))
 
 #Exclude md6 from hash list borrowed from Objects.py - hashlib doesn't support md6.
 walk_default_hashes = Objects.FileObject._hash_properties - {"md6"}
@@ -172,7 +173,6 @@ def filepath_to_fileobject(filepath, **kwargs):
 def main():
     global walk_default_hashes
 
-    import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--debug", action="store_true")
     parser.add_argument("-i", "--ignore", action="append", help="Do not track named property on file objects.  E.g. '-i inode' will exclude inode numbers from DFXML manifest.  Can be given multiple times.  To exclude a fileobject property of a specific file type (e.g. regular, directory, device), supply the name_type value in addition; for example, to ignore mtime of a directory, '-i mtime@d'.")
