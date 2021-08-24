@@ -39,11 +39,12 @@ import os
 import sys
 import struct
 import platform
+import typing
 
 # The following allows us to import the dfxml module as dfxml
 # There may be a cleaner way to do this.
 sys.path.append( os.path.dirname(__file__) + "/..")
-import dfxml
+import dfxml  # type: ignore
 
 
 _logger = logging.getLogger(os.path.basename(__file__))
@@ -312,7 +313,10 @@ class DFXMLObject(object):
                 # Put all non-DFXML-namespace elements into the externals list.
                 self.externals.append(ce)
 
-    def print_dfxml(self, output_fh=sys.stdout):
+    def print_dfxml(
+      self,
+      output_fh : typing.IO[str] = sys.stdout
+    ) -> None:
         """Memory-efficient DFXML document printer.  However, it assumes the whole element tree is already constructed."""
         pe = self.to_partial_Element()
         dfxml_wrapper = _ET_tostring(pe)
