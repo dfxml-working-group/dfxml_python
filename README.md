@@ -62,3 +62,6 @@ The [DFXML schema](https://github.com/dfxml-working-group/dfxml_schema) is track
   - Removed calls to logging in Objects tests where the only thing that the test program was logging was the fact that it had run. py.test will provide similar logging now.
 
 --- Simson Garfinkel, May 6, 2021
+
+## Disclaimer
+Participation by NIST in the creation of the documentation of mentioned software is not intended to imply a recommendation or endorsement by the National Institute of Standards and Technology, nor is it intended to imply that any specific software is necessarily the best available for the purpose.
