@@ -588,7 +588,7 @@ class LibraryObject(object):
         if len(args) >= 2:
             self.version = args[1]
 
-    def __eq__(self, other):
+    def __eq__(self, other : object) -> bool:
         """
         This equality function tests the name and version values strictly.  For less-strict testing, like allowing matching on missing versions, use relaxed_eq.
         This function can compare against another LibraryObject.
@@ -2351,7 +2351,7 @@ class ByteRun(object):
             return retval
         return None
 
-    def __eq__(self, other):
+    def __eq__(self, other : object) -> bool:
         # Check type.
         if other is None:
             return False
@@ -2365,9 +2365,9 @@ class ByteRun(object):
         #Check hashes
         if self.has_hash_property or other.has_hash_property:
             for hash_name in ByteRun._hash_properties:
-                if self.hash_name is None or other.hash_name is None:
+                if getattr(self, hash_name) is None or getattr(other, hash_name) is None:
                     continue
-                if self.hash_name != other.hash_name:
+                if getattr(self, hash_name) != getattr(other, hash_name):
                     return False
 
         # Check values.
@@ -2635,12 +2635,12 @@ class ByteRuns(object):
     def __delitem__(self, key):
         del self._listdata[key]
 
-    def __eq__(self, other):
+    def __eq__(self, other : object) -> bool:
         """Compares the byte run lists and the facet (allowing a null facet to match "data")."""
         # Check type.
-        if other is None:
-            return False
         _typecheck(other, ByteRuns)
+        if not isinstance(other, ByteRuns):
+            return False
 
         if self.facet != other.facet:
             if set([self.facet, other.facet]) != set([None, "data"]):
@@ -2851,11 +2851,11 @@ class TimestampObject(object):
 
         self._timestamp = None
 
-    def __eq__(self, other):
+    def __eq__(self, other : object) -> bool:
         # Check type.
-        if other is None:
-            return False
         _typecheck(other, TimestampObject)
+        if not isinstance(other, TimestampObject):
+            return False
 
         if self.name != other.name:
             return False
@@ -3105,7 +3105,7 @@ class FileObject(object):
         self._annos = set()
         self._diffs = set()
 
-    def __eq__(self, other):
+    def __eq__(self, other : object) -> bool:
         if other is None:
             return False
         _typecheck(other, FileObject)
@@ -4098,7 +4098,7 @@ class CellObject(object):
 
         self._diffs = set()
 
-    def __eq__(self, other):
+    def __eq__(self, other : object) -> bool:
         if other is None:
             return False
         _typecheck(other, CellObject)
