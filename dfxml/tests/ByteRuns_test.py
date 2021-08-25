@@ -18,7 +18,6 @@ import os
 import sys
 import copy
 
-sys.path.append( os.path.join(os.path.dirname(__file__), "../.."))
 import dfxml.objects as Objects
 
 def test_all():

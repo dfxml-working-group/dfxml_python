@@ -6,7 +6,6 @@ __version__="0.1.0"
 import sys
 import os
 
-sys.path.append( os.path.join(os.path.dirname(__file__), "../.."))
 from dfxml.objects import *
 from dfxml.objects import _intcast, _qsplit, _logger
 
