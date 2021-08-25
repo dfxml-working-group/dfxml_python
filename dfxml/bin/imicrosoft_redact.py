@@ -123,7 +123,7 @@ if __name__=="__main__":
         fns = args
 
     for fn in fns:
-        print "Redacting %s" % fn
+        print("Redacting %s" % fn)
         xml_out = open(fn.replace(".raw","-redacted.xml"),"w")
         xml_out.write("<?xml version='1.0' encoding='ISO-8859-1'?>\n")
         xml_out.write("<redaction_report>\n")
