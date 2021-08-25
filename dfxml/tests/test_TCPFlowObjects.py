@@ -14,13 +14,14 @@
 import sys
 from os.path import dirname,basename,abspath
 
-import TCPFlowObjects
+#TODO - It seems TCPFlowObjects might be better served from /dfxml instead of /dfxml/bin.
+import dfxml.bin.TCPFlowObjects
 
 if __name__=="__main__":
-    for (event, obj) in TCPFlowObjects.Objects.iterparse(sys.argv[1]):
-        if not isinstance(obj, TCPFlowObjects.Objects.FileObject):
+    for (event, obj) in dfxml.bin.TCPFlowObjects.Objects.iterparse(sys.argv[1]):
+        if not isinstance(obj, dfxml.bin.TCPFlowObjects.Objects.FileObject):
             continue
-        results = TCPFlowObjects.scanner_results_from_FileObject(obj)
+        results = dfxml.bin.TCPFlowObjects.scanner_results_from_FileObject(obj)
         if len(results) > 0:
             print("Flow name: %r." % obj.filename)
             for result in results:

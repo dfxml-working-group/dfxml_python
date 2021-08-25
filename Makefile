@@ -41,6 +41,10 @@ check:
 	  SHELL=$(SHELL) \
 	  --directory tests \
 	  check
+	source tests/venv/bin/activate \
+	  && pytest \
+	    --log-level=DEBUG \
+	    dfxml/tests
 
 check-tools:
 	(cd dfxml/bin;make check)
