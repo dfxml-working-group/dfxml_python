@@ -2380,9 +2380,6 @@ class ByteRun(object):
           self.type == other.type and \
           self.uncompressed_len == other.uncompressed_len
 
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
     def __repr__(self):
         parts = []
         for prop in ByteRun._all_properties:
@@ -2670,9 +2667,6 @@ class ByteRuns(object):
     def __len__(self):
         return self._listdata.__len__()
 
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
     def __repr__(self):
         parts = []
         for run in self:
@@ -2903,9 +2897,6 @@ class TimestampObject(object):
             self._comparison_sanity_check(other)
         return self.time.__lt__(other.time)
 
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
     def __repr__(self):
         parts = []
         if self.name:
@@ -3124,9 +3115,6 @@ class FileObject(object):
             if getattr(self, prop) != getattr(other, prop):
                 return False
         return True
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
 
     def __repr__(self):
         parts = []
@@ -4120,9 +4108,6 @@ class CellObject(object):
             if getattr(self, prop) != getattr(other, prop):
                 return False
         return True
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
 
     def __repr__(self):
         parts = []
