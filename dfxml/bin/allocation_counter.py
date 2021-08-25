@@ -23,7 +23,7 @@ __version__ = "0.1.1"
 # * Tabular output in LaTeX
 
 import dfxml.objects as Objects
-import make_differential_dfxml
+import dfxml.bin.make_differential_dfxml
 
 import collections
 import logging
@@ -38,7 +38,7 @@ def main():
     prev_obj = None
     for (event, obj) in Objects.iterparse(args.input_image):
         if isinstance(obj, Objects.FileObject):
-            if args.ignore_virtual_files and make_differential_dfxml.ignorable_name(obj.filename):
+            if args.ignore_virtual_files and dfxml.bin.make_differential_dfxml.ignorable_name(obj.filename):
                 continue
             counter[(obj.alloc_inode, obj.alloc_name)] += 1
 
