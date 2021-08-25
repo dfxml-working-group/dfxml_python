@@ -6,6 +6,8 @@
 #
 # 2012-10-27 slg - updated to Python3
 
+import typing
+
 private_dirs = ["home/","usr/home","Users"]
 ok_top_paths_win = ["program files/","System","Windows"]
 ok_top_paths_mac = ["bin/","usr","etc","private","applications","developer",'bin','sbin','lib','dev']
@@ -14,7 +16,7 @@ acceptable_extensions = ["exe","dll","sys","com","hlp"]
 
 import os.path, os, sys
 
-partdir = {}
+partdir : typing.Dict[str, str] = dict()
 def sanitize_part(part):
     """Sanitize a part of a pathname in a consistent manner"""
     if part not in partdir:

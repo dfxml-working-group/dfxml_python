@@ -884,9 +884,6 @@ class fileobject:
     def frag_start_sector(self,fragment):
         return self.byte_runs()[fragment].img_offset / 512
 
-    def name_type(self):
-        return self.tag("name_type")
-
 class fileobject_dom(fileobject):
     """file objects created through the DOM. Each object has the XML document
     stored in the .doc attribute."""    

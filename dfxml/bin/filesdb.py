@@ -107,4 +107,4 @@ if __name__=="__main__":
     db   = filesdb()
     for fn in args.xmlfiles:
         db.read(fn)
-    print(db.stats())
+    db.print_stats()

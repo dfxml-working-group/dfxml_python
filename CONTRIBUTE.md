@@ -9,6 +9,7 @@ If there is a request to add a tool to the package's installed-tools list, the t
 1. A unit test suite that exercises the tool's command line features, such as flags, and `pytest` tests to confirm expected output.
 2. A documentation page, preferably a README alongside the unit test suite.  The documentation should include command-line usage.
 3. A row in [`dfxml/bin/README.md`](dfxml/bin/README.md)'s table of installed tools, linking to the documentation.
+4. The tool should be analyzed with a static type checker.  See e.g. the target `check-mypy` in the [tests Makefile](tests/Makefile) that is run as part of CI.  (Note this would be started by adding type signatures to the tool's functions.)
 
 
 ## Version management

@@ -22,13 +22,14 @@ Produces a differential DFXML file as output.
 This program's main purpose is matching files correctly.  It only performs enough analysis to determine that a fileobject has changed at all.  (This is half of the work done by idifference.py.)
 """
 
-__version__ = "0.12.2"
+__version__ = "0.12.3"
 
 import argparse
 import collections
 import logging
 import os
 import sys
+import typing
 import xml.etree.ElementTree as ET
 
 import dfxml
@@ -36,45 +37,56 @@ import dfxml.objects as Objects
 
 _logger = logging.getLogger(os.path.basename(__file__))
 
-def _lower_ftype_str(vo):
-    """The string labels of file system names might differ by something small like the casing.  Normalize the labels by lower-casing them."""
+def _lower_ftype_str(
+  vo : Objects.VolumeObject
+) -> str:
+    """
+    The string labels of file system names might differ by something small like the casing.  Normalize the labels by lower-casing them.
+
+    Note that this does not mutate the input vo.
+    """
     Objects._typecheck(vo, Objects.VolumeObject)
     f = vo.ftype_str
     if isinstance(f, str): f = f.lower()
     return f
 
-def ignorable_name(fn):
+def ignorable_name(
+  fn : str
+) -> bool:
     """Filter out recognized pseudo-file names."""
     if fn is None:
         return False
     return os.path.basename(fn) in [".", "..", "$FAT1", "$FAT2", "$OrphanFiles"]
 
-def make_differential_dfxml(pre, post, **kwargs):
+def make_differential_dfxml(
+  pre : str,
+  post : str,
+  *,
+  annotate_matches : bool = False,
+  diff_mode : str = "all",
+  glom_byte_runs : bool = False,
+  ignore_filename_function : typing.Callable[[str], bool] = ignorable_name,
+  rename_requires_hash : bool = False,
+  retain_unchanged : bool = False,
+  ignore_properties : typing.Set[str] = set()
+) -> Objects.DFXMLObject:
     """
     Takes as input two paths to DFXML files.  Returns a DFXMLObject.
-    @param pre String.
-    @param post String.
-    @param diff_mode Optional.  One of "all" or "idifference".
-    @param retain_unchanged Optional.  Boolean.
-    @param ignore_properties Optional.  Set.
-    @param annotate_matches Optional.  Boolean.  True -> matched file objects get a "delta:matched='1'" attribute.
-    @param rename_requires_hash Optional.  Boolean.  True -> all matches require matching SHA-1's, if present.
-    @param ignore_filename_function Optional.  Function, string -> Boolean.  Returns True if a file name (which can be null) should be ignored.
-    @param glom_byte_runs Optional.  Boolean.  Joins contiguous-region byte runs together in FileObject byte run lists.
+    :param pre: Path to DFXML file containing baseline manifest.
+    :param post: Path to DFXML file containing second-impression manifest.
+    :param diff_mode: Optional.  One of "all" or "idifference".
+    :param retain_unchanged: Optional.  Boolean.
+    :param ignore_properties: Optional.  Set.
+    :param annotate_matches: Optional.  Boolean.  True -> matched file objects get a "delta:matched='1'" attribute.
+    :param rename_requires_hash: Optional.  Boolean.  True -> all matches require matching SHA-1's, if present.
+    :param ignore_filename_function: Optional.  Function, string -> Boolean.  Returns True if a file name (which can be null) should be ignored.
+    :param glom_byte_runs: Optional.  Boolean.  Joins contiguous-region byte runs together in FileObject byte run lists.
     """
 
-    diff_mode = kwargs.get("diff_mode", "all")
-    retain_unchanged = kwargs.get("retain_unchanged", False)
-    ignore_properties = kwargs.get("ignore_properties", set())
-    annotate_matches = kwargs.get("annotate_matches", False)
-    rename_requires_hash = kwargs.get("rename_requires_hash", False)
-    ignore_filename_function = kwargs.get("ignore_filename_function", ignorable_name)
-    glom_byte_runs = kwargs.get("glom_byte_runs", False)
-
-    _expected_diff_modes = ["all", "idifference"]
+    _expected_diff_modes = {"all", "idifference"}
     if diff_mode not in _expected_diff_modes:
         raise ValueError("Differencing mode should be in: %r." % _expected_diff_modes)
-    diff_mask_set = set()
+    diff_mask_set : typing.Set[str] = set()
 
     if diff_mode == "idifference":
         diff_mask_set |= set([
@@ -106,27 +118,30 @@ def make_differential_dfxml(pre, post, **kwargs):
     _logger.debug("d.diff_file_ignores = " + repr(d.diff_file_ignores))
 
     #The list most of this function is spent on building
-    fileobjects_changed = []
+    fileobjects_changed : typing.List[Objects.FileObject] = []
 
     #Unmodified files; only retained if requested.
-    fileobjects_unchanged = []
+    fileobjects_unchanged : typing.List[Objects.FileObject] = []
 
     #Key: (partition, inode, filename); value: FileObject
-    old_fis = None
-    new_fis = None
+    Signature_fis = typing.Dict[typing.Tuple[typing.Optional[int], typing.Optional[int], typing.Optional[str]], Objects.FileObject] 
+    old_fis : Signature_fis = dict()
+    new_fis : Signature_fis = dict()
 
     #Key: (partition, inode, filename); value: FileObject list
-    old_fis_unalloc = None
-    new_fis_unalloc = None
+    Signature_fis_unalloc = typing.Dict[typing.Tuple[typing.Optional[int], typing.Optional[int], typing.Optional[str]], typing.List[Objects.FileObject]]
+    old_fis_unalloc : Signature_fis_unalloc = dict()
+    new_fis_unalloc : Signature_fis_unalloc = dict()
 
     #Key: Partition byte offset within the disk image, paired with the file system type
     #Value: VolumeObject
-    old_volumes = None
-    new_volumes = None
-    matched_volumes = dict()
+    Signature_volumes = typing.Dict[typing.Tuple[int, str], Objects.VolumeObject] 
+    old_volumes : Signature_volumes = dict()
+    new_volumes : Signature_volumes = dict()
+    matched_volumes : Signature_volumes = dict()
 
     #Populated in distinct (offset, file system type as string) encounter order
-    volumes_encounter_order = dict()
+    volumes_encounter_order : typing.Dict[typing.Tuple[int, str], int] = dict()
 
     for infile in [pre, post]:
 
@@ -176,8 +191,8 @@ def make_differential_dfxml(pre, post, **kwargs):
                 #1. If the volume is in the old list, pop it out of the old list - it's matched.
                 if old_volumes and (offset, ftype_str) in old_volumes:
                     _logger.debug("Found a volume in post image, at offset %r." % offset)
-                    old_obj = old_volumes.pop((offset, ftype_str))
-                    new_obj.original_volume = old_obj
+                    old_vobj = old_volumes.pop((offset, ftype_str))
+                    new_obj.original_volume = old_vobj
                     new_obj.compare_to_original()
                     matched_volumes[(offset, ftype_str)] = new_obj
 
@@ -188,9 +203,6 @@ def make_differential_dfxml(pre, post, **kwargs):
                     volumes_encounter_order[(offset, ftype_str)] = len(new_volumes) + ((old_volumes and len(old_volumes)) or 0) + len(matched_volumes)
 
                 #3. Afterwards, the old list contains deleted volumes.
-
-                #Record the ID
-                new_obj.id = volumes_encounter_order[(offset, ftype_str)]
 
                 #Move on to the next object
                 continue
@@ -229,15 +241,15 @@ def make_differential_dfxml(pre, post, **kwargs):
                 continue
 
             #The rest of this loop is irrelevant until the second DFXML file.
-            if old_fis is None:
+            if infile == pre:
                 new_fis[key] = new_obj
                 continue
 
 
             if key in old_fis:
                 #Extract the old fileobject and check for changes
-                old_obj = old_fis.pop(key)
-                new_obj.original_fileobject = old_obj
+                old_fobj = old_fis.pop(key)
+                new_obj.original_fileobject = old_fobj
                 new_obj.compare_to_original(file_ignores=d.diff_file_ignores)
 
                 #_logger.debug("Diffs: %r." % _diffs)
@@ -259,7 +271,7 @@ def make_differential_dfxml(pre, post, **kwargs):
                 new_fis[key] = new_obj
 
         #The rest of the files loop is irrelevant until the second file.
-        if old_fis is None:
+        if infile == pre:
             continue
 
 
@@ -272,7 +284,15 @@ def make_differential_dfxml(pre, post, **kwargs):
         #Identify renames - only possible if 1-to-1.  Many-to-many renames are just left as new and deleted files.
         _logger.debug("Detecting renames...")
         fileobjects_renamed = []
-        def _make_name_map(d):
+        def _make_name_map(
+          d : Signature_fis
+        ) -> typing.Dict[
+          typing.Tuple[
+            typing.Optional[int],
+            typing.Optional[int]
+          ],
+          typing.Set[typing.Optional[str]]
+        ]:
             """Returns a dictionary, mapping (partition, inode) -> {filename}."""
             retdict = collections.defaultdict(lambda: set())
             for (partition, inode, filename) in d.keys():
@@ -280,28 +300,28 @@ def make_differential_dfxml(pre, post, **kwargs):
             return retdict
         old_inode_names = _make_name_map(old_fis)
         new_inode_names = _make_name_map(new_fis)
-        for key in new_inode_names.keys():
-            (partition, inode) = key
+        for new_inode_name_key in new_inode_names.keys():
+            (partition, inode) = new_inode_name_key
 
-            if len(new_inode_names[key]) != 1:
+            if len(new_inode_names[new_inode_name_key]) != 1:
                 continue
-            if not key in old_inode_names:
+            if not new_inode_name_key in old_inode_names:
                 continue
-            if len(old_inode_names[key]) != 1:
+            if len(old_inode_names[new_inode_name_key]) != 1:
                 continue
             if rename_requires_hash:
                 #Peek at the set elements by doing a quite-ephemeral list cast
-                old_obj = old_fis[(partition, inode, list(old_inode_names[key])[0])]
-                new_obj = new_fis[(partition, inode, list(new_inode_names[key])[0])]
-                if old_obj.sha1 != new_obj.sha1:
+                old_fobj = old_fis[(partition, inode, list(old_inode_names[new_inode_name_key])[0])]
+                new_obj = new_fis[(partition, inode, list(new_inode_names[new_inode_name_key])[0])]
+                if old_fobj.sha1 != new_obj.sha1:
                     continue
 
             #Found a match if we're at this point in the loop
-            old_name = old_inode_names[key].pop()
-            new_name = new_inode_names[key].pop()
-            old_obj = old_fis.pop((partition, inode, old_name))
+            old_name = old_inode_names[new_inode_name_key].pop()
+            new_name = new_inode_names[new_inode_name_key].pop()
+            old_fobj = old_fis.pop((partition, inode, old_name))
             new_obj = new_fis.pop((partition, inode, new_name))
-            new_obj.original_fileobject = old_obj
+            new_obj.original_fileobject = old_fobj
             new_obj.compare_to_original(file_ignores=d.diff_file_ignores)
             fileobjects_renamed.append(new_obj)
         _logger.debug("len(old_fis) -> %d" % len(old_fis))
@@ -311,7 +331,15 @@ def make_differential_dfxml(pre, post, **kwargs):
 
         #Identify files that just changed inode number - basically, doing the rename detection again
         _logger.debug("Detecting inode number changes...")
-        def _make_inode_map(d):
+        def _make_inode_map(
+          d : Signature_fis
+        ) -> typing.Dict[
+          typing.Tuple[
+            typing.Optional[int],
+            typing.Optional[str]
+          ],
+          typing.Optional[int]
+        ]:
             """Returns a dictionary, mapping (partition, filename) -> inode."""
             retdict = dict()
             for (partition, inode, filename) in d.keys():
@@ -321,13 +349,13 @@ def make_differential_dfxml(pre, post, **kwargs):
             return retdict
         old_name_inodes = _make_inode_map(old_fis)
         new_name_inodes = _make_inode_map(new_fis)
-        for key in new_name_inodes.keys():
-            if not key in old_name_inodes:
+        for name_inode_key in new_name_inodes.keys():
+            if not name_inode_key in old_name_inodes:
                 continue
-            (partition, name) = key
-            old_obj = old_fis.pop((partition, old_name_inodes[key], name))
-            new_obj = new_fis.pop((partition, new_name_inodes[key], name))
-            new_obj.original_fileobject = old_obj
+            (partition, name) = name_inode_key
+            old_fobj = old_fis.pop((partition, old_name_inodes[name_inode_key], name))
+            new_obj = new_fis.pop((partition, new_name_inodes[name_inode_key], name))
+            new_obj.original_fileobject = old_fobj
             #TODO Test for what chaos ensues when filename is in the ignore list.
             new_obj.compare_to_original(file_ignores=d.diff_file_ignores)
             fileobjects_changed.append(new_obj)
@@ -347,9 +375,9 @@ def make_differential_dfxml(pre, post, **kwargs):
             if key in old_fis_unalloc:
                 if len(old_fis_unalloc[key]) == 1:
                     #The file was unallocated in the previous image, too.
-                    old_obj = old_fis_unalloc[key].pop()
+                    old_fobj = old_fis_unalloc[key].pop()
                     new_obj = new_fis_unalloc[key].pop()
-                    new_obj.original_fileobject = old_obj
+                    new_obj.original_fileobject = old_fobj
                     new_obj.compare_to_original(file_ignores=d.diff_file_ignores)
                     #The file might not have changed.  It's interesting if it did, though.
 
@@ -365,9 +393,9 @@ def make_differential_dfxml(pre, post, **kwargs):
                         fileobjects_unchanged.append(new_obj)
             elif key in old_fis:
                 #Identified a deletion.
-                old_obj = old_fis.pop(key)
+                old_fobj = old_fis.pop(key)
                 new_obj = new_fis_unalloc[key].pop()
-                new_obj.original_fileobject = old_obj
+                new_obj.original_fileobject = old_fobj
                 new_obj.compare_to_original(file_ignores=d.diff_file_ignores)
                 fileobjects_deleted.append(new_obj)
         _logger.debug("len(old_fis) -> %d" % len(old_fis))
@@ -385,21 +413,24 @@ def make_differential_dfxml(pre, post, **kwargs):
 
         #Begin output.
         #First, annotate the volume objects.
-        for key in new_volumes:
-            v = new_volumes[key]
+        for nv_key in new_volumes:
+            v = new_volumes[nv_key]
             v.annos.add("new")
-        for key in old_volumes:
-            v = old_volumes[key]
+        for ov_key in old_volumes:
+            v = old_volumes[ov_key]
             v.annos.add("deleted")
-        for key in matched_volumes:
-            v = matched_volumes[key]
+        for mv_key in matched_volumes:
+            v = matched_volumes[mv_key]
             if len(v.diffs) > 0:
                 v.annos.add("modified")
 
         #Build list of FileObject appenders, child volumes of the DFXML Document.
         #Key: Partition number, or None
         #Value: Reference to the VolumeObject corresponding with that partition number.  None -> the DFXMLObject.
-        appenders = dict()
+        appenders : typing.Dict[
+          typing.Optional[int],
+          typing.Union[Objects.DFXMLObject, Objects.VolumeObject]
+        ] = dict()
         for volume_dict in [new_volumes, matched_volumes, old_volumes]:
             for (offset, ftype_str) in volume_dict:
                     veo = volumes_encounter_order[(offset, ftype_str)]
@@ -474,10 +505,10 @@ def make_differential_dfxml(pre, post, **kwargs):
             _maybe_match_attr(fi)
             appenders[fi.partition].append(fi)
 
-        #Output
-        return d
+    #Output
+    return d
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--debug", action="store_true")
     parser.add_argument("--idifference-diffs", action="store_true", help="Only consider the modifications idifference had considered (names, hashes, timestamps).")
@@ -498,9 +529,6 @@ def main():
     if len(args.infiles) != 2:
         raise ValueError("This script requires exactly two DFXML files as input.")
 
-    pre = None
-    post = None
-
     if len(args.infiles) > 2:
         raise NotImplementedError("This program only analyzes two files at the moment.")
 
@@ -509,20 +537,22 @@ def main():
         for i in args.ignore:
             ignore_properties.add(i)
 
-    for infile in args.infiles:
+    post : str = args.infiles[0]
+
+    for infile in args.infiles[1:]:
         pre = post
         post = infile
-        if not pre is None:
-            dobj = make_differential_dfxml(
-              pre,
-              post,
-              diff_mode="idifference" if args.idifference_diffs else "all",
-              retain_unchanged=args.retain_unchanged,
-              ignore_properties=ignore_properties,
-              annotate_matches=args.annotate_matches,
-              rename_requires_hash=args.rename_with_hash
-            )
-            dobj.print_dfxml()
+        dobj = make_differential_dfxml(
+          pre,
+          post,
+          diff_mode="idifference" if args.idifference_diffs else "all",
+          retain_unchanged=args.retain_unchanged,
+          ignore_properties=ignore_properties,
+          annotate_matches=args.annotate_matches,
+          rename_requires_hash=args.rename_with_hash
+        )
+        #TODO - Some more thought needs to be put into whether this program should analyze more than two files.
+        dobj.print_dfxml()
 
 if __name__ == "__main__":
     main()
