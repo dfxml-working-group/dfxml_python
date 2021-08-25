@@ -42,6 +42,9 @@ check:
 	  --directory tests \
 	  check
 	source tests/venv/bin/activate \
+	  && mypy \
+	    dfxml/tests
+	source tests/venv/bin/activate \
 	  && pytest \
 	    --log-level=DEBUG \
 	    dfxml/tests
