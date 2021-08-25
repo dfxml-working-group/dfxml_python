@@ -19,7 +19,7 @@ walk_to_dfxml
 Walk current directory, writing DFXML to stdout.
 """
 
-__version__ = "0.4.2"
+__version__ = "0.4.3"
 
 import argparse
 import collections

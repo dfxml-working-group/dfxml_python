@@ -30,7 +30,7 @@ This pattern breaks down to:
 The rounds of serialization are to affirm losslessness.
 """
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 import argparse
 import os
