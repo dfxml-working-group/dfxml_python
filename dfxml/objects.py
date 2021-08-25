@@ -261,7 +261,7 @@ class DFXMLObject(object):
             ET.register_namespace(prefix, url)
             #_logger.debug("ET namespaces after registration: %r." % ET._namespace_map)
 
-    def append(self, value):
+    def append(self, value) -> None:
         if isinstance(value, DiskImageObject):
             self.disk_images.append(value)
         elif isinstance(value, PartitionSystemObject):
@@ -687,7 +687,7 @@ class RegXMLObject(object):
         self._namespaces[prefix] = url
         ET.register_namespace(prefix, url)
 
-    def append(self, value):
+    def append(self, value) -> None:
         if isinstance(value, HiveObject):
             self._hives.append(value)
         elif isinstance(value, CellObject):
@@ -838,7 +838,7 @@ class DiskImageObject(object):
                 parts.append("%s=%s" % (prop, val))
         return "DiskImageObject(" + ", ".join(parts) + ")"
 
-    def append(self, obj):
+    def append(self, obj) -> None:
         if isinstance(obj, PartitionSystemObject):
             self.partition_systems.append(obj)
         elif isinstance(obj, VolumeObject):
@@ -1096,7 +1096,7 @@ class PartitionSystemObject(object):
                 parts.append("%s=%s" % (prop, val))
         return "PartitionSystemObject(" + ", ".join(parts) + ")"
 
-    def append(self, obj):
+    def append(self, obj) -> None:
         if isinstance(obj, PartitionObject):
             self.partitions.append(obj)
         elif isinstance(obj, FileObject):
@@ -1392,7 +1392,7 @@ class PartitionObject(object):
                 parts.append("%s=%s" % (prop, val))
         return "PartitionObject(" + ", ".join(parts) + ")"
 
-    def append(self, obj):
+    def append(self, obj) -> None:
         if isinstance(obj, PartitionSystemObject):
             self.partition_systems.append(obj)
         elif isinstance(obj, PartitionObject):
@@ -1695,7 +1695,7 @@ class VolumeObject(object):
                 parts.append("%s=%r" % (prop, val))
         return "VolumeObject(" + ", ".join(parts) + ")"
 
-    def append(self, value):
+    def append(self, value) -> None:
         _typecheck(value, (DiskImageObject, FileObject, VolumeObject))
         if isinstance(value, DiskImageObject):
             self.disk_images.append(value)
@@ -2144,7 +2144,7 @@ class HiveObject(object):
         for c in self._cells:
             yield c
 
-    def append(self, value):
+    def append(self, value) -> None:
         _typecheck(value, CellObject)
         self._cells.append(value)
 
@@ -2680,7 +2680,7 @@ class ByteRuns(object):
         _typecheck(value, ByteRun)
         self._listdata[key] = value
 
-    def append(self, value):
+    def append(self, value) -> None:
         """
         Appends a ByteRun object to this container's list.
         """
@@ -4047,7 +4047,7 @@ class OtherNSElementList(list):
         OtherNSElementList._check_qname(value.tag)
         super(OtherNSElementList, self).__setitem__(idx, value)
 
-    def append(self, value):
+    def append(self, value) -> None:
         _typecheck(value, ET.Element)
         OtherNSElementList._check_qname(value.tag)
         super(OtherNSElementList, self).append(value)
