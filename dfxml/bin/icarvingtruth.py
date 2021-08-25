@@ -184,7 +184,7 @@ if __name__=="__main__":
                 if sectors_that_match:
                     if options.debug:
                         print(fi.filename(),
-                              "run sectors:", db.sectors_for_bytes(run_len),
+                              "run sectors:", db.sectors_for_bytes(run.len),
                               "total sectors: ",len(sectors_to_check),
                               "matching:",len(sectors_that_match))
                     runs = db.runs_for_sectors(sectors_that_match)
