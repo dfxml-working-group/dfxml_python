@@ -2625,9 +2625,14 @@ class ByteRuns(object):
 
     _facet_values = [None, "data", "inode", "name"]
 
-    def __init__(self, run_list=None, **kwargs):
-        self._facet = kwargs.get("facet")
-        self._listdata = []
+    def __init__(
+      self,
+      run_list : typing.Optional[typing.List[ByteRun]] = None,
+      *,
+      facet : typing.Optional[str] = None
+    ) -> None:
+        self._facet = facet
+        self._listdata : typing.List[ByteRun] = []
         if isinstance(run_list, list):
             for run in run_list:
                 self.append(run)
