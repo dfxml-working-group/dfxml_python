@@ -13,7 +13,7 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
-__version__ = "0.8.3"
+__version__ = "0.8.4"
 
 import collections
 import copy

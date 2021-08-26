@@ -31,7 +31,7 @@ Process:
 4. Replace the old maps with the new maps
 """
 
-__version__ = "0.2.0rfc5"
+__version__ = "0.2.0rfc6"
 
 import copy
 import logging
