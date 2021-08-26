@@ -22,7 +22,7 @@ import os
 
 from dfxml import objects as Objects
 
-import idifference
+import dfxml.bin.idifference as idifference
 
 _logger = logging.getLogger(os.path.basename(__file__))
 
