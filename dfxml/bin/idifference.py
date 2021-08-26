@@ -33,9 +33,12 @@ Process:
 
 __version__ = "0.2.0rfc5"
 
-import sys,time
 import copy
 import logging
+import os
+import sys
+import time
+import typing
 if sys.version_info < (3,1):
     raise RuntimeError("idifference.py now requires Python 3.1 or above")
 
@@ -45,6 +48,8 @@ import dfxml.fiwalk as fiwalk
 #Global variable, to be adjusted later
 global options
 options = None
+
+_logger = logging.getLogger(os.path.basename(__file__))
 
 def ignore_filename(fn, include_dotdirs=False):
     """
@@ -96,8 +101,18 @@ def h2(title):
     print("\n\n%s\n%s" % (title,"="*len(title)))
 
 
-def table(rows,styles=None,break_on_change=False):
-    import sys
+def table(
+  rows : typing.List[str],
+  styles : typing.Optional[typing.List[str]] = None,
+  break_on_change : bool = False
+) -> None:
+    # Validate input.
+    if isinstance(styles, list):
+        if len(rows) != len(styles):
+            _logger.error("len(rows) = %d.", len(rows))
+            _logger.error("len(styles) = %d.", len(styles))
+            raise ValueError("table() called with rows and styles of different lengths, when they need to be the same.")
+
     global options
     def alldigits(x):
         if type(x)!=str: return False
@@ -504,7 +519,10 @@ class DiskState:
 
     def output_archive(self,imagefile=None,tarname=None,zipname=None):
         """Write the changed and/or new files to a tarfile or a ZIP file. """
-        import zipfile, tarfile, io, datetime
+        import datetime
+        import io
+        import tarfile
+        import zipfile
 
         tfile = None
         zfile = None
