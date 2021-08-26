@@ -504,7 +504,7 @@ class DiskState:
 
     def output_archive(self,imagefile=None,tarname=None,zipname=None):
         """Write the changed and/or new files to a tarfile or a ZIP file. """
-        import zipfile, tarfile, StringIO, datetime
+        import zipfile, tarfile, io, datetime
 
         tfile = None
         zfile = None
@@ -559,7 +559,7 @@ class DiskState:
                     info.gid   = fi.gid()
                     info.size  = fi.filesize()
                     # addfile requires a 'file', so let's make one
-                    string = StringIO.StringIO()
+                    string = io.StringIO()
                     string.write(contents)
                     string.seek(0)
                     tfile.addfile(tarinfo=info,fileobj=string)
