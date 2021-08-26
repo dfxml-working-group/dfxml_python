@@ -588,8 +588,12 @@ class LibraryObject(object):
         This equality function tests the name and version values strictly.  For less-strict testing, like allowing matching on missing versions, use relaxed_eq.
         This function can compare against another LibraryObject.
         """
+        if other is None:
+            return False
+        _typecheck(other, LibraryObject)
         if not isinstance(other, LibraryObject):
             return False
+
         return self.name == other.name and \
           self.version == other.version
 
@@ -2350,6 +2354,9 @@ class ByteRun(object):
 
     def __eq__(self, other : object) -> bool:
         # Check type.
+        if other is None:
+            return False
+        _typecheck(other, ByteRun)
         if not isinstance(other, ByteRun):
             return False
 
@@ -2636,6 +2643,8 @@ class ByteRuns(object):
     def __eq__(self, other : object) -> bool:
         """Compares the byte run lists and the facet (allowing a null facet to match "data")."""
         # Check type.
+        if other is None:
+            return False
         _typecheck(other, ByteRuns)
         if not isinstance(other, ByteRuns):
             return False
@@ -2851,6 +2860,8 @@ class TimestampObject(object):
 
     def __eq__(self, other : object) -> bool:
         # Check type.
+        if other is None:
+            return False
         _typecheck(other, TimestampObject)
         if not isinstance(other, TimestampObject):
             return False
@@ -3107,6 +3118,9 @@ class FileObject(object):
         if other is None:
             return False
         _typecheck(other, FileObject)
+        if not isinstance(other, FileObject):
+            return False
+
         for prop in FileObject._all_properties:
             if prop in FileObject._incomparable_properties:
                 continue
@@ -4097,6 +4111,9 @@ class CellObject(object):
         if other is None:
             return False
         _typecheck(other, CellObject)
+        if not isinstance(other, CellObject):
+            return False
+
         for prop in CellObject._all_properties:
             if prop in CellObject._incomparable_properties:
                 continue
