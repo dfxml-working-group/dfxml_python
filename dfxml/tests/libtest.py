@@ -17,7 +17,7 @@
 This library provides functions for supporting the unit tests in this directory.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 import os
 import sys
