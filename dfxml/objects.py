@@ -40,6 +40,7 @@ import sys
 import struct
 import platform
 import typing
+import warnings
 
 # The following allows us to import the dfxml module as dfxml
 # There may be a cleaner way to do this.
@@ -58,12 +59,6 @@ _warned_hashes = set([])
 
 # Contains: Unexpected 'facet' values on byte_runs elements.
 _warned_byterun_facets = set([])
-
-# Issue some log statements only once per program invocation.
-_nagged_alloc = False
-_warned_byterun_badtypecomp = False
-_nagged_partition_file_alloc = False
-_nagged_partitionsystem_file_alloc = False
 
 XMLNS_REGXML = "http://www.forensicswiki.org/wiki/RegXML"
 XMLNS_DFXML_EXT = dfxml.XMLNS_DFXML + "#extensions"
@@ -89,7 +84,7 @@ def _ET_tostring(e):
         xmlns_attr_string = '%s="%s"' % (xmlns_attr_name, uri)
         xmlns_attr_tally = retval.count(xmlns_attr_string, 0, container_end)
         if xmlns_attr_tally > 1:
-            _logger.warning("ET.tostring() printed a repeated xmlns declaration: %r.  Trimming %d repetition(s)." % (xmlns_attr_string, xmlns_attr_tally-1))
+            _logger.info("ET.tostring() printed a repeated xmlns declaration: %r.  Trimming %d repetition(s)." % (xmlns_attr_string, xmlns_attr_tally-1))
             container_string = retval[ : container_end+1 ]
             retval = container_string.replace(xmlns_attr_string, "", xmlns_attr_tally-1) + retval[ container_end+1 : ]
     return retval
@@ -1097,13 +1092,14 @@ class PartitionSystemObject(object):
         return "PartitionSystemObject(" + ", ".join(parts) + ")"
 
     def append(self, obj) -> None:
+        """
+        Note that files appended directly to a PartitionSystemObject are expected to be slack space discoveries.  A warning is raised if an allocated file is appended.
+        """
         if isinstance(obj, PartitionObject):
             self.partitions.append(obj)
         elif isinstance(obj, FileObject):
             if obj.is_allocated():
-                if not _nagged_partitionsystem_file_alloc:
-                    _logger.warning("A partition system has had an 'allocated' file appended directly to it.  This list of files is expected to be slack space discoveries.")
-                    _nagged_partitionsystem_file_alloc = True
+                warnings.warn("A partition system has had an 'allocated' file appended directly to it.  This list of files is expected to be slack space discoveries.")
             self.files.append(obj)
         else:
             raise ValueError("Unexpected object type passed to PartitionSystemObject.append(): %r." % type(obj))
@@ -1393,6 +1389,9 @@ class PartitionObject(object):
         return "PartitionObject(" + ", ".join(parts) + ")"
 
     def append(self, obj) -> None:
+        """
+        Note that files appended directly to a PartitionObject are expected to be slack space discoveries.  A warning is raised if an allocated file is appended.
+        """
         if isinstance(obj, PartitionSystemObject):
             self.partition_systems.append(obj)
         elif isinstance(obj, PartitionObject):
@@ -1401,9 +1400,7 @@ class PartitionObject(object):
             self.volumes.append(obj)
         elif isinstance(obj, FileObject):
             if obj.is_allocated():
-                if not _nagged_partition_file_alloc:
-                    _logger.warning("A partition has had an 'allocated' file appended directly to it.  This list of files is expected to be slack space discoveries.")
-                    _nagged_partition_file_alloc = True
+                warnings.warn("A partition has had an 'allocated' file appended directly to it.  This list of files is expected to be slack space discoveries.")
             self.files.append(obj)
         else:
             raise ValueError("Unexpected object type passed to PartitionObject.append(): %r." % type(obj))
@@ -2353,12 +2350,7 @@ class ByteRun(object):
 
     def __eq__(self, other : object) -> bool:
         # Check type.
-        if other is None:
-            return False
         if not isinstance(other, ByteRun):
-            if not _warned_byterun_badtypecomp:
-                _logger.warning("A ByteRun comparison was called against a non-ByteRun object: " + repr(other) + ".")
-                _warned_byterun_badtypecomp = True
             return False
 
         #TODO Determine a way to set an ignore flag for comparison of byte run hashes.  Maybe byte_run/@has_hash_property, as a virtual XPath reference?
@@ -2633,6 +2625,7 @@ class ByteRuns(object):
     ) -> None:
         self._facet = facet
         self._listdata : typing.List[ByteRun] = []
+        self._listdata = []
         if isinstance(run_list, list):
             for run in run_list:
                 self.append(run)
@@ -3576,11 +3569,8 @@ class FileObject(object):
     @property
     def alloc(self):
         """Note that setting .alloc will affect the value of .unalloc, and vice versa.  The last one to set wins."""
-        global _nagged_alloc
-        if not _nagged_alloc:
-            #TODO alloc isn't deprecated yet.
-            #_logger.warning("The FileObject.alloc property is deprecated.  Use .alloc_inode and/or .alloc_name instead.  .alloc is proxied as True if alloc_inode and alloc_name are both True.")
-            _nagged_alloc = True
+        #TODO alloc isn't deprecated yet.
+        #warnings.warn("The FileObject.alloc property is deprecated.  Use .alloc_inode and/or .alloc_name instead.  .alloc is proxied as True if alloc_inode and alloc_name are both True.", warnings.DeprecationWarning)
         if self.alloc_inode and self.alloc_name:
             return True
         else:
