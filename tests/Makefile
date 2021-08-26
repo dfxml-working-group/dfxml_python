@@ -73,10 +73,13 @@ check: \
 	    --log-level=DEBUG
 
 #TODO - Type-checking would best be done against all of ../dfxml, when someone finds some time to do so.
-check-mypy:
+check-mypy: \
+  .venv.done.log
 	source venv/bin/activate \
 	  && mypy \
+	    ../dfxml/bin/idifference.py \
 	    ../dfxml/bin/make_differential_dfxml.py \
+	    ../dfxml/bin/summarize_differential_dfxml.py \
 	    ../dfxml/bin/walk_to_dfxml.py \
 	    ../dfxml/__init__.py \
 	    ../dfxml/objects.py \

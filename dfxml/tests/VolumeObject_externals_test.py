@@ -13,14 +13,13 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 import logging
 import os
 import xml.etree.ElementTree as ET
 import sys
 
-sys.path.append( os.path.join(os.path.dirname(__file__), "../.."))
 import dfxml.objects as Objects
 
 import libtest

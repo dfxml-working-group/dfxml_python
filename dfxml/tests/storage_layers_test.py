@@ -13,14 +13,13 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 import os
 import sys
 import hashlib
 import logging
 
-sys.path.append( os.path.join(os.path.dirname(__file__), "../.."))
 import dfxml.objects as Objects
 
 import libtest

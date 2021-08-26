@@ -13,7 +13,7 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
-__version__ = "0.8.3"
+__version__ = "0.8.4"
 
 import collections
 import copy
@@ -22,7 +22,7 @@ import os
 
 from dfxml import objects as Objects
 
-import idifference
+import dfxml.bin.idifference as idifference
 
 _logger = logging.getLogger(os.path.basename(__file__))
 

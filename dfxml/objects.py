@@ -18,7 +18,7 @@ This file re-creates the major DFXML classes with an emphasis on type safety, se
 With this module, reading disk images or DFXML files is done with the parse or iterparse functions.  Writing DFXML files can be done with the DFXMLObject.print_dfxml function.
 """
 
-__version__ = "0.11.2"
+__version__ = "0.11.3"
 
 # Revision Log
 # 2018-07-22 @simsong - removed calls to logging, since this module shouldn't create log files.
@@ -40,6 +40,7 @@ import sys
 import struct
 import platform
 import typing
+import warnings
 
 # The following allows us to import the dfxml module as dfxml
 # There may be a cleaner way to do this.
@@ -58,12 +59,6 @@ _warned_hashes = set([])
 
 # Contains: Unexpected 'facet' values on byte_runs elements.
 _warned_byterun_facets = set([])
-
-# Issue some log statements only once per program invocation.
-_nagged_alloc = False
-_warned_byterun_badtypecomp = False
-_nagged_partition_file_alloc = False
-_nagged_partitionsystem_file_alloc = False
 
 XMLNS_REGXML = "http://www.forensicswiki.org/wiki/RegXML"
 XMLNS_DFXML_EXT = dfxml.XMLNS_DFXML + "#extensions"
@@ -89,7 +84,7 @@ def _ET_tostring(e):
         xmlns_attr_string = '%s="%s"' % (xmlns_attr_name, uri)
         xmlns_attr_tally = retval.count(xmlns_attr_string, 0, container_end)
         if xmlns_attr_tally > 1:
-            _logger.warning("ET.tostring() printed a repeated xmlns declaration: %r.  Trimming %d repetition(s)." % (xmlns_attr_string, xmlns_attr_tally-1))
+            _logger.info("ET.tostring() printed a repeated xmlns declaration: %r.  Trimming %d repetition(s)." % (xmlns_attr_string, xmlns_attr_tally-1))
             container_string = retval[ : container_end+1 ]
             retval = container_string.replace(xmlns_attr_string, "", xmlns_attr_tally-1) + retval[ container_end+1 : ]
     return retval
@@ -261,7 +256,7 @@ class DFXMLObject(object):
             ET.register_namespace(prefix, url)
             #_logger.debug("ET namespaces after registration: %r." % ET._namespace_map)
 
-    def append(self, value):
+    def append(self, value) -> None:
         if isinstance(value, DiskImageObject):
             self.disk_images.append(value)
         elif isinstance(value, PartitionSystemObject):
@@ -588,13 +583,17 @@ class LibraryObject(object):
         if len(args) >= 2:
             self.version = args[1]
 
-    def __eq__(self, other):
+    def __eq__(self, other : object) -> bool:
         """
         This equality function tests the name and version values strictly.  For less-strict testing, like allowing matching on missing versions, use relaxed_eq.
         This function can compare against another LibraryObject.
         """
+        if other is None:
+            return False
+        _typecheck(other, LibraryObject)
         if not isinstance(other, LibraryObject):
             return False
+
         return self.name == other.name and \
           self.version == other.version
 
@@ -687,7 +686,7 @@ class RegXMLObject(object):
         self._namespaces[prefix] = url
         ET.register_namespace(prefix, url)
 
-    def append(self, value):
+    def append(self, value) -> None:
         if isinstance(value, HiveObject):
             self._hives.append(value)
         elif isinstance(value, CellObject):
@@ -838,7 +837,7 @@ class DiskImageObject(object):
                 parts.append("%s=%s" % (prop, val))
         return "DiskImageObject(" + ", ".join(parts) + ")"
 
-    def append(self, obj):
+    def append(self, obj) -> None:
         if isinstance(obj, PartitionSystemObject):
             self.partition_systems.append(obj)
         elif isinstance(obj, VolumeObject):
@@ -1096,14 +1095,15 @@ class PartitionSystemObject(object):
                 parts.append("%s=%s" % (prop, val))
         return "PartitionSystemObject(" + ", ".join(parts) + ")"
 
-    def append(self, obj):
+    def append(self, obj) -> None:
+        """
+        Note that files appended directly to a PartitionSystemObject are expected to be slack space discoveries.  A warning is raised if an allocated file is appended.
+        """
         if isinstance(obj, PartitionObject):
             self.partitions.append(obj)
         elif isinstance(obj, FileObject):
             if obj.is_allocated():
-                if not _nagged_partitionsystem_file_alloc:
-                    _logger.warning("A partition system has had an 'allocated' file appended directly to it.  This list of files is expected to be slack space discoveries.")
-                    _nagged_partitionsystem_file_alloc = True
+                warnings.warn("A partition system has had an 'allocated' file appended directly to it.  This list of files is expected to be slack space discoveries.")
             self.files.append(obj)
         else:
             raise ValueError("Unexpected object type passed to PartitionSystemObject.append(): %r." % type(obj))
@@ -1392,7 +1392,10 @@ class PartitionObject(object):
                 parts.append("%s=%s" % (prop, val))
         return "PartitionObject(" + ", ".join(parts) + ")"
 
-    def append(self, obj):
+    def append(self, obj) -> None:
+        """
+        Note that files appended directly to a PartitionObject are expected to be slack space discoveries.  A warning is raised if an allocated file is appended.
+        """
         if isinstance(obj, PartitionSystemObject):
             self.partition_systems.append(obj)
         elif isinstance(obj, PartitionObject):
@@ -1401,9 +1404,7 @@ class PartitionObject(object):
             self.volumes.append(obj)
         elif isinstance(obj, FileObject):
             if obj.is_allocated():
-                if not _nagged_partition_file_alloc:
-                    _logger.warning("A partition has had an 'allocated' file appended directly to it.  This list of files is expected to be slack space discoveries.")
-                    _nagged_partition_file_alloc = True
+                warnings.warn("A partition has had an 'allocated' file appended directly to it.  This list of files is expected to be slack space discoveries.")
             self.files.append(obj)
         else:
             raise ValueError("Unexpected object type passed to PartitionObject.append(): %r." % type(obj))
@@ -1695,7 +1696,7 @@ class VolumeObject(object):
                 parts.append("%s=%r" % (prop, val))
         return "VolumeObject(" + ", ".join(parts) + ")"
 
-    def append(self, value):
+    def append(self, value) -> None:
         _typecheck(value, (DiskImageObject, FileObject, VolumeObject))
         if isinstance(value, DiskImageObject):
             self.disk_images.append(value)
@@ -2144,7 +2145,7 @@ class HiveObject(object):
         for c in self._cells:
             yield c
 
-    def append(self, value):
+    def append(self, value) -> None:
         _typecheck(value, CellObject)
         self._cells.append(value)
 
@@ -2351,23 +2352,21 @@ class ByteRun(object):
             return retval
         return None
 
-    def __eq__(self, other):
+    def __eq__(self, other : object) -> bool:
         # Check type.
         if other is None:
             return False
+        _typecheck(other, ByteRun)
         if not isinstance(other, ByteRun):
-            if not _warned_byterun_badtypecomp:
-                _logger.warning("A ByteRun comparison was called against a non-ByteRun object: " + repr(other) + ".")
-                _warned_byterun_badtypecomp = True
             return False
 
         #TODO Determine a way to set an ignore flag for comparison of byte run hashes.  Maybe byte_run/@has_hash_property, as a virtual XPath reference?
         #Check hashes
         if self.has_hash_property or other.has_hash_property:
             for hash_name in ByteRun._hash_properties:
-                if self.hash_name is None or other.hash_name is None:
+                if getattr(self, hash_name) is None or getattr(other, hash_name) is None:
                     continue
-                if self.hash_name != other.hash_name:
+                if getattr(self, hash_name) != getattr(other, hash_name):
                     return False
 
         # Check values.
@@ -2379,9 +2378,6 @@ class ByteRun(object):
           self.len == other.len and \
           self.type == other.type and \
           self.uncompressed_len == other.uncompressed_len
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
 
     def __repr__(self):
         parts = []
@@ -2628,8 +2624,14 @@ class ByteRuns(object):
 
     _facet_values = [None, "data", "inode", "name"]
 
-    def __init__(self, run_list=None, **kwargs):
-        self._facet = kwargs.get("facet")
+    def __init__(
+      self,
+      run_list : typing.Optional[typing.List[ByteRun]] = None,
+      *,
+      facet : typing.Optional[str] = None
+    ) -> None:
+        self._facet = facet
+        self._listdata : typing.List[ByteRun] = []
         self._listdata = []
         if isinstance(run_list, list):
             for run in run_list:
@@ -2638,12 +2640,14 @@ class ByteRuns(object):
     def __delitem__(self, key):
         del self._listdata[key]
 
-    def __eq__(self, other):
+    def __eq__(self, other : object) -> bool:
         """Compares the byte run lists and the facet (allowing a null facet to match "data")."""
         # Check type.
         if other is None:
             return False
         _typecheck(other, ByteRuns)
+        if not isinstance(other, ByteRuns):
+            return False
 
         if self.facet != other.facet:
             if set([self.facet, other.facet]) != set([None, "data"]):
@@ -2670,9 +2674,6 @@ class ByteRuns(object):
     def __len__(self):
         return self._listdata.__len__()
 
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
     def __repr__(self):
         parts = []
         for run in self:
@@ -2686,7 +2687,7 @@ class ByteRuns(object):
         _typecheck(value, ByteRun)
         self._listdata[key] = value
 
-    def append(self, value):
+    def append(self, value) -> None:
         """
         Appends a ByteRun object to this container's list.
         """
@@ -2857,11 +2858,13 @@ class TimestampObject(object):
 
         self._timestamp = None
 
-    def __eq__(self, other):
+    def __eq__(self, other : object) -> bool:
         # Check type.
         if other is None:
             return False
         _typecheck(other, TimestampObject)
+        if not isinstance(other, TimestampObject):
+            return False
 
         if self.name != other.name:
             return False
@@ -2902,9 +2905,6 @@ class TimestampObject(object):
         else:
             self._comparison_sanity_check(other)
         return self.time.__lt__(other.time)
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
 
     def __repr__(self):
         parts = []
@@ -3114,19 +3114,19 @@ class FileObject(object):
         self._annos = set()
         self._diffs = set()
 
-    def __eq__(self, other):
+    def __eq__(self, other : object) -> bool:
         if other is None:
             return False
         _typecheck(other, FileObject)
+        if not isinstance(other, FileObject):
+            return False
+
         for prop in FileObject._all_properties:
             if prop in FileObject._incomparable_properties:
                 continue
             if getattr(self, prop) != getattr(other, prop):
                 return False
         return True
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
 
     def __repr__(self):
         parts = []
@@ -3583,11 +3583,8 @@ class FileObject(object):
     @property
     def alloc(self):
         """Note that setting .alloc will affect the value of .unalloc, and vice versa.  The last one to set wins."""
-        global _nagged_alloc
-        if not _nagged_alloc:
-            #TODO alloc isn't deprecated yet.
-            #_logger.warning("The FileObject.alloc property is deprecated.  Use .alloc_inode and/or .alloc_name instead.  .alloc is proxied as True if alloc_inode and alloc_name are both True.")
-            _nagged_alloc = True
+        #TODO alloc isn't deprecated yet.
+        #warnings.warn("The FileObject.alloc property is deprecated.  Use .alloc_inode and/or .alloc_name instead.  .alloc is proxied as True if alloc_inode and alloc_name are both True.", warnings.DeprecationWarning)
         if self.alloc_inode and self.alloc_name:
             return True
         else:
@@ -4059,7 +4056,7 @@ class OtherNSElementList(list):
         OtherNSElementList._check_qname(value.tag)
         super(OtherNSElementList, self).__setitem__(idx, value)
 
-    def append(self, value):
+    def append(self, value) -> None:
         _typecheck(value, ET.Element)
         OtherNSElementList._check_qname(value.tag)
         super(OtherNSElementList, self).append(value)
@@ -4110,19 +4107,19 @@ class CellObject(object):
 
         self._diffs = set()
 
-    def __eq__(self, other):
+    def __eq__(self, other : object) -> bool:
         if other is None:
             return False
         _typecheck(other, CellObject)
+        if not isinstance(other, CellObject):
+            return False
+
         for prop in CellObject._all_properties:
             if prop in CellObject._incomparable_properties:
                 continue
             if getattr(self, prop) != getattr(other, prop):
                 return False
         return True
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
 
     def __repr__(self):
         parts = []
