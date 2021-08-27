@@ -4653,9 +4653,6 @@ class Parser(object):
       PARTITION_SYSTEM_POSTSTREAM: {
         _PARTITION_SYSTEM_END
       },
-      PARTITION_SYSTEM_POSTSTREAM: {
-        _PARTITION_SYSTEM_END
-      },
       PARTITION_SYSTEM_PRESTREAM: {
         _FILE_START,
         _PARTITION_START,
