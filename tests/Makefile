@@ -80,9 +80,11 @@ check-mypy: \
 	    ../dfxml/bin/idifference.py \
 	    ../dfxml/bin/make_differential_dfxml.py \
 	    ../dfxml/bin/summarize_differential_dfxml.py \
+	    ../dfxml/bin/tests \
 	    ../dfxml/bin/walk_to_dfxml.py \
 	    ../dfxml/__init__.py \
 	    ../dfxml/objects.py \
+	    ../dfxml/tests \
 	    .
 	@echo "INFO:tests/Makefile:mypy is currently run against a subset of the dfxml directory." >&2
 

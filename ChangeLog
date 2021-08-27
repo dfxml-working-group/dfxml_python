@@ -1,5 +1,6 @@
 2021-08-27    <alexander.nelson@nist.gov>
 
+	* Python: PEP 561 type designation added, though scripts and modules are still typed as needed thus far
 	* objects.py: Cut copy-paste error
 
 2021-08-20    <alexander.nelson@nist.gov>
