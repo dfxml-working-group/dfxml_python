@@ -1,3 +1,7 @@
+2021-08-27    <alexander.nelson@nist.gov>
+
+	* objects.py: Cut copy-paste error
+
 2021-08-20    <alexander.nelson@nist.gov>
 
 	* Python: Reversion: `dfxml_cwd` is named `walk_to_dfxml` again
