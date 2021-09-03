@@ -789,6 +789,571 @@ class RegXMLObject(object):
         return _ET_tostring(self.to_Element())
 
 
+class ByteRun(object):
+
+    _all_properties = set([
+      "img_offset",
+      "fs_offset",
+      "file_offset",
+      "fill",
+      "len",
+      "md5",
+      "sha1",
+      "sha224",
+      "sha256",
+      "sha384",
+      "sha512",
+      "type",
+      "uncompressed_len"
+    ])
+
+    _hash_properties : typing.Set[str] = set([
+      "md5",
+      "sha1",
+      "sha224",
+      "sha256",
+      "sha384",
+      "sha512"
+    ])
+
+    def __init__(self, *args, **kwargs):
+        self._has_hash_property = False
+        for prop in ByteRun._all_properties:
+            setattr(self, prop, kwargs.get(prop))
+
+    def __add__(self, other):
+        """
+        Joins two ByteRun objects into a single run if possible.  Returns a new object of the concatenation if successful, None if not.
+        """
+        _typecheck(other, ByteRun)
+        # Don't glom fills of different values.
+        if self.fill != other.fill:
+            return None
+
+        # Don't glom typed byte runs (particularly since type has been observed to be 'resident').
+        if self.type != other.type:
+            return None
+
+        # Don't glom compressed runs.
+        if not self.uncompressed_len is None or not other.uncompressed_len is None:
+            return None
+
+        #Don't glom runs with hashes
+        if self.has_hash_property or other.has_hash_property:
+            return None
+
+        if self.len is None or other.len is None:
+            return None
+
+        # Test for contiguity.
+        contiguous = None
+        for prop in ["img_offset", "fs_offset", "file_offset"]:
+            self_prop = getattr(self, prop)
+            other_prop = getattr(other, prop)
+
+            if self_prop is None or other_prop is None:
+                if self_prop is None and other_prop is None:
+                    # Both properties are absent - this is fine.
+                    continue
+                else:
+                    # Incomparable information present.  Do not glom.
+                    # As a design decision, if other properties are present, they are NOT used to infer this semi-present property.
+                    return None
+
+            # Test contiguity for THIS property.  If any fail, the loop concludes.
+            if self_prop + self.len == other_prop:
+                contiguous = True
+            else:
+                return None
+        if contiguous:
+            retval = copy.deepcopy(self)
+            retval.len += other.len
+            return retval
+        return None
+
+    def __eq__(self, other : object) -> bool:
+        # Check type.
+        if other is None:
+            return False
+        _typecheck(other, ByteRun)
+        if not isinstance(other, ByteRun):
+            return False
+
+        #TODO Determine a way to set an ignore flag for comparison of byte run hashes.  Maybe byte_run/@has_hash_property, as a virtual XPath reference?
+        #Check hashes
+        if self.has_hash_property or other.has_hash_property:
+            for hash_name in ByteRun._hash_properties:
+                if getattr(self, hash_name) is None or getattr(other, hash_name) is None:
+                    continue
+                if getattr(self, hash_name) != getattr(other, hash_name):
+                    return False
+
+        # Check values.
+        return \
+          self.img_offset == other.img_offset and \
+          self.fs_offset == other.fs_offset and \
+          self.file_offset == other.file_offset and \
+          self.fill == other.fill and \
+          self.len == other.len and \
+          self.type == other.type and \
+          self.uncompressed_len == other.uncompressed_len
+
+    def __repr__(self):
+        parts = []
+        for prop in ByteRun._all_properties:
+            val = getattr(self, prop)
+            if not val is None:
+                parts.append("%s=%r" % (prop, val))
+        return "ByteRun(" + ", ".join(parts) + ")"
+
+    def populate_from_Element(self, e):
+        global _warned_elements
+        global _warned_hashes
+
+        _typecheck(e, (ET.Element, ET.ElementTree))
+
+        # Split into namespace and tagname.
+        (ns, tn) = _qsplit(e.tag)
+        assert tn == "byte_run"
+
+        copied_attrib = copy.deepcopy(e.attrib)
+
+        # Populate run properties from element attributes.
+        for prop in ByteRun._all_properties:
+            if prop in copied_attrib:
+                val = copied_attrib.get(prop)
+                if not val is None:
+                    setattr(self, prop, val)
+                del copied_attrib[prop]
+        # Note remaining properties.
+        for prop in copied_attrib:
+            if prop not in _warned_byterun_attribs:
+                _warned_byterun_attribs.add(prop)
+                _logger.warning("No instructions present for processing this attribute found on a byte run: %r." % prop)
+
+        # Look through direct-child elements for other properties.
+        for ce in e.findall("./*"):
+            (cns, ctn) = _qsplit(ce.tag)
+            #_logger.debug("Populating from child element: %r." % ce.tag)
+            if ctn == "hashdigest":
+                type_lower = ce.attrib["type"].lower()
+                if type_lower in ByteRun._hash_properties:
+                    setattr(self, type_lower, ce.text)
+                else:
+                    if (type_lower, ByteRun) not in _warned_hashes:
+                        _warned_hashes.add((type_lower, ByteRun))
+                        _logger.warning("Uncertain what to do with this hash encountered in a ByteRun: %r." % type_lower)
+            else:
+                if (cns, ctn, ByteRun) not in _warned_elements:
+                    _warned_elements.add((cns, ctn, ByteRun))
+                    _logger.warning("Uncertain what to do with this element in a ByteRun: %r" % ce)
+
+    def to_Element(self):
+        outel = ET.Element("byte_run")
+
+        if self.has_hash_property:
+            def _append_hash(name):
+                value = getattr(self, name)
+                if not value is None:
+                    tmpel = ET.Element("hashdigest")
+                    tmpel.attrib["type"] = name
+                    tmpel.text = value
+                    outel.append(tmpel)
+
+            for prop in sorted(ByteRun._hash_properties):
+                _append_hash(prop)
+
+        for prop in ByteRun._all_properties:
+            val = getattr(self, prop)
+
+            # Skip null properties.
+            if val is None:
+                continue
+
+            #Hash properties become child elements - handled in sort order.
+            if prop in ByteRun._hash_properties:
+                continue
+
+            # Everything else becomes attributes.
+            if isinstance(val, bytes):
+                outel.attrib[prop] = str(struct.unpack("b", val)[0])
+            else:
+                outel.attrib[prop] = str(val)
+
+        return outel
+
+    @property
+    def file_offset(self):
+        return self._file_offset
+
+    @file_offset.setter
+    def file_offset(self, val):
+        self._file_offset = _intcast(val)
+
+    @property
+    def fill(self):
+        """
+        At the moment, the fill value is assumed to be a single byte.  The value you receive from this property wll be None or a byte.  Setting fill to the string "0" will return the null byte when retrieved later.
+
+        For now, setting to any digital string (e.g. "41") will return a byte representing the integer casting string (e.g. the number 41), but this is subject to change pending some discussion.
+        """
+        return self._fill
+
+    @fill.setter
+    def fill(self, val):
+        if val is None:
+            self._fill = val
+        elif val == "0":
+            self._fill = b'\x00'
+        elif isinstance(val, bytes):
+            if len(val) != 1:
+                raise NotImplementedError("Received a %d-length fill byte string for a byte run.  Only 1-byte fill strings are accepted for now, pending further discussion.")
+            self._fill = val
+        elif isinstance(val, int):
+            # This is the easiest way between Python 2 and 3.  int.to_bytes would be better, but that is only in >=3.2.
+            self._fill = struct.pack("b", val)
+        elif isinstance(val, str) and val.isdigit():
+            # Recurse, changing type.
+            self.fill = int(val)
+
+    @property
+    def fs_offset(self):
+        return self._fs_offset
+
+    @fs_offset.setter
+    def fs_offset(self, val):
+        self._fs_offset = _intcast(val)
+
+    @property
+    def has_hash_property(self):
+        """
+        has_hash_property is a convenience variable without a setter, not to be serialized.
+        This property intentionally has no setter.
+        """
+        return self._has_hash_property
+
+    @property
+    def img_offset(self):
+        return self._img_offset
+
+    @img_offset.setter
+    def img_offset(self, val):
+        self._img_offset = _intcast(val)
+
+    @property
+    def len(self):
+        return self._len
+
+    @len.setter
+    def len(self, val):
+        self._len = _intcast(val)
+
+    @property
+    def md5(self):
+        return self._md5
+
+    @md5.setter
+    def md5(self, val):
+        if not val is None:
+            self._has_hash_property = True
+        self._md5 = _strcast(val)
+
+    @property
+    def sha1(self):
+        return self._sha1
+
+    @sha1.setter
+    def sha1(self, val):
+        if not val is None:
+            self._has_hash_property = True
+        self._sha1 = _strcast(val)
+
+    @property
+    def sha224(self):
+        return self._sha224
+
+    @sha224.setter
+    def sha224(self, val):
+        if not val is None:
+            self._has_hash_property = True
+        self._sha224 = _strcast(val)
+
+    @property
+    def sha256(self):
+        return self._sha256
+
+    @sha256.setter
+    def sha256(self, val):
+        if not val is None:
+            self._has_hash_property = True
+        self._sha256 = _strcast(val)
+
+    @property
+    def sha384(self):
+        return self._sha384
+
+    @sha384.setter
+    def sha384(self, val):
+        if not val is None:
+            self._has_hash_property = True
+        self._sha384 = _strcast(val)
+
+    @property
+    def sha512(self):
+        return self._sha512
+
+    @sha512.setter
+    def sha512(self, val):
+        if not val is None:
+            self._has_hash_property = True
+        self._sha512 = _strcast(val)
+
+    @property
+    def type(self):
+        return self._type
+
+    @type.setter
+    def type(self, val):
+        self._type = _strcast(val)
+
+    @property
+    def uncompressed_len(self):
+        return self._uncompressed_len
+
+    @uncompressed_len.setter
+    def uncompressed_len(self, val):
+        self._uncompressed_len = _intcast(val)
+
+
+class ByteRuns(object):
+    """
+    A list-like object for ByteRun objects.
+    """
+    # Must define these methods to adhere to the list protocol:
+    # __len__
+    # __getitem__
+    # __setitem__
+    # __delitem__
+    # __iter__
+    # append
+    #
+    # Refs:
+    # http://www.rafekettler.com/magicmethods.html
+    # http://stackoverflow.com/a/8841520
+
+    _facet_values = [None, "data", "inode", "name"]
+
+    def __init__(
+      self,
+      run_list : typing.Optional[typing.List[ByteRun]] = None,
+      *,
+      facet : typing.Optional[str] = None
+    ) -> None:
+        self._facet = facet
+        self._listdata : typing.List[ByteRun] = []
+        self._listdata = []
+        if isinstance(run_list, list):
+            for run in run_list:
+                self.append(run)
+
+    def __delitem__(self, key):
+        del self._listdata[key]
+
+    def __eq__(self, other : object) -> bool:
+        """Compares the byte run lists and the facet (allowing a null facet to match "data")."""
+        # Check type.
+        if other is None:
+            return False
+        _typecheck(other, ByteRuns)
+        if not isinstance(other, ByteRuns):
+            return False
+
+        if self.facet != other.facet:
+            if set([self.facet, other.facet]) != set([None, "data"]):
+                return False
+        if len(self) != len(other):
+            #_logger.debug("len(self) = %d" % len(self))
+            #_logger.debug("len(other) = %d" % len(other))
+            return False
+        for (sbr_index, sbr) in enumerate(self):
+            obr = other[sbr_index]
+            #_logger.debug("sbr_index = %d" % sbr_index)
+            #_logger.debug("sbr = %r" % sbr)
+            #_logger.debug("obr = %r" % obr)
+            if sbr != obr:
+                return False
+        return True
+
+    def __getitem__(self, key):
+        return self._listdata.__getitem__(key)
+
+    def __iter__(self):
+        return iter(self._listdata)
+
+    def __len__(self):
+        return self._listdata.__len__()
+
+    def __repr__(self):
+        parts = []
+        for run in self:
+            parts.append(repr(run))
+        maybe_facet = ""
+        if self.facet:
+            maybe_facet = "facet=%r, " % self.facet
+        return "ByteRuns(" + maybe_facet + "run_list=[" + ", ".join(parts) + "])"
+
+    def __setitem__(self, key, value):
+        _typecheck(value, ByteRun)
+        self._listdata[key] = value
+
+    def append(self, value) -> None:
+        """
+        Appends a ByteRun object to this container's list.
+        """
+        _typecheck(value, ByteRun)
+        self._listdata.append(value)
+
+    def glom(self, value):
+        """
+        Appends a ByteRun object to this container's list, after attempting to join the run with the last run already stored.
+        """
+        _typecheck(value, ByteRun)
+        if len(self._listdata) == 0:
+            self.append(value)
+        else:
+            last_run = self._listdata[-1]
+            maybe_new_run = last_run + value
+            if maybe_new_run is None:
+                self.append(value)
+            else:
+                self._listdata[-1] = maybe_new_run
+
+    def iter_contents(self, raw_image, buffer_size=1048576, sector_size=512, errlog=None, statlog=None):
+        """
+        Generator.  Yields contents, as byte strings one block at a time, given a backing raw image path.  Relies on The SleuthKit's img_cat, so contents can be extracted from any disk image type that TSK supports.
+        @param buffer_size The maximum size of the byte strings yielded.
+        @param sector_size The size of a disk sector in the raw image.  Required by img_cat.
+        """
+        if not isinstance(raw_image, str):
+            raise TypeError("iter_contents needs the string path to the image file.  Received: %r." % raw_image)
+
+        stderr_fh = None
+        if not errlog is None:
+            stderr_fh = open(errlog, "wb")
+
+        status_fh = None
+        if not statlog is None:
+            status_fh = open(errlog, "wb")
+
+        # The exit status of the last img_cat.
+        last_status = None
+
+        try:
+            for run in self:
+                if run.len is None:
+                    raise AttributeError("Byte runs can't be extracted if a run length is undefined.")
+
+                len_to_read = run.len
+
+                # If we have a fill character, just pump out that character.
+                if not run.fill is None and len(run.fill) > 0:
+                    while len_to_read > 0:
+                        # This multiplication and slice should handle multi-byte fill characters, in case that ever comes up.
+                        yield (run.fill * buffer_size)[ : min(len_to_read, buffer_size)]
+                        len_to_read -= buffer_size
+                    # Next byte run.
+                    continue
+
+                if run.img_offset is None:
+                    raise AttributeError("Byte runs can't be extracted if missing a fill character and image offset.")
+
+                cmd = ["img_cat"]
+                cmd.append("-b")
+                cmd.append(str(sector_size))
+                cmd.append("-s")
+                cmd.append(str(run.img_offset//sector_size))
+                cmd.append("-e")
+                cmd.append(str( (run.img_offset + run.len)//sector_size))
+                cmd.append(raw_image)
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr_fh)
+
+                # Do the buffered read.
+                while len_to_read > 0:
+                    buffer_data = p.stdout.read(buffer_size)
+                    yield_data = buffer_data[ : min(len_to_read, buffer_size)]
+                    if len(yield_data) > 0:
+                        yield yield_data
+                    else:
+                        # Let the subprocess terminate so we can see the exit status.
+                        p.wait()
+                        last_status = p.returncode
+                        if last_status != 0:
+                            raise subprocess.CalledProcessError(last_status, " ".join(cmd), "img_cat failed.")
+                    len_to_read -= buffer_size
+        except Exception as e:
+            # Cleanup in an exception.
+            if not stderr_fh is None:
+                stderr_fh.close()
+
+            if not status_fh is None:
+                if isinstance(e, subprocess.CalledProcessError):
+                    status_fh.write(e.returncode)
+                else:
+                    status_fh.write("1")
+                status_fh.close()
+            raise e
+
+        # Cleanup when all's gone well.
+        if not status_fh is None:
+            if not last_status is None:
+                status_fh.write(last_status)
+            status_fh.close()
+        if not stderr_fh is None:
+            stderr_fh.close()
+
+    def populate_from_Element(self, e):
+        _typecheck(e, (ET.Element, ET.ElementTree))
+
+        # Split into namespace and tagname.
+        (ns, tn) = _qsplit(e.tag)
+        assert tn == "byte_runs"
+
+        if "facet" in e.attrib:
+            self.facet = e.attrib["facet"]
+
+        # Look through direct-child elements to populate run array.
+        for ce in e.findall("./*"):
+            (cns, ctn) = _qsplit(ce.tag)
+            if ctn == "byte_run":
+                nbr = ByteRun()
+                nbr.populate_from_Element(ce)
+                self.append(nbr)
+
+    def to_Element(self):
+        outel = ET.Element("byte_runs")
+        for run in self:
+            tmpel = run.to_Element()
+            outel.append(tmpel)
+        if self.facet:
+            outel.attrib["facet"] = self.facet
+        return outel
+
+    @property
+    def facet(self):
+        """Expected to be null, "data", "inode", or "name".  See FileObject.data_brs, FileObject.inode_brs, and FileObject.name_brs."""
+        return self._facet
+
+    @facet.setter
+    def facet(self, val):
+        if not val is None:
+            _typecheck(val, str)
+        if val not in ByteRuns._facet_values:
+            raise ValueError("A ByteRuns facet must be one of these: %r.  Received: %r." % (ByteRuns._facet_values, val))
+        self._facet = val
+
+
+re_precision = re.compile(r"(?P<num>\d+)(?P<unit>(|m|n)s|d)?")
+
 class DiskImageObject(object):
 
     _all_properties = set([
@@ -2269,571 +2834,6 @@ class HiveObject(object):
             _typecheck(val, HiveObject)
         self._original_hive = val
 
-
-class ByteRun(object):
-
-    _all_properties = set([
-      "img_offset",
-      "fs_offset",
-      "file_offset",
-      "fill",
-      "len",
-      "md5",
-      "sha1",
-      "sha224",
-      "sha256",
-      "sha384",
-      "sha512",
-      "type",
-      "uncompressed_len"
-    ])
-
-    _hash_properties : typing.Set[str] = set([
-      "md5",
-      "sha1",
-      "sha224",
-      "sha256",
-      "sha384",
-      "sha512"
-    ])
-
-    def __init__(self, *args, **kwargs):
-        self._has_hash_property = False
-        for prop in ByteRun._all_properties:
-            setattr(self, prop, kwargs.get(prop))
-
-    def __add__(self, other):
-        """
-        Joins two ByteRun objects into a single run if possible.  Returns a new object of the concatenation if successful, None if not.
-        """
-        _typecheck(other, ByteRun)
-        # Don't glom fills of different values.
-        if self.fill != other.fill:
-            return None
-
-        # Don't glom typed byte runs (particularly since type has been observed to be 'resident').
-        if self.type != other.type:
-            return None
-
-        # Don't glom compressed runs.
-        if not self.uncompressed_len is None or not other.uncompressed_len is None:
-            return None
-
-        #Don't glom runs with hashes
-        if self.has_hash_property or other.has_hash_property:
-            return None
-
-        if self.len is None or other.len is None:
-            return None
-
-        # Test for contiguity.
-        contiguous = None
-        for prop in ["img_offset", "fs_offset", "file_offset"]:
-            self_prop = getattr(self, prop)
-            other_prop = getattr(other, prop)
-
-            if self_prop is None or other_prop is None:
-                if self_prop is None and other_prop is None:
-                    # Both properties are absent - this is fine.
-                    continue
-                else:
-                    # Incomparable information present.  Do not glom.
-                    # As a design decision, if other properties are present, they are NOT used to infer this semi-present property.
-                    return None
-
-            # Test contiguity for THIS property.  If any fail, the loop concludes.
-            if self_prop + self.len == other_prop:
-                contiguous = True
-            else:
-                return None
-        if contiguous:
-            retval = copy.deepcopy(self)
-            retval.len += other.len
-            return retval
-        return None
-
-    def __eq__(self, other : object) -> bool:
-        # Check type.
-        if other is None:
-            return False
-        _typecheck(other, ByteRun)
-        if not isinstance(other, ByteRun):
-            return False
-
-        #TODO Determine a way to set an ignore flag for comparison of byte run hashes.  Maybe byte_run/@has_hash_property, as a virtual XPath reference?
-        #Check hashes
-        if self.has_hash_property or other.has_hash_property:
-            for hash_name in ByteRun._hash_properties:
-                if getattr(self, hash_name) is None or getattr(other, hash_name) is None:
-                    continue
-                if getattr(self, hash_name) != getattr(other, hash_name):
-                    return False
-
-        # Check values.
-        return \
-          self.img_offset == other.img_offset and \
-          self.fs_offset == other.fs_offset and \
-          self.file_offset == other.file_offset and \
-          self.fill == other.fill and \
-          self.len == other.len and \
-          self.type == other.type and \
-          self.uncompressed_len == other.uncompressed_len
-
-    def __repr__(self):
-        parts = []
-        for prop in ByteRun._all_properties:
-            val = getattr(self, prop)
-            if not val is None:
-                parts.append("%s=%r" % (prop, val))
-        return "ByteRun(" + ", ".join(parts) + ")"
-
-    def populate_from_Element(self, e):
-        global _warned_elements
-        global _warned_hashes
-
-        _typecheck(e, (ET.Element, ET.ElementTree))
-
-        # Split into namespace and tagname.
-        (ns, tn) = _qsplit(e.tag)
-        assert tn == "byte_run"
-
-        copied_attrib = copy.deepcopy(e.attrib)
-
-        # Populate run properties from element attributes.
-        for prop in ByteRun._all_properties:
-            if prop in copied_attrib:
-                val = copied_attrib.get(prop)
-                if not val is None:
-                    setattr(self, prop, val)
-                del copied_attrib[prop]
-        # Note remaining properties.
-        for prop in copied_attrib:
-            if prop not in _warned_byterun_attribs:
-                _warned_byterun_attribs.add(prop)
-                _logger.warning("No instructions present for processing this attribute found on a byte run: %r." % prop)
-
-        # Look through direct-child elements for other properties.
-        for ce in e.findall("./*"):
-            (cns, ctn) = _qsplit(ce.tag)
-            #_logger.debug("Populating from child element: %r." % ce.tag)
-            if ctn == "hashdigest":
-                type_lower = ce.attrib["type"].lower()
-                if type_lower in ByteRun._hash_properties:
-                    setattr(self, type_lower, ce.text)
-                else:
-                    if (type_lower, ByteRun) not in _warned_hashes:
-                        _warned_hashes.add((type_lower, ByteRun))
-                        _logger.warning("Uncertain what to do with this hash encountered in a ByteRun: %r." % type_lower)
-            else:
-                if (cns, ctn, ByteRun) not in _warned_elements:
-                    _warned_elements.add((cns, ctn, ByteRun))
-                    _logger.warning("Uncertain what to do with this element in a ByteRun: %r" % ce)
-
-    def to_Element(self):
-        outel = ET.Element("byte_run")
-
-        if self.has_hash_property:
-            def _append_hash(name):
-                value = getattr(self, name)
-                if not value is None:
-                    tmpel = ET.Element("hashdigest")
-                    tmpel.attrib["type"] = name
-                    tmpel.text = value
-                    outel.append(tmpel)
-
-            for prop in sorted(ByteRun._hash_properties):
-                _append_hash(prop)
-
-        for prop in ByteRun._all_properties:
-            val = getattr(self, prop)
-
-            # Skip null properties.
-            if val is None:
-                continue
-
-            #Hash properties become child elements - handled in sort order.
-            if prop in ByteRun._hash_properties:
-                continue
-
-            # Everything else becomes attributes.
-            if isinstance(val, bytes):
-                outel.attrib[prop] = str(struct.unpack("b", val)[0])
-            else:
-                outel.attrib[prop] = str(val)
-
-        return outel
-
-    @property
-    def file_offset(self):
-        return self._file_offset
-
-    @file_offset.setter
-    def file_offset(self, val):
-        self._file_offset = _intcast(val)
-
-    @property
-    def fill(self):
-        """
-        At the moment, the fill value is assumed to be a single byte.  The value you receive from this property wll be None or a byte.  Setting fill to the string "0" will return the null byte when retrieved later.
-
-        For now, setting to any digital string (e.g. "41") will return a byte representing the integer casting string (e.g. the number 41), but this is subject to change pending some discussion.
-        """
-        return self._fill
-
-    @fill.setter
-    def fill(self, val):
-        if val is None:
-            self._fill = val
-        elif val == "0":
-            self._fill = b'\x00'
-        elif isinstance(val, bytes):
-            if len(val) != 1:
-                raise NotImplementedError("Received a %d-length fill byte string for a byte run.  Only 1-byte fill strings are accepted for now, pending further discussion.")
-            self._fill = val
-        elif isinstance(val, int):
-            # This is the easiest way between Python 2 and 3.  int.to_bytes would be better, but that is only in >=3.2.
-            self._fill = struct.pack("b", val)
-        elif isinstance(val, str) and val.isdigit():
-            # Recurse, changing type.
-            self.fill = int(val)
-
-    @property
-    def fs_offset(self):
-        return self._fs_offset
-
-    @fs_offset.setter
-    def fs_offset(self, val):
-        self._fs_offset = _intcast(val)
-
-    @property
-    def has_hash_property(self):
-        """
-        has_hash_property is a convenience variable without a setter, not to be serialized.
-        This property intentionally has no setter.
-        """
-        return self._has_hash_property
-
-    @property
-    def img_offset(self):
-        return self._img_offset
-
-    @img_offset.setter
-    def img_offset(self, val):
-        self._img_offset = _intcast(val)
-
-    @property
-    def len(self):
-        return self._len
-
-    @len.setter
-    def len(self, val):
-        self._len = _intcast(val)
-
-    @property
-    def md5(self):
-        return self._md5
-
-    @md5.setter
-    def md5(self, val):
-        if not val is None:
-            self._has_hash_property = True
-        self._md5 = _strcast(val)
-
-    @property
-    def sha1(self):
-        return self._sha1
-
-    @sha1.setter
-    def sha1(self, val):
-        if not val is None:
-            self._has_hash_property = True
-        self._sha1 = _strcast(val)
-
-    @property
-    def sha224(self):
-        return self._sha224
-
-    @sha224.setter
-    def sha224(self, val):
-        if not val is None:
-            self._has_hash_property = True
-        self._sha224 = _strcast(val)
-
-    @property
-    def sha256(self):
-        return self._sha256
-
-    @sha256.setter
-    def sha256(self, val):
-        if not val is None:
-            self._has_hash_property = True
-        self._sha256 = _strcast(val)
-
-    @property
-    def sha384(self):
-        return self._sha384
-
-    @sha384.setter
-    def sha384(self, val):
-        if not val is None:
-            self._has_hash_property = True
-        self._sha384 = _strcast(val)
-
-    @property
-    def sha512(self):
-        return self._sha512
-
-    @sha512.setter
-    def sha512(self, val):
-        if not val is None:
-            self._has_hash_property = True
-        self._sha512 = _strcast(val)
-
-    @property
-    def type(self):
-        return self._type
-
-    @type.setter
-    def type(self, val):
-        self._type = _strcast(val)
-
-    @property
-    def uncompressed_len(self):
-        return self._uncompressed_len
-
-    @uncompressed_len.setter
-    def uncompressed_len(self, val):
-        self._uncompressed_len = _intcast(val)
-
-
-class ByteRuns(object):
-    """
-    A list-like object for ByteRun objects.
-    """
-    # Must define these methods to adhere to the list protocol:
-    # __len__
-    # __getitem__
-    # __setitem__
-    # __delitem__
-    # __iter__
-    # append
-    #
-    # Refs:
-    # http://www.rafekettler.com/magicmethods.html
-    # http://stackoverflow.com/a/8841520
-
-    _facet_values = [None, "data", "inode", "name"]
-
-    def __init__(
-      self,
-      run_list : typing.Optional[typing.List[ByteRun]] = None,
-      *,
-      facet : typing.Optional[str] = None
-    ) -> None:
-        self._facet = facet
-        self._listdata : typing.List[ByteRun] = []
-        self._listdata = []
-        if isinstance(run_list, list):
-            for run in run_list:
-                self.append(run)
-
-    def __delitem__(self, key):
-        del self._listdata[key]
-
-    def __eq__(self, other : object) -> bool:
-        """Compares the byte run lists and the facet (allowing a null facet to match "data")."""
-        # Check type.
-        if other is None:
-            return False
-        _typecheck(other, ByteRuns)
-        if not isinstance(other, ByteRuns):
-            return False
-
-        if self.facet != other.facet:
-            if set([self.facet, other.facet]) != set([None, "data"]):
-                return False
-        if len(self) != len(other):
-            #_logger.debug("len(self) = %d" % len(self))
-            #_logger.debug("len(other) = %d" % len(other))
-            return False
-        for (sbr_index, sbr) in enumerate(self):
-            obr = other[sbr_index]
-            #_logger.debug("sbr_index = %d" % sbr_index)
-            #_logger.debug("sbr = %r" % sbr)
-            #_logger.debug("obr = %r" % obr)
-            if sbr != obr:
-                return False
-        return True
-
-    def __getitem__(self, key):
-        return self._listdata.__getitem__(key)
-
-    def __iter__(self):
-        return iter(self._listdata)
-
-    def __len__(self):
-        return self._listdata.__len__()
-
-    def __repr__(self):
-        parts = []
-        for run in self:
-            parts.append(repr(run))
-        maybe_facet = ""
-        if self.facet:
-            maybe_facet = "facet=%r, " % self.facet
-        return "ByteRuns(" + maybe_facet + "run_list=[" + ", ".join(parts) + "])"
-
-    def __setitem__(self, key, value):
-        _typecheck(value, ByteRun)
-        self._listdata[key] = value
-
-    def append(self, value) -> None:
-        """
-        Appends a ByteRun object to this container's list.
-        """
-        _typecheck(value, ByteRun)
-        self._listdata.append(value)
-
-    def glom(self, value):
-        """
-        Appends a ByteRun object to this container's list, after attempting to join the run with the last run already stored.
-        """
-        _typecheck(value, ByteRun)
-        if len(self._listdata) == 0:
-            self.append(value)
-        else:
-            last_run = self._listdata[-1]
-            maybe_new_run = last_run + value
-            if maybe_new_run is None:
-                self.append(value)
-            else:
-                self._listdata[-1] = maybe_new_run
-
-    def iter_contents(self, raw_image, buffer_size=1048576, sector_size=512, errlog=None, statlog=None):
-        """
-        Generator.  Yields contents, as byte strings one block at a time, given a backing raw image path.  Relies on The SleuthKit's img_cat, so contents can be extracted from any disk image type that TSK supports.
-        @param buffer_size The maximum size of the byte strings yielded.
-        @param sector_size The size of a disk sector in the raw image.  Required by img_cat.
-        """
-        if not isinstance(raw_image, str):
-            raise TypeError("iter_contents needs the string path to the image file.  Received: %r." % raw_image)
-
-        stderr_fh = None
-        if not errlog is None:
-            stderr_fh = open(errlog, "wb")
-
-        status_fh = None
-        if not statlog is None:
-            status_fh = open(errlog, "wb")
-
-        # The exit status of the last img_cat.
-        last_status = None
-
-        try:
-            for run in self:
-                if run.len is None:
-                    raise AttributeError("Byte runs can't be extracted if a run length is undefined.")
-
-                len_to_read = run.len
-
-                # If we have a fill character, just pump out that character.
-                if not run.fill is None and len(run.fill) > 0:
-                    while len_to_read > 0:
-                        # This multiplication and slice should handle multi-byte fill characters, in case that ever comes up.
-                        yield (run.fill * buffer_size)[ : min(len_to_read, buffer_size)]
-                        len_to_read -= buffer_size
-                    # Next byte run.
-                    continue
-
-                if run.img_offset is None:
-                    raise AttributeError("Byte runs can't be extracted if missing a fill character and image offset.")
-
-                cmd = ["img_cat"]
-                cmd.append("-b")
-                cmd.append(str(sector_size))
-                cmd.append("-s")
-                cmd.append(str(run.img_offset//sector_size))
-                cmd.append("-e")
-                cmd.append(str( (run.img_offset + run.len)//sector_size))
-                cmd.append(raw_image)
-                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr_fh)
-
-                # Do the buffered read.
-                while len_to_read > 0:
-                    buffer_data = p.stdout.read(buffer_size)
-                    yield_data = buffer_data[ : min(len_to_read, buffer_size)]
-                    if len(yield_data) > 0:
-                        yield yield_data
-                    else:
-                        # Let the subprocess terminate so we can see the exit status.
-                        p.wait()
-                        last_status = p.returncode
-                        if last_status != 0:
-                            raise subprocess.CalledProcessError(last_status, " ".join(cmd), "img_cat failed.")
-                    len_to_read -= buffer_size
-        except Exception as e:
-            # Cleanup in an exception.
-            if not stderr_fh is None:
-                stderr_fh.close()
-
-            if not status_fh is None:
-                if isinstance(e, subprocess.CalledProcessError):
-                    status_fh.write(e.returncode)
-                else:
-                    status_fh.write("1")
-                status_fh.close()
-            raise e
-
-        # Cleanup when all's gone well.
-        if not status_fh is None:
-            if not last_status is None:
-                status_fh.write(last_status)
-            status_fh.close()
-        if not stderr_fh is None:
-            stderr_fh.close()
-
-    def populate_from_Element(self, e):
-        _typecheck(e, (ET.Element, ET.ElementTree))
-
-        # Split into namespace and tagname.
-        (ns, tn) = _qsplit(e.tag)
-        assert tn == "byte_runs"
-
-        if "facet" in e.attrib:
-            self.facet = e.attrib["facet"]
-
-        # Look through direct-child elements to populate run array.
-        for ce in e.findall("./*"):
-            (cns, ctn) = _qsplit(ce.tag)
-            if ctn == "byte_run":
-                nbr = ByteRun()
-                nbr.populate_from_Element(ce)
-                self.append(nbr)
-
-    def to_Element(self):
-        outel = ET.Element("byte_runs")
-        for run in self:
-            tmpel = run.to_Element()
-            outel.append(tmpel)
-        if self.facet:
-            outel.attrib["facet"] = self.facet
-        return outel
-
-    @property
-    def facet(self):
-        """Expected to be null, "data", "inode", or "name".  See FileObject.data_brs, FileObject.inode_brs, and FileObject.name_brs."""
-        return self._facet
-
-    @facet.setter
-    def facet(self, val):
-        if not val is None:
-            _typecheck(val, str)
-        if val not in ByteRuns._facet_values:
-            raise ValueError("A ByteRuns facet must be one of these: %r.  Received: %r." % (ByteRuns._facet_values, val))
-        self._facet = val
-
-
-re_precision = re.compile(r"(?P<num>\d+)(?P<unit>(|m|n)s|d)?")
 
 class TimestampObject(object):
     """
