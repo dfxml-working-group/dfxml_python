@@ -1352,8 +1352,6 @@ class ByteRuns(object):
         self._facet = val
 
 
-re_precision = re.compile(r"(?P<num>\d+)(?P<unit>(|m|n)s|d)?")
-
 class DiskImageObject(object):
 
     _all_properties = set([
@@ -1562,11 +1560,16 @@ class DiskImageObject(object):
         return outel
 
     @property
-    def byte_runs(self):
+    def byte_runs(
+      self
+    ) -> ByteRuns:
         return self._byte_runs
 
     @byte_runs.setter
-    def byte_runs(self, val):
+    def byte_runs(
+      self,
+      val : typing.Optional[ByteRuns]
+    ) -> None:
         if not val is None:
             _typecheck(val, ByteRuns)
         self._byte_runs = val
@@ -1838,11 +1841,16 @@ class PartitionSystemObject(object):
         return outel
 
     @property
-    def byte_runs(self):
+    def byte_runs(
+      self
+    ) -> ByteRuns:
         return self._byte_runs
 
     @byte_runs.setter
-    def byte_runs(self, val):
+    def byte_runs(
+      self,
+      val : typing.Optional[ByteRuns]
+    ) -> None:
         if not val is None:
             _typecheck(val, ByteRuns)
         self._byte_runs = val
@@ -2108,11 +2116,16 @@ class PartitionObject(object):
         return outel
 
     @property
-    def byte_runs(self):
+    def byte_runs(
+      self
+    ) -> ByteRuns:
         return self._byte_runs
 
     @byte_runs.setter
-    def byte_runs(self, val):
+    def byte_runs(
+      self,
+      val : typing.Optional[ByteRuns]
+    ) -> None:
         if not val is None:
             _typecheck(val, ByteRuns)
         self._byte_runs = val
@@ -2563,11 +2576,16 @@ class VolumeObject(object):
         self._block_size = _intcast(val)
 
     @property
-    def byte_runs(self):
+    def byte_runs(
+      self
+    ) -> typing.Optional[ByteRuns]:
         return self._byte_runs
 
     @byte_runs.setter
-    def byte_runs(self, val):
+    def byte_runs(
+      self,
+      val : typing.Optional[ByteRuns]
+    ) -> None:
         if not val is None:
             _typecheck(val, ByteRuns)
         self._byte_runs = val
@@ -2834,6 +2852,8 @@ class HiveObject(object):
             _typecheck(val, HiveObject)
         self._original_hive = val
 
+
+re_precision = re.compile(r"(?P<num>\d+)(?P<unit>(|m|n)s|d)?")
 
 class TimestampObject(object):
     """
@@ -3651,12 +3671,17 @@ class FileObject(object):
             self._bkup_time = checked_val
 
     @property
-    def byte_runs(self):
+    def byte_runs(
+      self
+    ) -> typing.Optional[ByteRuns]:
         """This property is now a synonym for the data byte runs (.data_brs)."""
         return self.data_brs
 
     @byte_runs.setter
-    def byte_runs(self, val):
+    def byte_runs(
+      self,
+      val : typing.Optional[ByteRuns]
+    ) -> None:
         self.data_brs = val
 
     @property
@@ -3696,12 +3721,17 @@ class FileObject(object):
             self._crtime = checked_val
 
     @property
-    def data_brs(self):
+    def data_brs(
+      self
+    ) -> typing.Optional[ByteRuns]:
         """The byte runs that store the file's content."""
         return self._data_brs
 
     @data_brs.setter
-    def data_brs(self, val):
+    def data_brs(
+      self,
+      val : typing.Optional[ByteRuns]
+    ) -> None:
         if not val is None:
             _typecheck(val, ByteRuns)
         self._data_brs = val
@@ -3809,12 +3839,17 @@ class FileObject(object):
         self._link_target = val
 
     @property
-    def inode_brs(self):
+    def inode_brs(
+      self
+    ) -> typing.Optional[ByteRuns]:
         """The byte run(s) that represents the file's metadata object (the inode or the MFT entry).  In file systems that do not distinguish between inode and directory entry, e.g. FAT, .inode_brs should be equivalent to .name_brs, if both fields are present."""
         return self._inode_brs
 
     @inode_brs.setter
-    def inode_brs(self, val):
+    def inode_brs(
+      self,
+      val : typing.Optional[ByteRuns]
+    ) -> None:
         if not val is None:
             _typecheck(val, ByteRuns)
         self._inode_brs = val
@@ -3867,12 +3902,17 @@ class FileObject(object):
             self._mtime = checked_val
 
     @property
-    def name_brs(self):
+    def name_brs(
+      self
+    ) -> typing.Optional[ByteRuns]:
         """The byte run(s) that represents the file's name object (the directory entry).  In file systems that do not distinguish between inode and directory entry, e.g. FAT, .inode_brs should be equivalent to .name_brs, if both fields are present."""
         return self._name_brs
 
     @name_brs.setter
-    def name_brs(self, val):
+    def name_brs(
+      self,
+      val : typing.Optional[ByteRuns]
+    ) -> None:
         if not val is None:
             _typecheck(val, ByteRuns)
         self._name_brs = val
@@ -4355,11 +4395,16 @@ class CellObject(object):
         self._basename = val
 
     @property
-    def byte_runs(self):
+    def byte_runs(
+      self
+    ) -> typing.Optional[ByteRuns]:
         return self._byte_runs
 
     @byte_runs.setter
-    def byte_runs(self, val):
+    def byte_runs(
+      self,
+      val : typing.Optional[ByteRuns]
+    ) -> None:
         if not val is None:
             _typecheck(val, ByteRuns)
         self._byte_runs = val
