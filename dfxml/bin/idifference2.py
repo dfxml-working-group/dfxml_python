@@ -29,11 +29,13 @@ import dfxml.objects as Objects
 import make_differential_dfxml
 import summarize_differential_dfxml
 
+INCLUDE_DOTDIRS = False
+
 def ignorable_name(fn):
     """Filter out recognized pseudo-file names, accommodating user request for including dotdirs."""
     if fn is None:
         return False
-    if args.include_dotdirs and os.path.basename(fn) in [".", ".."]:
+    if INCLUDE_DOTDIRS and os.path.basename(fn) in [".", ".."]:
         return False
     return make_differential_dfxml.ignorable_name(fn)
 
@@ -83,9 +85,13 @@ def main():
 
     if args.imagefile:
         raise NotImplementedError("Sorry, but the imagefile argument was not carried forward in the re-implementation.  Please feel free to request this feature be re-implemented if you need it.")
-
+        
     pre = None
     post = None
+
+    # Set module wide variable, which is used by the ignorable_name-function
+    INCLUDE_DOTDIRS = args.include_dotdirs
+
     for infile in args.infiles:
         pre = post
         post = infile
