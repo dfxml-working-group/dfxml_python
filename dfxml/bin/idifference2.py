@@ -26,19 +26,21 @@ import os
 _logger = logging.getLogger(os.path.basename(__file__))
 
 import dfxml.objects as Objects
-import make_differential_dfxml
-import summarize_differential_dfxml
+import dfxml.bin.make_differential_dfxml
+import dfxml.bin.summarize_differential_dfxml
 
-def ignorable_name(fn):
+def ignorable_name(
+  fn : str
+) -> bool:
     """Filter out recognized pseudo-file names, accommodating user request for including dotdirs."""
     if fn is None:
         return False
     if args.include_dotdirs and os.path.basename(fn) in [".", ".."]:
         return False
-    return make_differential_dfxml.ignorable_name(fn)
+    return dfxml.bin.make_differential_dfxml.ignorable_name(fn)
 
 
-def main():
+def main() -> None:
     import argparse
     parser = argparse.ArgumentParser(description='%prog [options] file1 file2  (files can be xml or image files)')
     returningsoon = parser.add_argument_group("Returning soon", "Some of the options in idifference were not carried forward in the reimplementation.  Please feel free to request these features be re-implemented if you need them.")
@@ -93,7 +95,7 @@ def main():
         _logger.info(">>> Reading %s." % infile)
 
         if not pre is None:
-            diffdfxml = make_differential_dfxml.make_differential_dfxml(
+            diffdfxml = dfxml.bin.make_differential_dfxml.make_differential_dfxml(
               pre,
               post,
               diff_mode="idifference",
@@ -105,13 +107,12 @@ def main():
                 _logger.debug("Opening temp file for writing.")
                 with open(args.xmlfilename, "w") as fh:
                     diffdfxml.print_dfxml(output_fh=fh)
-            summarize_differential_dfxml.report(
+            dfxml.bin.summarize_differential_dfxml.report(
               diffdfxml,
               sort_by=args.sort_by,
               summary=args.summary,
               timestamp=args.timestamp
             )
-
 
 if __name__=="__main__":
     main()
