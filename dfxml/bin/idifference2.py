@@ -87,7 +87,7 @@ def main() -> None:
 
     if args.imagefile:
         raise NotImplementedError("Sorry, but the imagefile argument was not carried forward in the re-implementation.  Please feel free to request this feature be re-implemented if you need it.")
-        
+
     pre = None
     post = None
 
