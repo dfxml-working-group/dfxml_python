@@ -49,13 +49,13 @@ def confirm_schema_conformance(dfxml_path : str) -> None:
 
     # Confirm this function is acting from the expected directory relative to the repository root.
     top_srcdir = os.path.join(os.path.dirname(__file__), "..", "..")
-    if not os.path.exists(os.path.join(top_srcdir, "dfxml_schema_commit.txt")):
-        raise _FileNotFoundError("This script (%r) tries to refer to the top Git-tracked DFXML directory, but could not find it based on looking for dfxml_schema_commit.txt." % os.path.basename(__file__))
+    if not os.path.exists(os.path.join(top_srcdir, "CONTRIBUTE.md")):
+        raise _FileNotFoundError("This script (%r) tries to refer to the top Git-tracked DFXML directory, but could not find it based on looking for CONTRIBUTE.md." % os.path.basename(__file__))
 
     # Use the schema file if it is present.
     #   - Testing in the CI environment should require the file be present.
     #   - Offline testing does not necessarily need to fail if the file wasn't downloaded.
-    schema_path = os.path.join(top_srcdir, "schema", "dfxml.xsd")
+    schema_path = os.path.join(top_srcdir, "dependencies", "dfxml_schema", "dfxml.xsd")
     if os.path.exists(schema_path):
         command = ["xmllint", "--noout", "--schema", schema_path, dfxml_path]
         try:

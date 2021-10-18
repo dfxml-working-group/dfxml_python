@@ -18,25 +18,21 @@ ifeq ($(shell basename $(SHELL)),sh)
 SHELL := $(shell which /bin/bash 2>/dev/null || which /usr/local/bin/bash)
 endif
 
-SCHEMA_REPOSITORY_URL ?= https://github.com/dfxml-working-group/dfxml_schema.git
-
 all:
 
-.PHONY: schema-init
-
-schema-init: schema/dfxml.xsd
-
-schema/dfxml.xsd: dfxml_schema_commit.txt
-	if [ -z "$(SCHEMA_REPOSITORY_URL)" ]; then echo 'ERROR:Makefile:Please provide a URL for the Makefile parameter SCHEMA_REPOSITORY_URL.' >&2 ; exit 1 ; fi
-	if [ ! -d schema ]; then git clone $(SCHEMA_REPOSITORY_URL) schema ; cd schema ; git checkout $$(head -n1 ../dfxml_schema_commit.txt) ; fi
-	test -r $@ && touch $@
+.git_submodule_init.done.log: .gitmodules
+	# Confirm dfxml_schema has been checked out at least once.
+	test ! -r dependencies/dfxml_schema/README.md \
+	  || (git submodule init dependencies/dfxml_schema && git submodule update dependencies/dfxml_schema)
+	touch $@
 
 clean:
 	find . -name '*~' -exec rm {} \;
 	(cd tests;make clean)
 	(cd dfxml/bin;make clean)
 	(cd dfxml/tests;make clean)
-check:
+
+check: .git_submodule_init.done.log
 	$(MAKE) \
 	  SHELL=$(SHELL) \
 	  --directory tests \
