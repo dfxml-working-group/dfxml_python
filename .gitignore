@@ -3,7 +3,6 @@
 __pycache__
 _deps
 python/demo.dfxml
-schema
 
 .DS_Store
 build

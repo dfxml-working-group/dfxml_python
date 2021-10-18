@@ -41,7 +41,3 @@ jobs:
 
       - name: Test with pytest
         run: PYTHONPATH=./bin pytest --cov=./ --cov-report=xml dfxml
-
-      - name: schema test
-        run: |
-          make schema-init
