@@ -6,6 +6,7 @@ python/demo.dfxml
 schema
 
 .DS_Store
+build
 python/demo.dfxml
 .cache
 .pytest_cache
