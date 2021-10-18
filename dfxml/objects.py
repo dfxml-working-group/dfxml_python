@@ -173,10 +173,16 @@ def _typecheck(obj, classinfo):
         else:
             raise TypeError("Expecting object to be of type %r." % classinfo)
 
+class AbstractObject(object):
+    """
+    This class is an abstract superclass of all of the *Object classes defined in objects.py, from DFXMLObject through to ByteRun.  It is provided for type-system convenience, particularly with parsing functions.
+    """
+    pass
 
-class DFXMLObject(object):
 
-    def __init__(self, *args, **kwargs):
+class DFXMLObject(AbstractObject):
+
+    def __init__(self, *args, **kwargs) -> None:
         self.command_line = kwargs.get("command_line")
         self.program = kwargs.get("program")
         self.program_version = kwargs.get("program_version")
@@ -186,16 +192,22 @@ class DFXMLObject(object):
         self.externals = kwargs.get("externals", OtherNSElementList())
         self.diff_file_ignores = kwargs.get("diff_file_ignores", set())
 
-        self._namespaces = dict()
-        self._child_objects = []
-        self._disk_images = []
-        self._partition_systems = []
-        self._partitions = []
-        self._volumes = []
-        self._files = []
+        self._namespaces : typing.Dict[str, str] = dict()
+        self._child_objects : typing.List[typing.Union[
+          DiskImageObject,
+          PartitionSystemObject,
+          PartitionObject,
+          VolumeObject,
+          FileObject
+        ]] = []
+        self._disk_images : typing.List[DiskImageObject] = []
+        self._partition_systems : typing.List[PartitionSystemObject] = []
+        self._partitions : typing.List[PartitionObject] = []
+        self._volumes : typing.List[VolumeObject] = []
+        self._files : typing.List[FileObject] = []
 
-        self._build_libraries = []
-        self._creator_libraries = []
+        self._build_libraries : typing.List[LibraryObject] = []
+        self._creator_libraries : typing.List[LibraryObject] = []
 
         for di in kwargs.get("disk_images", []):
             self.append(di)
@@ -244,10 +256,14 @@ class DFXMLObject(object):
     def add_build_library(self, *args, **kwargs):
         self._add_library(self.build_libraries, *args, **kwargs)
 
-    def add_creator_library(self, *args, **kwargs):
+    def add_creator_library(self, *args, **kwargs) -> None:
         self._add_library(self.creator_libraries, *args, **kwargs)
 
-    def add_namespace(self, prefix, url):
+    def add_namespace(
+      self,
+      prefix : str,
+      url : str
+    ) -> None:
         """In case of conflicting namespace definitions, first definition wins."""
         #_logger.debug("self._namespaces.keys() = %r." % self._namespaces.keys())
         if prefix not in self._namespaces.keys():
@@ -572,7 +588,7 @@ class DFXMLObject(object):
         return self._volumes
 
 
-class LibraryObject(object):
+class LibraryObject(AbstractObject):
 
     def __init__(self, *args, **kwargs):
         self.name = None
@@ -648,7 +664,7 @@ class LibraryObject(object):
         self._version = _strcast(value)
 
 
-class RegXMLObject(object):
+class RegXMLObject(AbstractObject):
 
     def __init__(self, *args, **kwargs):
         self.child_objects = kwargs.get("child_objects", [])
@@ -789,7 +805,7 @@ class RegXMLObject(object):
         return _ET_tostring(self.to_Element())
 
 
-class ByteRun(object):
+class ByteRun(AbstractObject):
 
     _all_properties = set([
       "img_offset",
@@ -1125,7 +1141,7 @@ class ByteRun(object):
         self._uncompressed_len = _intcast(val)
 
 
-class ByteRuns(object):
+class ByteRuns(AbstractObject):
     """
     A list-like object for ByteRun objects.
     """
@@ -1352,7 +1368,7 @@ class ByteRuns(object):
         self._facet = val
 
 
-class DiskImageObject(object):
+class DiskImageObject(AbstractObject):
 
     _all_properties = set([
       "byte_runs",
@@ -1610,7 +1626,7 @@ class DiskImageObject(object):
         return self._volumes
 
 
-class PartitionSystemObject(object):
+class PartitionSystemObject(AbstractObject):
 
     _all_properties = set([
       "block_size",
@@ -1898,7 +1914,7 @@ class PartitionSystemObject(object):
         self._pstype_str = _strcast(val)
 
 
-class PartitionObject(object):
+class PartitionObject(AbstractObject):
 
     _all_properties = set([
       "block_count",
@@ -2190,7 +2206,7 @@ class PartitionObject(object):
         return self._volumes
 
 
-class VolumeObject(object):
+class VolumeObject(AbstractObject):
 
     _all_properties = set([
       "annos",
@@ -2691,7 +2707,7 @@ class VolumeObject(object):
         return self._volumes
 
 
-class HiveObject(object):
+class HiveObject(AbstractObject):
 
     _all_properties = set([
       "annos",
@@ -2855,7 +2871,7 @@ class HiveObject(object):
 
 re_precision = re.compile(r"(?P<num>\d+)(?P<unit>(|m|n)s|d)?")
 
-class TimestampObject(object):
+class TimestampObject(AbstractObject):
     """
     Encodes the "dftime" type.  Wraps around dfxml.dftime, closely enough that this might just get folded into that class.
 
@@ -3024,7 +3040,7 @@ class TimestampObject(object):
         return self._timestamp
 
 
-class FileObject(object):
+class FileObject(AbstractObject):
     """
     This class provides property accesses, an XML serializer (ElementTree-based), and a deserializer.
     The properties interface is NOT function calls, but simple accesses.  That is, the old _fileobject_ style:
@@ -3122,7 +3138,7 @@ class FileObject(object):
       "matched":"delta:matched"
     }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         # Prime all the properties.
         for prop in FileObject._all_properties:
             if prop == "annos":
@@ -3131,8 +3147,8 @@ class FileObject(object):
                 setattr(self, prop, kwargs.get(prop, OtherNSElementList()))
             else:
                 setattr(self, prop, kwargs.get(prop))
-        self._annos = set()
-        self._diffs = set()
+        self._annos : typing.Set[str] = set()
+        self._diffs : typing.Set[str] = set()
 
     def __eq__(self, other : object) -> bool:
         if other is None:
@@ -3279,7 +3295,7 @@ class FileObject(object):
             for chunk in self.byte_runs.iter_contents(_image_path, buffer_size, sector_size, errlog, statlog):
                 yield chunk
 
-    def is_allocated(self):
+    def is_allocated(self) -> typing.Optional[bool]:
         """Collapse potentially-partial allocation information into a yes, no, or unknown answer."""
         if self.alloc_inode == True and self.alloc_name == True:
             return True
@@ -4102,7 +4118,7 @@ class OtherNSElementList(list):
         super(OtherNSElementList, self).append(value)
 
 
-class CellObject(object):
+class CellObject(AbstractObject):
 
     _all_properties = set([
       "alloc",
@@ -4731,8 +4747,14 @@ class Parser(object):
         self._proxy_element_stack = []
         self._state = Parser._INPUT_START
 
-    def iterparse(self, fh, events=("start","end"), **kwargs):
-        self.dobj = kwargs.get("dfxmlobject", DFXMLObject())
+    def iterparse(
+      self,
+      fh: typing.IO[bytes],
+      events : typing.Iterable[str] = ("start","end"),
+      *,
+      dfxmlobject : typing.Optional[DFXMLObject] = None
+    ) -> typing.Iterator[typing.Tuple[str, AbstractObject]]:
+        self.dobj = dfxmlobject or DFXMLObject()
 
         self.iterparse_events = set()
         for event in events:
@@ -5026,7 +5048,13 @@ class Parser(object):
         _typecheck(value, int)
         self._state = value
 
-def iterparse(filename, events=("start","end"), **kwargs):
+def iterparse(
+  filename : str,
+  events : typing.Tuple[str, ...] = ("start","end"),
+  *,
+  dfxmlobject : typing.Optional[DFXMLObject] = None,
+  fiwalk : typing.Optional[str] = None
+) -> typing.Iterator[typing.Tuple[str, AbstractObject]]:
     """
     Generator.  Yields a stream of populated DFXMLObjects, VolumeObjects and FileObjects, paired with an event type ("start" or "end").  The DFXMLObject and VolumeObjects do NOT have their child lists populated with this method - that is left to the calling program.
 
@@ -5039,10 +5067,10 @@ def iterparse(filename, events=("start","end"), **kwargs):
     """
 
     # The DFXML stream file handle.
-    fh = None
+    fh : typing.IO[bytes]
 
     subp = None
-    fiwalk_path = kwargs.get("fiwalk", "fiwalk")
+    fiwalk_path = fiwalk or "fiwalk"
     subp_command = [fiwalk_path, "-x", filename]
     need_cleanup = False
     if filename.endswith("xml"):
@@ -5050,6 +5078,8 @@ def iterparse(filename, events=("start","end"), **kwargs):
         need_cleanup = True
     else:
         subp = subprocess.Popen(subp_command, stdout=subprocess.PIPE)
+        if subp.stdout is None:
+            raise ValueError("Failed to open subprocess stdout.")
         fh = subp.stdout
 
     _events = set()
@@ -5059,7 +5089,7 @@ def iterparse(filename, events=("start","end"), **kwargs):
         _events.add(e)
 
     parser = Parser()
-    for (event, obj) in parser.iterparse(fh, _events, **kwargs):
+    for (event, obj) in parser.iterparse(fh, _events, dfxmlobject=dfxmlobject):
         yield (event, obj)
 
     # If we called Fiwalk, double-check that it exited successfully.
@@ -5067,10 +5097,12 @@ def iterparse(filename, events=("start","end"), **kwargs):
         _logger.debug("Calling wait() to let the Fiwalk subprocess terminate...") # Just reading from subp.stdout doesn't let the process terminate; it only finishes working.
         subp.wait()
         if subp.returncode != 0:
-            e = subprocess.CalledProcessError("There was an error running Fiwalk.")
-            e.returncode = subp.returncode
-            e.cmd = subp_command
-            raise e
+            error_object = subprocess.CalledProcessError(
+              subp.returncode,
+              subp_command,
+              "There was an error running Fiwalk."
+            )
+            raise error_object
         _logger.debug("...Done.")
 
     if need_cleanup:
