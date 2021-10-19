@@ -22,8 +22,9 @@ all:
 
 .git_submodule_init.done.log: .gitmodules
 	# Confirm dfxml_schema has been checked out at least once.
-	test ! -r dependencies/dfxml_schema/README.md \
+	test -r dependencies/dfxml_schema/dfxml.xsd \
 	  || (git submodule init dependencies/dfxml_schema && git submodule update dependencies/dfxml_schema)
+	test -r dependencies/dfxml_schema/dfxml.xsd
 	touch $@
 
 clean:
