@@ -32,6 +32,7 @@ import sys
 import traceback
 import typing
 
+import dfxml
 import dfxml.objects as Objects
 
 _logger = logging.getLogger(os.path.basename(__file__))
@@ -218,7 +219,7 @@ def main() -> None:
     dobj.dc["type"] = "File system walk"
     dobj.add_creator_library("Python", ".".join(map(str, sys.version_info[0:3]))) #A bit of a bend, but gets the major version information out.
     dobj.add_creator_library("Objects.py", Objects.__version__)
-    dobj.add_creator_library("dfxml.py", Objects.dfxml.__version__)
+    dobj.add_creator_library("dfxml.py", dfxml.__version__)
 
     # Key: property.
     # Value: set of name_types that should have the property ignored.  "*" indicates all.  No sets should be empty by the end of this setup.
@@ -253,10 +254,10 @@ def main() -> None:
 
     if using_threading:
         #Threading syntax c/o: https://docs.python.org/3.5/library/queue.html
-        q : queue.Queue = queue.Queue()
+        q : queue.Queue[typing.Optional[str]] = queue.Queue()
         threads = []
 
-        def _worker():
+        def _worker() -> None:
             while True:
                 filepath = q.get()
                 if filepath is None:

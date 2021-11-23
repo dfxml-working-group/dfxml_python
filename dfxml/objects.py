@@ -3180,7 +3180,7 @@ class FileObject(AbstractObject):
         return "FileObject(" + ", ".join(parts) + ")"
 
     @staticmethod
-    def _should_ignore_property(ignore_properties, name_type, property_name):
+    def _should_ignore_property(ignore_properties, name_type, property_name) -> bool:
         """
         Helper function for FileObject.populate_from_stat and walk_to_dfxml.py.  Defined as class method instead of inline definition in heavily looped functions.
         """
@@ -3389,7 +3389,11 @@ class FileObject(AbstractObject):
                     _warned_elements.add((cns, ctn, FileObject))
                     _logger.warning("Uncertain what to do with this element in a FileObject: %r" % ce)
 
-    def populate_from_stat(self, s, **kwargs):
+    def populate_from_stat(
+      self,
+      s : os.stat_result,
+      **kwargs
+    ) -> None:
         """
         Populates FileObject fields from a stat() call.
         Optional arguments:
