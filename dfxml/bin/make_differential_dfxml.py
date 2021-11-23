@@ -39,7 +39,7 @@ _logger = logging.getLogger(os.path.basename(__file__))
 
 def _lower_ftype_str(
   vo : Objects.VolumeObject
-) -> str:
+) -> typing.Optional[str]:
     """
     The string labels of file system names might differ by something small like the casing.  Normalize the labels by lower-casing them.
 
@@ -112,7 +112,7 @@ def make_differential_dfxml(
     d.dc["type"] = "Disk image difference set"
     d.add_creator_library("Python", ".".join(map(str, sys.version_info[0:3]))) #A bit of a bend, but gets the major version information out.
     d.add_creator_library("Objects.py", Objects.__version__)
-    d.add_creator_library("dfxml.py", Objects.dfxml.__version__)
+    d.add_creator_library("dfxml.py", dfxml.__version__)
 
     d.diff_file_ignores |= ignore_properties
     _logger.debug("d.diff_file_ignores = " + repr(d.diff_file_ignores))
@@ -124,7 +124,7 @@ def make_differential_dfxml(
     fileobjects_unchanged : typing.List[Objects.FileObject] = []
 
     #Key: (partition, inode, filename); value: FileObject
-    Signature_fis = typing.Dict[typing.Tuple[typing.Optional[int], typing.Optional[int], typing.Optional[str]], Objects.FileObject] 
+    Signature_fis = typing.Dict[typing.Tuple[typing.Optional[int], typing.Optional[int], typing.Optional[str]], Objects.FileObject]
     old_fis : Signature_fis = dict()
     new_fis : Signature_fis = dict()
 
@@ -135,13 +135,13 @@ def make_differential_dfxml(
 
     #Key: Partition byte offset within the disk image, paired with the file system type
     #Value: VolumeObject
-    Signature_volumes = typing.Dict[typing.Tuple[int, str], Objects.VolumeObject] 
+    Signature_volumes = typing.Dict[typing.Tuple[int, typing.Optional[str]], Objects.VolumeObject]
     old_volumes : Signature_volumes = dict()
     new_volumes : Signature_volumes = dict()
     matched_volumes : Signature_volumes = dict()
 
     #Populated in distinct (offset, file system type as string) encounter order
-    volumes_encounter_order : typing.Dict[typing.Tuple[int, str], int] = dict()
+    volumes_encounter_order : typing.Dict[typing.Tuple[int, typing.Optional[str]], int] = dict()
 
     for infile in [pre, post]:
 
@@ -446,7 +446,9 @@ def make_differential_dfxml(
         #A file should only be considered "modified" if its contents have changed.
         content_diffs = set(["md5", "sha1", "sha256"])
 
-        def _maybe_match_attr(obj):
+        def _maybe_match_attr(
+          obj : Objects.FileObject
+        ) -> None:
             """Just adds the 'matched' annotation when called."""
             if annotate_matches:
                 obj.annos.add("matched")
