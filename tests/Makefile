@@ -79,7 +79,6 @@ check-mypy: \
 	source venv/bin/activate \
 	  && mypy \
 	    ../dfxml/bin/idifference.py \
-	    ../dfxml/bin/idifference2.py \
 	    ../dfxml/bin/summarize_differential_dfxml.py \
 	    ../dfxml/bin/tests \
 	    ../dfxml/__init__.py \
@@ -93,6 +92,7 @@ check-mypy-strict: \
 	source venv/bin/activate \
 	  && mypy \
 	    --strict \
+	    ../dfxml/bin/idifference2.py \
 	    ../dfxml/bin/make_differential_dfxml.py \
 	    ../dfxml/bin/walk_to_dfxml.py
 
