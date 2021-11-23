@@ -18,7 +18,11 @@ This file re-creates the major DFXML classes with an emphasis on type safety, se
 With this module, reading disk images or DFXML files is done with the parse or iterparse functions.  Writing DFXML files can be done with the DFXMLObject.print_dfxml function.
 """
 
-__version__ = "0.11.5"
+# This import allows type signatures within a class to reference the class itself.
+# Further explanation is on PEPs 484 and 563, via: https://stackoverflow.com/a/33533514
+from __future__ import annotations
+
+__version__ = "0.11.6"
 
 # Revision Log
 # 2018-07-22 @simsong - removed calls to logging, since this module shouldn't create log files.
@@ -113,7 +117,9 @@ def _bytecast(val):
         return val
     return _strcast(val).encode("utf-8")
 
-def _intcast(val):
+def _intcast(
+  val : typing.Optional[typing.Any]
+) -> typing.Optional[int]:
     """Casts input integer or string to integer.  Preserves nulls.  Balks at everything else."""
     if val is None:
         return None
@@ -159,12 +165,17 @@ def _qsplit(tagname):
     else:
         return (None, tagname)
 
-def _strcast(val):
+def _strcast(
+  val : typing.Optional[typing.Any]
+) -> typing.Optional[str]:
     if val is None:
         return None
     return str(val)
 
-def _typecheck(obj, classinfo):
+def _typecheck(
+  obj : object,
+  classinfo : typing.Union[type, typing.Tuple[type]]
+) -> None:
     if not isinstance(obj, classinfo):
         _logger.info("obj = " + repr(obj))
         if isinstance(classinfo, tuple):
@@ -289,7 +300,7 @@ class DFXMLObject(AbstractObject):
 
         self.child_objects.append(value)
 
-    def iter_namespaces(self):
+    def iter_namespaces(self) -> typing.Iterator[typing.Tuple[str, str]]:
         """Yields (prefix, url) pairs of each namespace registered in this DFXMLObject."""
         for prefix in sorted(self._namespaces.keys()):
             yield (prefix, self._namespaces[prefix])
@@ -503,12 +514,15 @@ class DFXMLObject(AbstractObject):
         self._dc = value
 
     @property
-    def diff_file_ignores(self):
+    def diff_file_ignores(self) -> typing.Set[str]:
         """A set of DFXML file properties that are excluded from being flagged as differences.  An example of when one may want to use this is when comparing two file system trees in the same file system: inodes are likely to be a differing factor, best excluded to inspect other changes."""
         return self._diff_file_ignores
 
     @diff_file_ignores.setter
-    def diff_file_ignores(self, value):
+    def diff_file_ignores(
+      self,
+      value : typing.Set[str]
+    ) -> None:
         _typecheck(value, set)
         self._diff_file_ignores = value
 
@@ -1229,7 +1243,10 @@ class ByteRuns(AbstractObject):
         _typecheck(value, ByteRun)
         self._listdata.append(value)
 
-    def glom(self, value):
+    def glom(
+      self,
+      value : ByteRun
+    ) -> None:
         """
         Appends a ByteRun object to this container's list, after attempting to join the run with the last run already stored.
         """
@@ -2290,8 +2307,10 @@ class VolumeObject(AbstractObject):
                 parts.append("%s=%r" % (prop, val))
         return "VolumeObject(" + ", ".join(parts) + ")"
 
-    def append(self, value) -> None:
-        _typecheck(value, (DiskImageObject, FileObject, VolumeObject))
+    def append(
+      self,
+      value : typing.Union[DiskImageObject, FileObject, VolumeObject]
+    ) -> None:
         if isinstance(value, DiskImageObject):
             self.disk_images.append(value)
         elif isinstance(value, VolumeObject):
@@ -2300,10 +2319,10 @@ class VolumeObject(AbstractObject):
             self.files.append(value)
         self.child_objects.append(value)
 
-    def compare_to_original(self):
+    def compare_to_original(self) -> None:
         self._diffs = self.compare_to_other(self.original_volume, True)
 
-    def compare_to_other(self, other, ignore_original=False):
+    def compare_to_other(self, other, ignore_original=False) -> typing.Set[str]:
         """Returns a set of all the properties found to differ."""
         _typecheck(other, VolumeObject)
         diffs = set()
@@ -2660,11 +2679,14 @@ class VolumeObject(AbstractObject):
         self._ftype = _intcast(val)
 
     @property
-    def ftype_str(self):
+    def ftype_str(self) -> typing.Optional[str]:
         return self._ftype_str
 
     @ftype_str.setter
-    def ftype_str(self, val):
+    def ftype_str(
+      self,
+      val : typing.Optional[typing.Any]
+    ) -> None:
         self._ftype_str = _strcast(val)
 
     @property
@@ -2686,11 +2708,14 @@ class VolumeObject(AbstractObject):
         self._original_volume= val
 
     @property
-    def partition_offset(self):
+    def partition_offset(self) -> typing.Optional[int]:
         return self._partition_offset
 
     @partition_offset.setter
-    def partition_offset(self, val):
+    def partition_offset(
+      self,
+      val : typing.Optional[int]
+    ) -> None:
         self._partition_offset = _intcast(val)
 
     @property
@@ -3180,7 +3205,7 @@ class FileObject(AbstractObject):
         return "FileObject(" + ", ".join(parts) + ")"
 
     @staticmethod
-    def _should_ignore_property(ignore_properties, name_type, property_name):
+    def _should_ignore_property(ignore_properties, name_type, property_name) -> bool:
         """
         Helper function for FileObject.populate_from_stat and walk_to_dfxml.py.  Defined as class method instead of inline definition in heavily looped functions.
         """
@@ -3191,11 +3216,19 @@ class FileObject(AbstractObject):
                 return True
         return False
 
-    def compare_to_original(self, **kwargs):
-        file_ignores = kwargs.get("file_ignores", set())
+    def compare_to_original(
+      self,
+      *,
+      file_ignores : typing.Set[str] = set()
+    ) -> None:
         self._diffs = self.compare_to_other(self.original_fileobject, True, file_ignores)
 
-    def compare_to_other(self, other, ignore_original=False, file_ignores=set()):
+    def compare_to_other(
+      self,
+      other,
+      ignore_original : bool = False,
+      file_ignores : typing.Set[str] = set()
+    ) -> typing.Set[str]:
         _typecheck(other, FileObject)
 
         diffs = set()
@@ -3389,7 +3422,11 @@ class FileObject(AbstractObject):
                     _warned_elements.add((cns, ctn, FileObject))
                     _logger.warning("Uncertain what to do with this element in a FileObject: %r" % ce)
 
-    def populate_from_stat(self, s, **kwargs):
+    def populate_from_stat(
+      self,
+      s : os.stat_result,
+      **kwargs
+    ) -> None:
         """
         Populates FileObject fields from a stat() call.
         Optional arguments:
