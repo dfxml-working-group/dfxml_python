@@ -87,6 +87,7 @@ check-mypy: \
 	    .
 	@echo "INFO:tests/Makefile:mypy is currently run against a subset of the dfxml directory." >&2
 
+#TODO - Strict type-checking is another long-term goal, likewise eventually done against all of ../dfxml.
 check-mypy-strict: \
   .venv.done.log
 	source venv/bin/activate \
