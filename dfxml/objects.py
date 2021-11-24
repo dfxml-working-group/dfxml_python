@@ -190,12 +190,31 @@ class AbstractObject(abc.ABC):
     """
     This class is an abstract superclass of all of the *Object classes defined in objects.py, from DFXMLObject through to ByteRun.  It is provided for type-system convenience, particularly with parsing functions.
     """
+
     def __init__(self, *args, **kwargs) -> None:
         # Match signature of object.__init__().
         super().__init__()
 
 
-class DFXMLObject(AbstractObject):
+class AbstractChildObject(AbstractObject):
+    """
+    This abstract superclass represents Objects that can be contained in some parent layer, such as a file that can be in a file system.  It is designed to exclude the top "Document" object, DFXMLObject.
+    """
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+
+class AbstractParentObject(AbstractObject):
+    """
+    This abstract superclass represents "container" Objects, that is, objects that provide an append() method.
+    """
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+
+class DFXMLObject(AbstractParentObject):
 
     def __init__(self, *args, **kwargs) -> None:
         self.command_line = kwargs.get("command_line")
@@ -686,7 +705,7 @@ class LibraryObject(AbstractObject):
         self._version = _strcast(value)
 
 
-class RegXMLObject(AbstractObject):
+class RegXMLObject(AbstractParentObject):
 
     def __init__(self, *args, **kwargs):
         self.child_objects = kwargs.get("child_objects", [])
@@ -1404,7 +1423,7 @@ class ByteRuns(AbstractObject):
         self._facet = val
 
 
-class DiskImageObject(AbstractObject):
+class DiskImageObject(AbstractParentObject, AbstractChildObject):
 
     _all_properties = set([
       "byte_runs",
@@ -1666,7 +1685,7 @@ class DiskImageObject(AbstractObject):
         return self._volumes
 
 
-class PartitionSystemObject(AbstractObject):
+class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
 
     _all_properties = set([
       "block_size",
@@ -1958,7 +1977,7 @@ class PartitionSystemObject(AbstractObject):
         self._pstype_str = _strcast(val)
 
 
-class PartitionObject(AbstractObject):
+class PartitionObject(AbstractParentObject, AbstractChildObject):
 
     _all_properties = set([
       "block_count",
@@ -2254,7 +2273,7 @@ class PartitionObject(AbstractObject):
         return self._volumes
 
 
-class VolumeObject(AbstractObject):
+class VolumeObject(AbstractParentObject, AbstractChildObject):
 
     _all_properties = set([
       "annos",
@@ -2766,7 +2785,7 @@ class VolumeObject(AbstractObject):
         return self._volumes
 
 
-class HiveObject(AbstractObject):
+class HiveObject(AbstractParentObject, AbstractChildObject):
 
     _all_properties = set([
       "annos",
@@ -3106,7 +3125,7 @@ class TimestampObject(AbstractObject):
         return self._timestamp
 
 
-class FileObject(AbstractObject):
+class FileObject(AbstractChildObject):
     """
     This class provides property accesses, an XML serializer (ElementTree-based), and a deserializer.
     The properties interface is NOT function calls, but simple accesses.  That is, the old _fileobject_ style:
@@ -4201,7 +4220,7 @@ class OtherNSElementList(list):
         super(OtherNSElementList, self).append(value)
 
 
-class CellObject(AbstractObject):
+class CellObject(AbstractChildObject):
 
     _all_properties = set([
       "alloc",
