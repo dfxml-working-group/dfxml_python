@@ -190,7 +190,9 @@ class AbstractObject(abc.ABC):
     """
     This class is an abstract superclass of all of the *Object classes defined in objects.py, from DFXMLObject through to ByteRun.  It is provided for type-system convenience, particularly with parsing functions.
     """
-    pass
+    def __init__(self, *args, **kwargs) -> None:
+        # Match signature of object.__init__().
+        super().__init__()
 
 
 class DFXMLObject(AbstractObject):
@@ -237,6 +239,8 @@ class DFXMLObject(AbstractObject):
         self.add_namespace("", dfxml.XMLNS_DFXML)
         self.add_namespace("dc", dfxml.XMLNS_DC)
         self.add_namespace("dfxmlext", XMLNS_DFXML_EXT)
+
+        super().__init__(*args, **kwargs)
 
     def __iter__(self):
         """
@@ -615,6 +619,8 @@ class LibraryObject(AbstractObject):
         if len(args) >= 2:
             self.version = args[1]
 
+        super().__init__(*args, **kwargs)
+
     def __eq__(self, other : object) -> bool:
         """
         This equality function tests the name and version values strictly.  For less-strict testing, like allowing matching on missing versions, use relaxed_eq.
@@ -704,6 +710,8 @@ class RegXMLObject(AbstractObject):
         # Add default namespaces.
         #TODO This will cause a problem when the Objects bindings are used for a DFXML document and RegXML document in the same program.
         self.add_namespace("", XMLNS_REGXML)
+
+        super().__init__(*args, **kwargs)
 
     def __iter__(self):
         """Yields all HiveObjects, recursively their CellObjects, and the CellObjects directly attached to this RegXMLObject, in that order."""
@@ -853,6 +861,8 @@ class ByteRun(AbstractObject):
         self._has_hash_property = False
         for prop in ByteRun._all_properties:
             setattr(self, prop, kwargs.get(prop))
+
+        super().__init__(*args, **kwargs)
 
     def __add__(self, other):
         """
@@ -1179,8 +1189,9 @@ class ByteRuns(AbstractObject):
     def __init__(
       self,
       run_list : typing.Optional[typing.List[ByteRun]] = None,
-      *,
-      facet : typing.Optional[str] = None
+      *args,
+      facet : typing.Optional[str] = None,
+      **kwargs
     ) -> None:
         self._facet = facet
         self._listdata : typing.List[ByteRun] = []
@@ -1188,6 +1199,8 @@ class ByteRuns(AbstractObject):
         if isinstance(run_list, list):
             for run in run_list:
                 self.append(run)
+
+        super().__init__(*args, **kwargs)
 
     def __delitem__(self, key):
         del self._listdata[key]
@@ -1414,6 +1427,8 @@ class DiskImageObject(AbstractObject):
         self._partition_systems : typing.List[PartitionSystemObject] = []
         self._sector_size = None
         self._volumes : typing.List[VolumeObject] = []
+
+        super().__init__(*args, **kwargs)
 
     def __iter__(self):
         """Recursively yields all child Objects in depth-first order."""
@@ -1680,6 +1695,8 @@ class PartitionSystemObject(AbstractObject):
         self.block_size = None
         self.guid = None
         self.volume_name = None # (This might only appear on Solaris disklabels that are directly nested in a partition.)
+
+        super().__init__(*args, **kwargs)
 
     def __iter__(self):
         """Recursively yields all child Objects in depth-first order."""
@@ -1982,6 +1999,8 @@ class PartitionObject(AbstractObject):
         self.guid = None
         self.partition_label = None
         self.partition_system_offset = None # Unit: bytes.  Offset within partition system.  Could also be byte_run/@ps_offset, if that were defined in the ByteRun class.
+
+        super().__init__(*args, **kwargs)
 
     def __iter__(self):
         """Recursively yields all child Objects in depth-first order."""
@@ -2294,6 +2313,8 @@ class VolumeObject(AbstractObject):
                 setattr(self, prop, kwargs.get(prop, OtherNSElementList()))
             else:
                 setattr(self, prop, kwargs.get(prop))
+
+        super().__init__(*args, **kwargs)
 
     def __iter__(self):
         """Recursively yields all child Objects in depth-first order."""
@@ -2777,6 +2798,8 @@ class HiveObject(AbstractObject):
                 continue
             setattr(self, prop, kwargs.get(prop))
 
+        super().__init__(*args, **kwargs)
+
     def __iter__(self):
         """Yields all CellObjects directly attached to this HiveObject."""
         for c in self._cells:
@@ -2934,6 +2957,8 @@ class TimestampObject(AbstractObject):
             raise ValueError("Unexpected arguments.  Whole args tuple: %r." % (args,))
 
         self._timestamp = None
+
+        super().__init__(*args, **kwargs)
 
     def __eq__(self, other : object) -> bool:
         # Check type.
@@ -3190,6 +3215,8 @@ class FileObject(AbstractObject):
                 setattr(self, prop, kwargs.get(prop))
         self._annos : typing.Set[str] = set()
         self._diffs : typing.Set[str] = set()
+
+        super().__init__(*args, **kwargs)
 
     def __eq__(self, other : object) -> bool:
         if other is None:
@@ -4218,6 +4245,8 @@ class CellObject(AbstractObject):
                 setattr(self, prop, kwargs.get(prop))
 
         self._diffs = set()
+
+        super().__init__(*args, **kwargs)
 
     def __eq__(self, other : object) -> bool:
         if other is None:
