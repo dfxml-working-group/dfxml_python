@@ -174,7 +174,7 @@ def _strcast(
 
 def _typecheck(
   obj : object,
-  classinfo : typing.Union[type, typing.Tuple[type]]
+  classinfo : typing.Union[type, typing.Tuple[type, ...]]
 ) -> None:
     if not isinstance(obj, classinfo):
         _logger.info("obj = " + repr(obj))
