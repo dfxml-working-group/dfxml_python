@@ -34,6 +34,7 @@ __version__ = "0.11.6"
 # * User testing.
 # * Compatibility with the DFXML schema, version >1.1.1.
 
+import abc
 import logging
 import re
 import copy
@@ -184,7 +185,8 @@ def _typecheck(
         else:
             raise TypeError("Expecting object to be of type %r." % classinfo)
 
-class AbstractObject(object):
+
+class AbstractObject(abc.ABC):
     """
     This class is an abstract superclass of all of the *Object classes defined in objects.py, from DFXMLObject through to ByteRun.  It is provided for type-system convenience, particularly with parsing functions.
     """
