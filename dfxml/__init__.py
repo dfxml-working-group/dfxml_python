@@ -1470,7 +1470,7 @@ class extentdb:
         return filter(lambda x:not self.intersects_sector(x),self.sectors_for_run(run))
 
 
-def read_dfxml(xmlfile=None,imagefile=None,flags=0,callback=None,preserve_fis=False):
+def read_dfxml(xmlfile=None,imagefile=None,flags=0,callback=None,preserve_fis=False) -> fileobject_reader:
     """Processes an image using expat, calling a callback for every file object encountered.
     If xmlfile is provided, use that as the xmlfile, otherwise runs fiwalk."""
     if not callback:
