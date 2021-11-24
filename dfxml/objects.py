@@ -284,6 +284,7 @@ class DFXMLObject(AbstractObject):
             #_logger.debug("ET namespaces after registration: %r." % ET._namespace_map)
 
     def append(self, value) -> None:
+        _typecheck(value, (DiskImageObject, PartitionSystemObject, PartitionObject, VolumeObject, FileObject))
         if isinstance(value, DiskImageObject):
             self.disk_images.append(value)
         elif isinstance(value, PartitionSystemObject):
@@ -294,10 +295,6 @@ class DFXMLObject(AbstractObject):
             self.volumes.append(value)
         elif isinstance(value, FileObject):
             self.files.append(value)
-        else:
-            _logger.debug("value = %r" % value)
-            raise TypeError("Expecting a DiskImageObject, PartitionSystemObject, PartitionObject, VolumeObject, or a FileObject.  Got instead this type: %r." % type(value))
-
         self.child_objects.append(value)
 
     def iter_namespaces(self) -> typing.Iterator[typing.Tuple[str, str]]:
@@ -717,13 +714,11 @@ class RegXMLObject(AbstractObject):
         ET.register_namespace(prefix, url)
 
     def append(self, value) -> None:
+        _typecheck(value, (HiveObject, CellObject))
         if isinstance(value, HiveObject):
             self._hives.append(value)
         elif isinstance(value, CellObject):
             self._cells.append(value)
-        else:
-            _logger.debug("value = %r" % value)
-            raise TypeError("Expecting a HiveObject or a CellObject.  Got instead this type: %r." % type(value))
         self.child_objects.append(value)
 
     def print_regxml(self, output_fh=sys.stdout):
@@ -1434,14 +1429,13 @@ class DiskImageObject(AbstractObject):
         return "DiskImageObject(" + ", ".join(parts) + ")"
 
     def append(self, value) -> None:
+        _typecheck(value, (PartitionSystemObject, VolumeObject, FileObject))
         if isinstance(value, PartitionSystemObject):
             self.partition_systems.append(value)
         elif isinstance(value, VolumeObject):
             self.volumes.append(value)
         elif isinstance(value, FileObject):
             self.files.append(value)
-        else:
-            raise ValueError("Unexpected object type passed to DiskImageObject.append(): %r." % type(value))
         self.child_objects.append(value)
 
     def pop_poststream_elements(self, diskimage_element):
@@ -1700,14 +1694,13 @@ class PartitionSystemObject(AbstractObject):
         """
         Note that files appended directly to a PartitionSystemObject are expected to be slack space discoveries.  A warning is raised if an allocated file is appended.
         """
+        _typecheck(value, (PartitionObject, FileObject))
         if isinstance(value, PartitionObject):
             self.partitions.append(value)
         elif isinstance(value, FileObject):
             if value.is_allocated():
                 warnings.warn("A partition system has had an 'allocated' file appended directly to it.  This list of files is expected to be slack space discoveries.")
             self.files.append(value)
-        else:
-            raise ValueError("Unexpected object type passed to PartitionSystemObject.append(): %r." % type(value))
         self.child_objects.append(value)
 
     def populate_from_Element(self, e):
@@ -2002,6 +1995,7 @@ class PartitionObject(AbstractObject):
         """
         Note that files appended directly to a PartitionObject are expected to be slack space discoveries.  A warning is raised if an allocated file is appended.
         """
+        _typecheck(value, (PartitionSystemObject, PartitionObject, VolumeObject, FileObject))
         if isinstance(value, PartitionSystemObject):
             self.partition_systems.append(value)
         elif isinstance(value, PartitionObject):
@@ -2012,8 +2006,6 @@ class PartitionObject(AbstractObject):
             if value.is_allocated():
                 warnings.warn("A partition has had an 'allocated' file appended directly to it.  This list of files is expected to be slack space discoveries.")
             self.files.append(value)
-        else:
-            raise ValueError("Unexpected object type passed to PartitionObject.append(): %r." % type(value))
         self.child_objects.append(value)
 
     def populate_from_Element(self, e):
@@ -2311,6 +2303,7 @@ class VolumeObject(AbstractObject):
       self,
       value : typing.Union[DiskImageObject, FileObject, VolumeObject]
     ) -> None:
+        _typecheck(value, (DiskImageObject, FileObject, VolumeObject))
         if isinstance(value, DiskImageObject):
             self.disk_images.append(value)
         elif isinstance(value, VolumeObject):
