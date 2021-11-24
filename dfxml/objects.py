@@ -282,7 +282,7 @@ class DFXMLObject(AbstractParentObject):
         """
         for co in self.child_objects:
             yield co
-            if hasattr(co, "child_objects"):
+            if isinstance(co, AbstractParentObject):
                 for gco in co:
                     yield gco
 
@@ -1456,7 +1456,7 @@ class DiskImageObject(AbstractParentObject, AbstractChildObject):
         """Recursively yields all child Objects in depth-first order."""
         for co in self.child_objects:
             yield co
-            if hasattr(co, "child_objects"):
+            if isinstance(co, AbstractParentObject):
                 for gco in co:
                     yield gco
 
@@ -1719,7 +1719,7 @@ class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
         """Recursively yields all child Objects in depth-first order."""
         for co in self.child_objects:
             yield co
-            if hasattr(co, "child_objects"):
+            if isinstance(co, AbstractParentObject):
                 for gco in co:
                     yield gco
 
@@ -2017,7 +2017,7 @@ class PartitionObject(AbstractParentObject, AbstractChildObject):
         """Recursively yields all child Objects in depth-first order."""
         for co in self.child_objects:
             yield co
-            if hasattr(co, "child_objects"):
+            if isinstance(co, AbstractParentObject):
                 for gco in co:
                     yield gco
 
@@ -2325,7 +2325,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject):
         """Recursively yields all child Objects in depth-first order."""
         for co in self.child_objects:
             yield co
-            if hasattr(co, "child_objects"):
+            if isinstance(co, AbstractParentObject):
                 for gco in co:
                     yield gco
 
