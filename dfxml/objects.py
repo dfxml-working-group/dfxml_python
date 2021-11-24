@@ -1433,16 +1433,16 @@ class DiskImageObject(AbstractObject):
                 parts.append("%s=%s" % (prop, val))
         return "DiskImageObject(" + ", ".join(parts) + ")"
 
-    def append(self, obj) -> None:
-        if isinstance(obj, PartitionSystemObject):
-            self.partition_systems.append(obj)
-        elif isinstance(obj, VolumeObject):
-            self.volumes.append(obj)
-        elif isinstance(obj, FileObject):
-            self.files.append(obj)
+    def append(self, value) -> None:
+        if isinstance(value, PartitionSystemObject):
+            self.partition_systems.append(value)
+        elif isinstance(value, VolumeObject):
+            self.volumes.append(value)
+        elif isinstance(value, FileObject):
+            self.files.append(value)
         else:
-            raise ValueError("Unexpected object type passed to DiskImageObject.append(): %r." % type(obj))
-        self.child_objects.append(obj)
+            raise ValueError("Unexpected object type passed to DiskImageObject.append(): %r." % type(value))
+        self.child_objects.append(value)
 
     def pop_poststream_elements(self, diskimage_element):
         """
@@ -1696,19 +1696,19 @@ class PartitionSystemObject(AbstractObject):
                 parts.append("%s=%s" % (prop, val))
         return "PartitionSystemObject(" + ", ".join(parts) + ")"
 
-    def append(self, obj) -> None:
+    def append(self, value) -> None:
         """
         Note that files appended directly to a PartitionSystemObject are expected to be slack space discoveries.  A warning is raised if an allocated file is appended.
         """
-        if isinstance(obj, PartitionObject):
-            self.partitions.append(obj)
-        elif isinstance(obj, FileObject):
-            if obj.is_allocated():
+        if isinstance(value, PartitionObject):
+            self.partitions.append(value)
+        elif isinstance(value, FileObject):
+            if value.is_allocated():
                 warnings.warn("A partition system has had an 'allocated' file appended directly to it.  This list of files is expected to be slack space discoveries.")
-            self.files.append(obj)
+            self.files.append(value)
         else:
-            raise ValueError("Unexpected object type passed to PartitionSystemObject.append(): %r." % type(obj))
-        self.child_objects.append(obj)
+            raise ValueError("Unexpected object type passed to PartitionSystemObject.append(): %r." % type(value))
+        self.child_objects.append(value)
 
     def populate_from_Element(self, e):
         global _warned_elements
@@ -1998,23 +1998,23 @@ class PartitionObject(AbstractObject):
                 parts.append("%s=%s" % (prop, val))
         return "PartitionObject(" + ", ".join(parts) + ")"
 
-    def append(self, obj) -> None:
+    def append(self, value) -> None:
         """
         Note that files appended directly to a PartitionObject are expected to be slack space discoveries.  A warning is raised if an allocated file is appended.
         """
-        if isinstance(obj, PartitionSystemObject):
-            self.partition_systems.append(obj)
-        elif isinstance(obj, PartitionObject):
-            self.partitions.append(obj)
-        elif isinstance(obj, VolumeObject):
-            self.volumes.append(obj)
-        elif isinstance(obj, FileObject):
-            if obj.is_allocated():
+        if isinstance(value, PartitionSystemObject):
+            self.partition_systems.append(value)
+        elif isinstance(value, PartitionObject):
+            self.partitions.append(value)
+        elif isinstance(value, VolumeObject):
+            self.volumes.append(value)
+        elif isinstance(value, FileObject):
+            if value.is_allocated():
                 warnings.warn("A partition has had an 'allocated' file appended directly to it.  This list of files is expected to be slack space discoveries.")
-            self.files.append(obj)
+            self.files.append(value)
         else:
-            raise ValueError("Unexpected object type passed to PartitionObject.append(): %r." % type(obj))
-        self.child_objects.append(obj)
+            raise ValueError("Unexpected object type passed to PartitionObject.append(): %r." % type(value))
+        self.child_objects.append(value)
 
     def populate_from_Element(self, e):
         global _warned_elements
