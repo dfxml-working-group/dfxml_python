@@ -11,13 +11,96 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
+import collections
 import logging
 import tempfile
+import typing
 import warnings
 
 import pytest
 
 import dfxml.objects as Objects
+
+def test_AbstractHierarchyObject_append() -> None:
+    """
+    This test confirms expected append() behaviors, in lieu of static type checking enforcement.
+    """
+
+    hierarchy_object_classes : typing.List[type] = [
+      Objects.DFXMLObject,
+      Objects.RegXMLObject,
+      Objects.DiskImageObject,
+      Objects.PartitionSystemObject,
+      Objects.PartitionObject,
+      Objects.VolumeObject,
+      Objects.HiveObject,
+      Objects.FileObject,
+      Objects.CellObject
+    ]
+
+    parent_object_classes : typing.List[type] = [
+      Objects.DFXMLObject,
+      Objects.RegXMLObject,
+      Objects.DiskImageObject,
+      Objects.PartitionSystemObject,
+      Objects.PartitionObject,
+      Objects.VolumeObject,
+      Objects.HiveObject
+    ]
+
+    matrix_expected : typing.Dict[type, typing.Set[type]] = {
+      Objects.DFXMLObject: {
+        Objects.DiskImageObject,
+        Objects.PartitionSystemObject,
+        Objects.PartitionObject,
+        Objects.VolumeObject,
+        Objects.FileObject
+      },
+      Objects.RegXMLObject: {
+        Objects.HiveObject,
+        Objects.CellObject
+      },
+      Objects.DiskImageObject: {
+        Objects.PartitionSystemObject,
+        Objects.VolumeObject,
+        Objects.FileObject
+      },
+      Objects.PartitionSystemObject: {
+        Objects.PartitionObject,
+        Objects.FileObject
+      },
+      Objects.PartitionObject: {
+        Objects.PartitionSystemObject,
+        Objects.PartitionObject,
+        Objects.VolumeObject,
+        Objects.FileObject
+      },
+      Objects.VolumeObject: {
+        Objects.DiskImageObject,
+        Objects.VolumeObject,
+        Objects.FileObject
+      },
+      Objects.HiveObject: {
+        Objects.CellObject
+      }
+    }
+    matrix_computed_PASS : typing.Dict[type, typing.Set[type]] = collections.defaultdict(set)
+    matrix_computed_XFAIL : typing.Dict[type, typing.Set[type]] = collections.defaultdict(set)
+
+    for parent_class in parent_object_classes:
+        for child_class in hierarchy_object_classes:
+            parent_object = parent_class()
+            child_object = child_class()
+            try:
+                parent_object.append(child_object)
+                matrix_computed_PASS[parent_class].add(child_class)
+            except TypeError:
+                matrix_computed_XFAIL[parent_class].add(child_class)
+            except:
+                raise
+    logging.debug("matrix_computed_XFAIL:")
+    logging.debug(matrix_computed_XFAIL)
+    assert matrix_expected == matrix_computed_PASS
 
 @pytest.mark.xfail(strict=True, reason="print_dfxml currently requires a text, not binary, writer.")
 def test_serialization_to_binary_file() -> None:
