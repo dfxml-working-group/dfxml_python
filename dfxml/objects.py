@@ -283,7 +283,10 @@ class DFXMLObject(AbstractObject):
             ET.register_namespace(prefix, url)
             #_logger.debug("ET namespaces after registration: %r." % ET._namespace_map)
 
-    def append(self, value) -> None:
+    def append(
+      self,
+      value : typing.Union[DiskImageObject, PartitionSystemObject, PartitionObject, VolumeObject, FileObject]
+    ) -> None:
         _typecheck(value, (DiskImageObject, PartitionSystemObject, PartitionObject, VolumeObject, FileObject))
         if isinstance(value, DiskImageObject):
             self.disk_images.append(value)
@@ -713,7 +716,10 @@ class RegXMLObject(AbstractObject):
         self._namespaces[prefix] = url
         ET.register_namespace(prefix, url)
 
-    def append(self, value) -> None:
+    def append(
+      self,
+      value : typing.Union[HiveObject, CellObject]
+    ) -> None:
         _typecheck(value, (HiveObject, CellObject))
         if isinstance(value, HiveObject):
             self._hives.append(value)
@@ -1231,7 +1237,10 @@ class ByteRuns(AbstractObject):
         _typecheck(value, ByteRun)
         self._listdata[key] = value
 
-    def append(self, value) -> None:
+    def append(
+      self,
+      value : ByteRun
+    ) -> None:
         """
         Appends a ByteRun object to this container's list.
         """
@@ -1428,7 +1437,10 @@ class DiskImageObject(AbstractObject):
                 parts.append("%s=%s" % (prop, val))
         return "DiskImageObject(" + ", ".join(parts) + ")"
 
-    def append(self, value) -> None:
+    def append(
+      self,
+      value : typing.Union[PartitionSystemObject, VolumeObject, FileObject]
+    ) -> None:
         _typecheck(value, (PartitionSystemObject, VolumeObject, FileObject))
         if isinstance(value, PartitionSystemObject):
             self.partition_systems.append(value)
@@ -1690,7 +1702,10 @@ class PartitionSystemObject(AbstractObject):
                 parts.append("%s=%s" % (prop, val))
         return "PartitionSystemObject(" + ", ".join(parts) + ")"
 
-    def append(self, value) -> None:
+    def append(
+      self,
+      value : typing.Union[PartitionObject, FileObject]
+    ) -> None:
         """
         Note that files appended directly to a PartitionSystemObject are expected to be slack space discoveries.  A warning is raised if an allocated file is appended.
         """
@@ -1991,7 +2006,10 @@ class PartitionObject(AbstractObject):
                 parts.append("%s=%s" % (prop, val))
         return "PartitionObject(" + ", ".join(parts) + ")"
 
-    def append(self, value) -> None:
+    def append(
+      self,
+      value : typing.Union[PartitionSystemObject, PartitionObject, VolumeObject, FileObject]
+    ) -> None:
         """
         Note that files appended directly to a PartitionObject are expected to be slack space discoveries.  A warning is raised if an allocated file is appended.
         """
@@ -2762,7 +2780,10 @@ class HiveObject(AbstractObject):
         for c in self._cells:
             yield c
 
-    def append(self, value) -> None:
+    def append(
+      self,
+      value : CellObject
+    ) -> None:
         _typecheck(value, CellObject)
         self._cells.append(value)
 
@@ -4142,7 +4163,10 @@ class OtherNSElementList(list):
         OtherNSElementList._check_qname(value.tag)
         super(OtherNSElementList, self).__setitem__(idx, value)
 
-    def append(self, value) -> None:
+    def append(
+      self,
+      value : ET.Element
+    ) -> None:
         _typecheck(value, ET.Element)
         OtherNSElementList._check_qname(value.tag)
         super(OtherNSElementList, self).append(value)
