@@ -211,7 +211,24 @@ class AbstractParentObject(AbstractObject):
     """
 
     def __init__(self, *args, **kwargs) -> None:
+        self._child_objects : typing.Sequence[AbstractChildObject] = []
         super().__init__(*args, **kwargs)
+
+    @abc.abstractmethod
+    def append(
+      self,
+      value : AbstractChildObject
+    ) -> None:
+        """
+        Note that this abstract method defines a broad type interface for the value argument.  Subclasses will have to rely on runtime enforcement of more restrictive type signatures.  This is to avoid violation of the Liskov Substitution Principle.
+        https://mypy.readthedocs.io/en/stable/common_issues.html#incompatible-overrides
+        """
+        self.child_objects.append(value)
+
+    # No setter.
+    @property
+    def child_objects(self):
+        return self._child_objects
 
 
 class DFXMLObject(AbstractParentObject):
@@ -227,13 +244,6 @@ class DFXMLObject(AbstractParentObject):
         self.diff_file_ignores = kwargs.get("diff_file_ignores", set())
 
         self._namespaces : typing.Dict[str, str] = dict()
-        self._child_objects : typing.List[typing.Union[
-          DiskImageObject,
-          PartitionSystemObject,
-          PartitionObject,
-          VolumeObject,
-          FileObject
-        ]] = []
         self._disk_images : typing.List[DiskImageObject] = []
         self._partition_systems : typing.List[PartitionSystemObject] = []
         self._partitions : typing.List[PartitionObject] = []
@@ -310,7 +320,7 @@ class DFXMLObject(AbstractParentObject):
 
     def append(
       self,
-      value : typing.Union[DiskImageObject, PartitionSystemObject, PartitionObject, VolumeObject, FileObject]
+      value : AbstractChildObject
     ) -> None:
         _typecheck(value, (DiskImageObject, PartitionSystemObject, PartitionObject, VolumeObject, FileObject))
         if isinstance(value, DiskImageObject):
@@ -323,7 +333,7 @@ class DFXMLObject(AbstractParentObject):
             self.volumes.append(value)
         elif isinstance(value, FileObject):
             self.files.append(value)
-        self.child_objects.append(value)
+        super().append(value)
 
     def iter_namespaces(self) -> typing.Iterator[typing.Tuple[str, str]]:
         """Yields (prefix, url) pairs of each namespace registered in this DFXMLObject."""
@@ -506,11 +516,6 @@ class DFXMLObject(AbstractParentObject):
         #_logger.debug("outel.attrib = %r." % outel.attrib)
 
         return outel
-
-    # No setter.
-    @property
-    def child_objects(self):
-        return self._child_objects
 
     @property
     def command_line(self):
@@ -708,7 +713,6 @@ class LibraryObject(AbstractObject):
 class RegXMLObject(AbstractParentObject):
 
     def __init__(self, *args, **kwargs):
-        self.child_objects = kwargs.get("child_objects", [])
         self.command_line = kwargs.get("command_line")
         self.interpreter = kwargs.get("interpreter")
         self.metadata = kwargs.get("metadata")
@@ -747,14 +751,14 @@ class RegXMLObject(AbstractParentObject):
 
     def append(
       self,
-      value : typing.Union[HiveObject, CellObject]
+      value : AbstractChildObject
     ) -> None:
         _typecheck(value, (HiveObject, CellObject))
         if isinstance(value, HiveObject):
             self._hives.append(value)
         elif isinstance(value, CellObject):
             self._cells.append(value)
-        self.child_objects.append(value)
+        super().append(value)
 
     def print_regxml(self, output_fh=sys.stdout):
         """Serializes and prints the entire object, without constructing the whole tree."""
@@ -1440,7 +1444,6 @@ class DiskImageObject(AbstractParentObject, AbstractChildObject):
         self.externals = kwargs.get("externals", OtherNSElementList())
 
         self._byte_runs : typing.Optional[ByteRuns] = None
-        self._child_objects : typing.List[typing.Union[PartitionSystemObject, VolumeObject, FileObject]] = []
         self._error = None
         self._files : typing.List[FileObject] = []
         self._partition_systems : typing.List[PartitionSystemObject] = []
@@ -1475,7 +1478,7 @@ class DiskImageObject(AbstractParentObject, AbstractChildObject):
 
     def append(
       self,
-      value : typing.Union[PartitionSystemObject, VolumeObject, FileObject]
+      value : AbstractChildObject
     ) -> None:
         _typecheck(value, (PartitionSystemObject, VolumeObject, FileObject))
         if isinstance(value, PartitionSystemObject):
@@ -1484,7 +1487,7 @@ class DiskImageObject(AbstractParentObject, AbstractChildObject):
             self.volumes.append(value)
         elif isinstance(value, FileObject):
             self.files.append(value)
-        self.child_objects.append(value)
+        super().append(value)
 
     def pop_poststream_elements(self, diskimage_element):
         """
@@ -1650,10 +1653,6 @@ class DiskImageObject(AbstractParentObject, AbstractChildObject):
         self._byte_runs = val
 
     @property
-    def child_objects(self):
-        return self._child_objects
-
-    @property
     def error(self):
         return self._error
 
@@ -1704,7 +1703,6 @@ class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
         self.externals = kwargs.get("externals", OtherNSElementList())
 
         self._byte_runs : typing.Optional[ByteRuns] = None
-        self._child_objects : typing.List[typing.Union[PartitionObject, FileObject]] = []
         self._error = None
         self._files : typing.List[FileObject] = []
         self._partitions : typing.List[PartitionObject] = []
@@ -1742,7 +1740,7 @@ class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
 
     def append(
       self,
-      value : typing.Union[PartitionObject, FileObject]
+      value : AbstractChildObject
     ) -> None:
         """
         Note that files appended directly to a PartitionSystemObject are expected to be slack space discoveries.  A warning is raised if an allocated file is appended.
@@ -1754,7 +1752,7 @@ class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
             if value.is_allocated():
                 warnings.warn("A partition system has had an 'allocated' file appended directly to it.  This list of files is expected to be slack space discoveries.")
             self.files.append(value)
-        self.child_objects.append(value)
+        super().append(value)
 
     def populate_from_Element(self, e):
         global _warned_elements
@@ -1934,11 +1932,6 @@ class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
             _typecheck(val, ByteRuns)
         self._byte_runs = val
 
-    # No setter.
-    @property
-    def child_objects(self):
-        return self._child_objects
-
     @property
     def error(self):
         return self._error
@@ -2002,7 +1995,6 @@ class PartitionObject(AbstractParentObject, AbstractChildObject):
         self.externals = kwargs.get("externals", OtherNSElementList())
 
         self._byte_runs : typing.Optional[ByteRuns] = None
-        self._child_objects : typing.List[typing.Union[PartitionSystemObject, PartitionObject, VolumeObject, FileObject]] = [] # For maintaining order of objects of different types.
         self._files : typing.List[FileObject] = []
         self._partition_index = None
         self._partition_systems : typing.List[PartitionSystemObject] = []
@@ -2048,7 +2040,7 @@ class PartitionObject(AbstractParentObject, AbstractChildObject):
 
     def append(
       self,
-      value : typing.Union[PartitionSystemObject, PartitionObject, VolumeObject, FileObject]
+      value : AbstractChildObject
     ) -> None:
         """
         Note that files appended directly to a PartitionObject are expected to be slack space discoveries.  A warning is raised if an allocated file is appended.
@@ -2064,7 +2056,7 @@ class PartitionObject(AbstractParentObject, AbstractChildObject):
             if value.is_allocated():
                 warnings.warn("A partition has had an 'allocated' file appended directly to it.  This list of files is expected to be slack space discoveries.")
             self.files.append(value)
-        self.child_objects.append(value)
+        super().append(value)
 
     def populate_from_Element(self, e):
         global _warned_elements
@@ -2213,11 +2205,6 @@ class PartitionObject(AbstractParentObject, AbstractChildObject):
             _typecheck(val, ByteRuns)
         self._byte_runs = val
 
-    # No setter.
-    @property
-    def child_objects(self):
-        return self._child_objects
-
     @property
     def externals(self):
         """(This property behaves the same as FileObject.externals.)"""
@@ -2311,7 +2298,6 @@ class VolumeObject(AbstractParentObject, AbstractChildObject):
     ])
 
     def __init__(self, *args, **kwargs) -> None:
-        self._child_objects : typing.List[typing.Union[DiskImageObject, FileObject, VolumeObject]] = []
         self._disk_images : typing.List[DiskImageObject] = []
         self._files : typing.List[FileObject] = []
         self._volumes : typing.List[VolumeObject] = []
@@ -2361,7 +2347,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject):
 
     def append(
       self,
-      value : typing.Union[DiskImageObject, FileObject, VolumeObject]
+      value : AbstractChildObject
     ) -> None:
         _typecheck(value, (DiskImageObject, FileObject, VolumeObject))
         if isinstance(value, DiskImageObject):
@@ -2370,7 +2356,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject):
             self.volumes.append(value)
         elif isinstance(value, FileObject):
             self.files.append(value)
-        self.child_objects.append(value)
+        super().append(value)
 
     def compare_to_original(self) -> None:
         self._diffs = self.compare_to_other(self.original_volume, True)
@@ -2678,11 +2664,6 @@ class VolumeObject(AbstractParentObject, AbstractChildObject):
             _typecheck(val, ByteRuns)
         self._byte_runs = val
 
-    # No setter.
-    @property
-    def child_objects(self):
-        return self._child_objects
-
     @property
     def diffs(self):
         return self._diffs
@@ -2826,10 +2807,11 @@ class HiveObject(AbstractParentObject, AbstractChildObject):
 
     def append(
       self,
-      value : CellObject
+      value : AbstractChildObject
     ) -> None:
         _typecheck(value, CellObject)
         self._cells.append(value)
+        super().append(value)
 
     def compare_to_original(self):
         self._diffs = self.compare_to_other(self.original_hive, True)
