@@ -847,7 +847,7 @@ class ByteRun(AbstractObject):
       "sha512"
     ])
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self._has_hash_property = False
         for prop in ByteRun._all_properties:
             setattr(self, prop, kwargs.get(prop))
@@ -1402,16 +1402,16 @@ class DiskImageObject(AbstractObject):
       "volumes"
     ])
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.externals = kwargs.get("externals", OtherNSElementList())
 
         self._byte_runs : typing.Optional[ByteRuns] = None
-        self._child_objects = []
+        self._child_objects : typing.List[typing.Union[PartitionSystemObject, VolumeObject, FileObject]] = []
         self._error = None
-        self._files = []
-        self._partition_systems = []
+        self._files : typing.List[FileObject] = []
+        self._partition_systems : typing.List[PartitionSystemObject] = []
         self._sector_size = None
-        self._volumes = []
+        self._volumes : typing.List[VolumeObject] = []
 
     def __iter__(self):
         """Recursively yields all child Objects in depth-first order."""
@@ -1664,14 +1664,14 @@ class PartitionSystemObject(AbstractObject):
       "volume_name"
     ])
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.externals = kwargs.get("externals", OtherNSElementList())
 
         self._byte_runs : typing.Optional[ByteRuns] = None
-        self._child_objects = []
+        self._child_objects : typing.List[typing.Union[PartitionObject, FileObject]] = []
         self._error = None
-        self._files = []
-        self._partitions = []
+        self._files : typing.List[FileObject] = []
+        self._partitions : typing.List[PartitionObject] = []
         self._pstype_str = None
 
         #TODO Make @property methods once properties listed in DFXML schema.
@@ -1960,16 +1960,16 @@ class PartitionObject(AbstractObject):
       "volumes"
     ])
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.externals = kwargs.get("externals", OtherNSElementList())
 
         self._byte_runs : typing.Optional[ByteRuns] = None
-        self._child_objects = [] # For maintaining order of objects of different types.
-        self._files = []
+        self._child_objects : typing.List[typing.Union[PartitionSystemObject, PartitionObject, VolumeObject, FileObject]] = [] # For maintaining order of objects of different types.
+        self._files : typing.List[FileObject] = []
         self._partition_index = None
-        self._partition_systems = []
-        self._partitions = []
-        self._volumes = []
+        self._partition_systems : typing.List[PartitionSystemObject] = []
+        self._partitions : typing.List[PartitionObject] = []
+        self._volumes : typing.List[VolumeObject] = []
         self._ptype = None
         self._ptype_str = None
 
@@ -2270,14 +2270,14 @@ class VolumeObject(AbstractObject):
       "volumes"
     ])
 
-    def __init__(self, *args, **kwargs):
-        self._child_objects = []
-        self._disk_images = []
-        self._files = []
-        self._volumes = []
+    def __init__(self, *args, **kwargs) -> None:
+        self._child_objects : typing.List[typing.Union[DiskImageObject, FileObject, VolumeObject]] = []
+        self._disk_images : typing.List[DiskImageObject] = []
+        self._files : typing.List[FileObject] = []
+        self._volumes : typing.List[VolumeObject] = []
 
-        self._annos = set()
-        self._diffs = set()
+        self._annos : typing.Set[str] = set()
+        self._diffs : typing.Set[str] = set()
 
         for prop in VolumeObject._all_properties:
             if prop in {
