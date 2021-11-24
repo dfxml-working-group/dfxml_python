@@ -5217,7 +5217,7 @@ def parse(filename):
     Returns a DFXMLObject populated from the contents of the (string) filename argument.
     Internally, this function uses iterparse().  One key operational difference is this function also appends child objects emitted by iterparse() to parent objects; iterparse() does not handle parent-child relationships.
     """
-    object_stack = []
+    object_stack : typing.List[AbstractParentObject] = []
 
     for (event, obj) in iterparse(filename):
         #_logger.debug("(event, type(obj)) = %r." % ((event, type(obj)),))

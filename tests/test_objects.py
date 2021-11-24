@@ -47,6 +47,8 @@ def test_AbstractHierarchyObject_append() -> None:
       Objects.VolumeObject,
       Objects.HiveObject
     ]
+    for parent_object_class in parent_object_classes:
+        assert issubclass(parent_object_class, Objects.AbstractParentObject)
 
     matrix_expected : typing.Dict[type, typing.Set[type]] = {
       Objects.DFXMLObject: {
