@@ -57,3 +57,50 @@ def test_warn_append_allocated_file_to_psobj() -> None:
         psobj.append(fobj)
         assert len(w) == 1
         assert issubclass(w[-1].category, UserWarning) == 1
+
+def test_instance_isolation_byte_runs() -> None:
+    """
+    This test confirms no unintentional confusion of instance variables and class variables when initializing any abstract base classes.
+
+    Reference:
+    * https://docs.python.org/3/tutorial/classes.html#class-and-instance-variables
+    """
+    fobj1 = Objects.FileObject()
+    fobj2 = Objects.FileObject()
+
+    br1 = Objects.ByteRun(img_offset=1, len=2)
+    br2 = Objects.ByteRun(img_offset=3, len=4)
+
+    fobj1.byte_runs = Objects.ByteRuns()
+    fobj2.byte_runs = Objects.ByteRuns()
+
+    fobj1.byte_runs.append(br1)
+    fobj2.byte_runs.append(br2)
+
+    assert len(fobj1.byte_runs) == 1
+    assert len(fobj2.byte_runs) == 1
+
+def test_instance_isolation_child_objects() -> None:
+    """
+    This test confirms no unintentional confusion of instance variables and class variables when initializing any abstract base classes.
+
+    Reference:
+    * https://docs.python.org/3/tutorial/classes.html#class-and-instance-variables
+    """
+    diobj1 = Objects.DiskImageObject()
+    diobj2 = Objects.DiskImageObject()
+    fsobj1 = Objects.VolumeObject()
+
+    fobj1 = Objects.FileObject(filename="foo")
+    fobj2 = Objects.FileObject(filename="bar")
+    fobj3 = Objects.FileObject(filename="baz")
+    fobj4 = Objects.FileObject(filename="boo")
+
+    diobj1.append(fobj1)
+    diobj2.append(fobj2)
+    fsobj1.append(fobj3)
+    fsobj1.append(fobj4)
+
+    assert len(diobj1.child_objects) == 1
+    assert len(diobj2.child_objects) == 1
+    assert len(fsobj1.child_objects) == 2
