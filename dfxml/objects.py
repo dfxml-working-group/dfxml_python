@@ -1401,7 +1401,7 @@ class DiskImageObject(AbstractObject):
     def __init__(self, *args, **kwargs):
         self.externals = kwargs.get("externals", OtherNSElementList())
 
-        self._byte_runs = None
+        self._byte_runs : typing.Optional[ByteRuns] = None
         self._child_objects = []
         self._error = None
         self._files = []
@@ -1595,7 +1595,7 @@ class DiskImageObject(AbstractObject):
     @property
     def byte_runs(
       self
-    ) -> ByteRuns:
+    ) -> typing.Optional[ByteRuns]:
         return self._byte_runs
 
     @byte_runs.setter
@@ -1661,7 +1661,7 @@ class PartitionSystemObject(AbstractObject):
     def __init__(self, *args, **kwargs):
         self.externals = kwargs.get("externals", OtherNSElementList())
 
-        self._byte_runs = None
+        self._byte_runs : typing.Optional[ByteRuns] = None
         self._child_objects = []
         self._error = None
         self._files = []
@@ -1876,7 +1876,7 @@ class PartitionSystemObject(AbstractObject):
     @property
     def byte_runs(
       self
-    ) -> ByteRuns:
+    ) -> typing.Optional[ByteRuns]:
         return self._byte_runs
 
     @byte_runs.setter
@@ -1955,7 +1955,7 @@ class PartitionObject(AbstractObject):
     def __init__(self, *args, **kwargs):
         self.externals = kwargs.get("externals", OtherNSElementList())
 
-        self._byte_runs = None
+        self._byte_runs : typing.Optional[ByteRuns] = None
         self._child_objects = [] # For maintaining order of objects of different types.
         self._files = []
         self._partition_index = None
@@ -2151,7 +2151,7 @@ class PartitionObject(AbstractObject):
     @property
     def byte_runs(
       self
-    ) -> ByteRuns:
+    ) -> typing.Optional[ByteRuns]:
         return self._byte_runs
 
     @byte_runs.setter
