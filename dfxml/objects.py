@@ -5194,7 +5194,9 @@ def iterparse(
     if need_cleanup:
         fh.close()
 
-def parse(filename):
+def parse(
+  filename : str
+) -> DFXMLObject:
     """
     Returns a DFXMLObject populated from the contents of the (string) filename argument.
     Internally, this function uses iterparse().  One key operational difference is this function also appends child objects emitted by iterparse() to parent objects; iterparse() does not handle parent-child relationships.
@@ -5236,7 +5238,12 @@ def parse(filename):
                 raise NotImplementedError("parse:Unexpected object type with end-event: %r." % type(obj))
 
     #_logger.debug("len(object_stack) = %d." % len(object_stack))
-    if len(object_stack) > 0:
-        return object_stack[0]
-    else:
-        return None
+    if len(object_stack) == 0:
+        raise ValueError("Failed to parse DFXML data from file: %r." % filename)
+
+    bottom_object = object_stack[0]
+    if not isinstance(bottom_object, DFXMLObject):
+        # TODO - There might be use cases that call for .parse() to handle files that contain, say, only a <fileobject> as its root.  This is left for future work, as there might be complexities with the schema.
+        raise NotImplementedError("The parse() function expects to operate on files with a root element of <dfxml>.")
+
+    return bottom_object
