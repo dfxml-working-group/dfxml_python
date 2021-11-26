@@ -83,8 +83,7 @@ check-mypy: \
 	    ../dfxml/bin/tests \
 	    ../dfxml/__init__.py \
 	    ../dfxml/objects.py \
-	    ../dfxml/tests \
-	    .
+	    ../dfxml/tests
 	@echo "INFO:tests/Makefile:mypy is currently run against a subset of the dfxml directory." >&2
 
 #TODO - Strict type-checking is another long-term goal, likewise eventually done against all of ../dfxml.
@@ -93,13 +92,10 @@ check-mypy-strict: \
 	source venv/bin/activate \
 	  && mypy \
 	    --strict \
+	    . \
 	    ../dfxml/bin/idifference2.py \
 	    ../dfxml/bin/make_differential_dfxml.py \
-	    ../dfxml/bin/walk_to_dfxml.py \
-	    test_objects.py \
-	    test_reads.py \
-	    test_version.py \
-	    walk_to_dfxml/test_walk_to_dfxml.py
+	    ../dfxml/bin/walk_to_dfxml.py
 
 clean:
 	@$(MAKE) \
