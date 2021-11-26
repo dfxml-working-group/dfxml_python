@@ -855,7 +855,7 @@ class RegXMLObject(AbstractParentObject):
 
 class ByteRun(AbstractObject):
 
-    _all_properties = set([
+    _class_properties = set([
       "img_offset",
       "fs_offset",
       "file_offset",
@@ -882,7 +882,7 @@ class ByteRun(AbstractObject):
 
     def __init__(self, *args, **kwargs) -> None:
         self._has_hash_property = False
-        for prop in ByteRun._all_properties:
+        for prop in ByteRun._class_properties:
             setattr(self, prop, kwargs.get(prop))
 
         super().__init__(*args, **kwargs)
@@ -966,7 +966,7 @@ class ByteRun(AbstractObject):
 
     def __repr__(self):
         parts = []
-        for prop in ByteRun._all_properties:
+        for prop in ByteRun._class_properties:
             val = getattr(self, prop)
             if not val is None:
                 parts.append("%s=%r" % (prop, val))
@@ -985,7 +985,7 @@ class ByteRun(AbstractObject):
         copied_attrib = copy.deepcopy(e.attrib)
 
         # Populate run properties from element attributes.
-        for prop in ByteRun._all_properties:
+        for prop in ByteRun._class_properties:
             if prop in copied_attrib:
                 val = copied_attrib.get(prop)
                 if not val is None:
@@ -1029,7 +1029,7 @@ class ByteRun(AbstractObject):
             for prop in sorted(ByteRun._hash_properties):
                 _append_hash(prop)
 
-        for prop in ByteRun._all_properties:
+        for prop in ByteRun._class_properties:
             val = getattr(self, prop)
 
             # Skip null properties.
@@ -1429,7 +1429,7 @@ class ByteRuns(AbstractObject):
 
 class DiskImageObject(AbstractParentObject, AbstractChildObject):
 
-    _all_properties = set([
+    _class_properties = set([
       "byte_runs",
       "child_objects",
       "error",
@@ -1462,7 +1462,7 @@ class DiskImageObject(AbstractParentObject, AbstractChildObject):
 
     def __repr__(self):
         parts = []
-        for prop in DiskImageObject._all_properties:
+        for prop in DiskImageObject._class_properties:
             if prop in {
               "child_objects",
               "externals",
@@ -1533,7 +1533,7 @@ class DiskImageObject(AbstractParentObject, AbstractChildObject):
             elif ctn == "byte_run":
                 # byte_runs' block recursively handles this element.
                 continue
-            elif ctn in DiskImageObject._all_properties:
+            elif ctn in DiskImageObject._class_properties:
                 setattr(self, ctn, ce.text)
             else:
                 if (cns, ctn, DiskImageObject) not in _warned_elements:
@@ -1686,7 +1686,7 @@ class DiskImageObject(AbstractParentObject, AbstractChildObject):
 
 class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
 
-    _all_properties = set([
+    _class_properties = set([
       "block_size",
       "byte_runs",
       "child_objects",
@@ -1725,7 +1725,7 @@ class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
 
     def __repr__(self):
         parts = []
-        for prop in PartitionSystemObject._all_properties:
+        for prop in PartitionSystemObject._class_properties:
             if prop in {
               "child_objects",
               "externals",
@@ -1771,7 +1771,7 @@ class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
             elif ctn == "byte_run":
                 # byte_runs' block recursively handles this element.
                 continue
-            elif ctn in PartitionSystemObject._all_properties:
+            elif ctn in PartitionSystemObject._class_properties:
                 setattr(self, ctn, ce.text)
             elif cns not in [dfxml.XMLNS_DFXML, ""]:
                 # Put all non-DFXML-namespace elements into the externals list.
@@ -1972,7 +1972,7 @@ class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
 
 class PartitionObject(AbstractParentObject, AbstractChildObject):
 
-    _all_properties = set([
+    _class_properties = set([
       "block_count",
       "block_size",
       "byte_runs",
@@ -2023,7 +2023,7 @@ class PartitionObject(AbstractParentObject, AbstractChildObject):
 
     def __repr__(self):
         parts = []
-        for prop in PartitionObject._all_properties:
+        for prop in PartitionObject._class_properties:
             if prop in {
               "child_objects",
               "externals",
@@ -2075,7 +2075,7 @@ class PartitionObject(AbstractParentObject, AbstractChildObject):
             elif ctn == "byte_run":
                 # byte_runs' block recursively handles this element.
                 continue
-            elif ctn in PartitionObject._all_properties:
+            elif ctn in PartitionObject._class_properties:
                 setattr(self, ctn, ce.text)
             elif cns not in [dfxml.XMLNS_DFXML, ""]:
                 # Put all non-DFXML-namespace elements into the externals list.
@@ -2262,7 +2262,7 @@ class PartitionObject(AbstractParentObject, AbstractChildObject):
 
 class VolumeObject(AbstractParentObject, AbstractChildObject):
 
-    _all_properties = set([
+    _class_properties = set([
       "annos",
       "allocated_only",
       "block_count",
@@ -2305,7 +2305,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject):
         self._annos : typing.Set[str] = set()
         self._diffs : typing.Set[str] = set()
 
-        for prop in VolumeObject._all_properties:
+        for prop in VolumeObject._class_properties:
             if prop in {
               "annos",
               "child_objects",
@@ -2331,7 +2331,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject):
 
     def __repr__(self):
         parts = []
-        for prop in VolumeObject._all_properties:
+        for prop in VolumeObject._class_properties:
             # Skip outputting the files, file systems, and disk images lists.
             if prop in {
               "child_objects",
@@ -2365,7 +2365,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject):
         """Returns a set of all the properties found to differ."""
         _typecheck(other, VolumeObject)
         diffs = set()
-        for prop in VolumeObject._all_properties:
+        for prop in VolumeObject._class_properties:
             if prop in VolumeObject._incomparable_properties:
                 continue
             if ignore_original and prop == "original_volume":
@@ -2424,7 +2424,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject):
             elif ctn == "original_volume":
                 self.original_volume = VolumeObject()
                 self.original_volume.populate_from_Element(ce)
-            elif ctn in VolumeObject._all_properties:
+            elif ctn in VolumeObject._class_properties:
                 #_logger.debug("ce.text = %r" % ce.text)
                 setattr(self, ctn, ce.text)
                 #_logger.debug("getattr(self, %r) = %r" % (ctn, getattr(self, ctn)))
@@ -2768,7 +2768,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject):
 
 class HiveObject(AbstractParentObject, AbstractChildObject):
 
-    _all_properties = set([
+    _class_properties = set([
       "annos",
       "mtime",
       "filename",
@@ -2793,7 +2793,7 @@ class HiveObject(AbstractParentObject, AbstractChildObject):
         self._annos = set()
         self._diffs = set()
 
-        for prop in HiveObject._all_properties:
+        for prop in HiveObject._class_properties:
             if prop in ["annos", "cells"]:
                 continue
             setattr(self, prop, kwargs.get(prop))
@@ -2820,7 +2820,7 @@ class HiveObject(AbstractParentObject, AbstractChildObject):
         """Returns a set of all the properties found to differ."""
         _typecheck(other, HiveObject)
         diffs = set()
-        for prop in HiveObject._all_properties:
+        for prop in HiveObject._class_properties:
             if prop in HiveObject._incomparable_properties:
                 continue
             if ignore_original and prop == "original_hive":
@@ -3121,7 +3121,7 @@ class FileObject(AbstractChildObject):
         fi.mtime
     """
 
-    _all_properties = set([
+    _class_properties = set([
       "alloc",
       "alloc_inode",
       "alloc_name",
@@ -3207,7 +3207,7 @@ class FileObject(AbstractChildObject):
 
     def __init__(self, *args, **kwargs) -> None:
         # Prime all the properties.
-        for prop in FileObject._all_properties:
+        for prop in FileObject._class_properties:
             if prop == "annos":
                 continue
             elif prop == "externals":
@@ -3226,7 +3226,7 @@ class FileObject(AbstractChildObject):
         if not isinstance(other, FileObject):
             return False
 
-        for prop in FileObject._all_properties:
+        for prop in FileObject._class_properties:
             if prop in FileObject._incomparable_properties:
                 continue
             if getattr(self, prop) != getattr(other, prop):
@@ -3236,7 +3236,7 @@ class FileObject(AbstractChildObject):
     def __repr__(self):
         parts = []
 
-        for prop in sorted(FileObject._all_properties):
+        for prop in sorted(FileObject._class_properties):
             # Save data byte runs for the end, as their lists can get really long.  Skip parent-volume reference.
             if prop not in ["byte_runs", "data_brs", "externals", "volume_object"]:
                 value = getattr(self, prop)
@@ -3277,7 +3277,7 @@ class FileObject(AbstractChildObject):
 
         diffs = set()
 
-        for propname in FileObject._all_properties:
+        for propname in FileObject._class_properties:
             if propname in file_ignores:
                 continue
             if propname in FileObject._incomparable_properties:
@@ -3456,7 +3456,7 @@ class FileObject(AbstractChildObject):
             elif ctn in ["atime", "bkup_time", "crtime", "ctime", "dtime", "mtime"]:
                 setattr(self, ctn, TimestampObject())
                 getattr(self, ctn).populate_from_Element(ce)
-            elif ctn in FileObject._all_properties:
+            elif ctn in FileObject._class_properties:
                 setattr(self, ctn, ce.text)
             elif cns not in [dfxml.XMLNS_DFXML, ""]:
                 # Put all non-DFXML-namespace elements into the externals list.
@@ -4204,7 +4204,7 @@ class OtherNSElementList(list):
 
 class CellObject(AbstractChildObject):
 
-    _all_properties = set([
+    _class_properties = set([
       "alloc",
       "annos",
       "basename",
@@ -4239,7 +4239,7 @@ class CellObject(AbstractChildObject):
         # These properties must be assigned first for sanity check dependencies.
         self.name_type = kwargs.get("name_type")
 
-        for prop in CellObject._all_properties:
+        for prop in CellObject._class_properties:
             if prop == "annos":
                 setattr(self, prop, kwargs.get(prop, set()))
             else:
@@ -4256,7 +4256,7 @@ class CellObject(AbstractChildObject):
         if not isinstance(other, CellObject):
             return False
 
-        for prop in CellObject._all_properties:
+        for prop in CellObject._class_properties:
             if prop in CellObject._incomparable_properties:
                 continue
             if getattr(self, prop) != getattr(other, prop):
@@ -4266,7 +4266,7 @@ class CellObject(AbstractChildObject):
     def __repr__(self):
         parts = []
 
-        for prop in sorted(list(CellObject._all_properties)):
+        for prop in sorted(list(CellObject._class_properties)):
             if not getattr(self, prop) is None:
                 parts.append("%s=%r" % (prop, getattr(self, prop)))
 
@@ -4280,7 +4280,7 @@ class CellObject(AbstractChildObject):
 
         diffs = set()
 
-        for propname in CellObject._all_properties:
+        for propname in CellObject._class_properties:
             if propname in CellObject._incomparable_properties:
                 continue
             if ignore_original and propname == "original_cellobject":
