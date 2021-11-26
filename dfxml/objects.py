@@ -1427,10 +1427,43 @@ class ByteRuns(AbstractObject):
         self._facet = val
 
 
-class DiskImageObject(AbstractParentObject, AbstractChildObject):
+class AbstractGeometricObject(AbstractObject):
+    """
+    This class is an abstract superclass of all *Object classes that have a .byte_runs property.
+    """
 
     _class_properties = set([
-      "byte_runs",
+      "byte_runs"
+    ])
+
+    def __init__(
+      self,
+      *args,
+      byte_runs : typing.Optional[ByteRuns] = None,
+      **kwargs
+    ) -> None:
+        self._byte_runs = byte_runs
+        super().__init__(*args, **kwargs)
+
+    @property
+    def byte_runs(
+      self
+    ) -> typing.Optional[ByteRuns]:
+        return self._byte_runs
+
+    @byte_runs.setter
+    def byte_runs(
+      self,
+      val : typing.Optional[ByteRuns]
+    ) -> None:
+        if not val is None:
+            _typecheck(val, ByteRuns)
+        self._byte_runs = val
+
+
+class DiskImageObject(AbstractParentObject, AbstractChildObject, AbstractGeometricObject):
+
+    _class_properties = set([
       "child_objects",
       "error",
       "externals",
@@ -1443,7 +1476,6 @@ class DiskImageObject(AbstractParentObject, AbstractChildObject):
     def __init__(self, *args, **kwargs) -> None:
         self.externals = kwargs.get("externals", OtherNSElementList())
 
-        self._byte_runs : typing.Optional[ByteRuns] = None
         self._error = None
         self._files : typing.List[FileObject] = []
         self._partition_systems : typing.List[PartitionSystemObject] = []
@@ -1638,21 +1670,6 @@ class DiskImageObject(AbstractParentObject, AbstractChildObject):
         return outel
 
     @property
-    def byte_runs(
-      self
-    ) -> typing.Optional[ByteRuns]:
-        return self._byte_runs
-
-    @byte_runs.setter
-    def byte_runs(
-      self,
-      val : typing.Optional[ByteRuns]
-    ) -> None:
-        if not val is None:
-            _typecheck(val, ByteRuns)
-        self._byte_runs = val
-
-    @property
     def error(self):
         return self._error
 
@@ -1684,11 +1701,10 @@ class DiskImageObject(AbstractParentObject, AbstractChildObject):
         return self._volumes
 
 
-class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
+class PartitionSystemObject(AbstractParentObject, AbstractChildObject, AbstractGeometricObject):
 
     _class_properties = set([
       "block_size",
-      "byte_runs",
       "child_objects",
       "error",
       "externals",
@@ -1702,7 +1718,6 @@ class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
     def __init__(self, *args, **kwargs) -> None:
         self.externals = kwargs.get("externals", OtherNSElementList())
 
-        self._byte_runs : typing.Optional[ByteRuns] = None
         self._error = None
         self._files : typing.List[FileObject] = []
         self._partitions : typing.List[PartitionObject] = []
@@ -1918,21 +1933,6 @@ class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
         return outel
 
     @property
-    def byte_runs(
-      self
-    ) -> typing.Optional[ByteRuns]:
-        return self._byte_runs
-
-    @byte_runs.setter
-    def byte_runs(
-      self,
-      val : typing.Optional[ByteRuns]
-    ) -> None:
-        if not val is None:
-            _typecheck(val, ByteRuns)
-        self._byte_runs = val
-
-    @property
     def error(self):
         return self._error
 
@@ -1970,12 +1970,11 @@ class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
         self._pstype_str = _strcast(val)
 
 
-class PartitionObject(AbstractParentObject, AbstractChildObject):
+class PartitionObject(AbstractParentObject, AbstractChildObject, AbstractGeometricObject):
 
     _class_properties = set([
       "block_count",
       "block_size",
-      "byte_runs",
       "child_objects",
       "externals",
       "files",
@@ -1994,7 +1993,6 @@ class PartitionObject(AbstractParentObject, AbstractChildObject):
     def __init__(self, *args, **kwargs) -> None:
         self.externals = kwargs.get("externals", OtherNSElementList())
 
-        self._byte_runs : typing.Optional[ByteRuns] = None
         self._files : typing.List[FileObject] = []
         self._partition_index = None
         self._partition_systems : typing.List[PartitionSystemObject] = []
@@ -2191,21 +2189,6 @@ class PartitionObject(AbstractParentObject, AbstractChildObject):
         return outel
 
     @property
-    def byte_runs(
-      self
-    ) -> typing.Optional[ByteRuns]:
-        return self._byte_runs
-
-    @byte_runs.setter
-    def byte_runs(
-      self,
-      val : typing.Optional[ByteRuns]
-    ) -> None:
-        if not val is None:
-            _typecheck(val, ByteRuns)
-        self._byte_runs = val
-
-    @property
     def externals(self):
         """(This property behaves the same as FileObject.externals.)"""
         return self._externals
@@ -2260,14 +2243,13 @@ class PartitionObject(AbstractParentObject, AbstractChildObject):
         return self._volumes
 
 
-class VolumeObject(AbstractParentObject, AbstractChildObject):
+class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricObject):
 
     _class_properties = set([
       "annos",
       "allocated_only",
       "block_count",
       "block_size",
-      "byte_runs",
       "child_objects",
       "disk_images",
       "error",
@@ -2650,21 +2632,6 @@ class VolumeObject(AbstractParentObject, AbstractChildObject):
         self._block_size = _intcast(val)
 
     @property
-    def byte_runs(
-      self
-    ) -> typing.Optional[ByteRuns]:
-        return self._byte_runs
-
-    @byte_runs.setter
-    def byte_runs(
-      self,
-      val : typing.Optional[ByteRuns]
-    ) -> None:
-        if not val is None:
-            _typecheck(val, ByteRuns)
-        self._byte_runs = val
-
-    @property
     def diffs(self):
         return self._diffs
 
@@ -2766,7 +2733,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject):
         return self._volumes
 
 
-class HiveObject(AbstractParentObject, AbstractChildObject):
+class HiveObject(AbstractParentObject, AbstractChildObject, AbstractGeometricObject):
 
     _class_properties = set([
       "annos",
@@ -3107,7 +3074,7 @@ class TimestampObject(AbstractObject):
         return self._timestamp
 
 
-class FileObject(AbstractChildObject):
+class FileObject(AbstractChildObject, AbstractGeometricObject):
     """
     This class provides property accesses, an XML serializer (ElementTree-based), and a deserializer.
     The properties interface is NOT function calls, but simple accesses.  That is, the old _fileobject_ style:
@@ -3128,7 +3095,6 @@ class FileObject(AbstractChildObject):
       "annos",
       "atime",
       "bkup_time",
-      "byte_runs",
       "compressed",
       "crtime",
       "ctime",
@@ -3768,20 +3734,6 @@ class FileObject(AbstractChildObject):
             self._bkup_time = checked_val
 
     @property
-    def byte_runs(
-      self
-    ) -> typing.Optional[ByteRuns]:
-        """This property is now a synonym for the data byte runs (.data_brs)."""
-        return self.data_brs
-
-    @byte_runs.setter
-    def byte_runs(
-      self,
-      val : typing.Optional[ByteRuns]
-    ) -> None:
-        self.data_brs = val
-
-    @property
     def compressed(self):
         return self._compressed
 
@@ -3821,17 +3773,18 @@ class FileObject(AbstractChildObject):
     def data_brs(
       self
     ) -> typing.Optional[ByteRuns]:
-        """The byte runs that store the file's content."""
-        return self._data_brs
+        """
+        The byte runs that store the file's content.
+        This property is now a synonym for the data byte runs (.byte_runs).
+        """
+        return self.byte_runs
 
     @data_brs.setter
     def data_brs(
       self,
       val : typing.Optional[ByteRuns]
     ) -> None:
-        if not val is None:
-            _typecheck(val, ByteRuns)
-        self._data_brs = val
+        self.byte_runs = val
 
     @property
     def diffs(self):
@@ -4202,13 +4155,12 @@ class OtherNSElementList(list):
         super(OtherNSElementList, self).append(value)
 
 
-class CellObject(AbstractChildObject):
+class CellObject(AbstractChildObject, AbstractGeometricObject):
 
     _class_properties = set([
       "alloc",
       "annos",
       "basename",
-      "byte_runs",
       "cellpath",
       "data",
       "data_conversions",
@@ -4495,21 +4447,6 @@ class CellObject(AbstractChildObject):
         if not val is None:
             _typecheck(val, str)
         self._basename = val
-
-    @property
-    def byte_runs(
-      self
-    ) -> typing.Optional[ByteRuns]:
-        return self._byte_runs
-
-    @byte_runs.setter
-    def byte_runs(
-      self,
-      val : typing.Optional[ByteRuns]
-    ) -> None:
-        if not val is None:
-            _typecheck(val, ByteRuns)
-        self._byte_runs = val
 
     @property
     def cellpath(self):
