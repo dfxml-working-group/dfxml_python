@@ -19,6 +19,7 @@ import os
 import sys
 import hashlib
 import logging
+import typing
 
 import dfxml.objects as Objects
 
@@ -52,7 +53,12 @@ tmphash = hashlib.sha512()
 tmphash.update(TEST_BYTE_STRING_5)
 TEST_HASH_5 = tmphash.hexdigest()
 
-def _test_file_in_non_fs_levels_deep(include_disk_image, include_partition_system, include_partition, include_file_system):
+def _test_file_in_non_fs_levels_deep(
+  include_disk_image : bool,
+  include_partition_system : bool,
+  include_partition : bool,
+  include_file_system : bool
+) -> None:
     """
     This test follows a simple, vertical storage layer stack, but adds a file at each layer.
     """
@@ -65,7 +71,7 @@ def _test_file_in_non_fs_levels_deep(include_disk_image, include_partition_syste
     fobj_dobj.sha512 = TEST_HASH_1
     dobj.append(fobj_dobj)
 
-    appender_stack = [dobj]
+    appender_stack : typing.List[Objects.AbstractParentObject] = [dobj]
 
     if include_disk_image:
         # Add disk image to top-level document.
@@ -150,7 +156,7 @@ def _test_file_in_non_fs_levels_deep(include_disk_image, include_partition_syste
         raise
     os.remove(tmp_filename)
 
-def test_file_in_non_fs_levels_deep():
+def test_file_in_non_fs_levels_deep() -> None:
     for include_disk_image in [True, False]:
         for include_partition_system in [True, False]:
             for include_partition in [True, False]:
@@ -169,7 +175,12 @@ def test_file_in_non_fs_levels_deep():
                         _logger.debug("include_file_system = %r." % include_file_system)
                         raise
 
-def _test_file_in_non_fs_levels_flat(include_disk_image, include_partition_system, include_partition, include_file_system):
+def _test_file_in_non_fs_levels_flat(
+  include_disk_image : bool,
+  include_partition_system : bool,
+  include_partition : bool,
+  include_file_system : bool
+) -> None:
     """
     This test follows a simple, horizontal storage layer stack (every container attached to top document object), and adds a file for each container.
     """
@@ -253,7 +264,7 @@ def _test_file_in_non_fs_levels_flat(include_disk_image, include_partition_syste
         raise
     os.remove(tmp_filename)
 
-def test_file_in_non_fs_levels_flat():
+def test_file_in_non_fs_levels_flat() -> None:
     for include_disk_image in [True, False]:
         for include_partition_system in [True, False]:
             for include_partition in [True, False]:
@@ -272,7 +283,7 @@ def test_file_in_non_fs_levels_flat():
                         _logger.debug("include_file_system = %r." % include_file_system)
                         raise
 
-def test_solaris_ps_in_partition():
+def test_solaris_ps_in_partition() -> None:
     dobj = Objects.DFXMLObject(version="1.2.0")
 
     psobj_outer = Objects.PartitionSystemObject()
@@ -319,7 +330,7 @@ def test_solaris_ps_in_partition():
         raise
     os.remove(tmp_filename)
 
-def test_partition_in_partition():
+def test_partition_in_partition() -> None:
     #TODO Remove "+" on DFXML Schema 1.3.0 tracking.
     dobj = Objects.DFXMLObject(version="1.2.0+")
 
@@ -345,7 +356,7 @@ def test_partition_in_partition():
         raise
     os.remove(tmp_filename)
 
-def test_hfsplus_in_hfs():
+def test_hfsplus_in_hfs() -> None:
     dobj = Objects.DFXMLObject(version="1.2.0")
     vobj_outer = Objects.VolumeObject()
     vobj_outer.ftype_str = "hfs"
@@ -368,7 +379,7 @@ def test_hfsplus_in_hfs():
         raise
     os.remove(tmp_filename)
 
-def test_disk_image_in_file_system():
+def test_disk_image_in_file_system() -> None:
     dobj = Objects.DFXMLObject(version="1.2.0")
 
     vobj = Objects.VolumeObject()
