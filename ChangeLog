@@ -1,3 +1,7 @@
+2021-11-29    <alexander.nelson@nist.gov>
+
+	* objects.py: Add abstract base classes for parents, children, and geometric objects
+
 2021-08-27    <alexander.nelson@nist.gov>
 
 	* Python: PEP 561 type designation added, though scripts and modules are still typed as needed thus far
