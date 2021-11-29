@@ -855,7 +855,7 @@ class RegXMLObject(AbstractParentObject):
 
 class ByteRun(AbstractObject):
 
-    _all_properties = set([
+    _class_properties = set([
       "img_offset",
       "fs_offset",
       "file_offset",
@@ -882,7 +882,7 @@ class ByteRun(AbstractObject):
 
     def __init__(self, *args, **kwargs) -> None:
         self._has_hash_property = False
-        for prop in ByteRun._all_properties:
+        for prop in ByteRun._class_properties:
             setattr(self, prop, kwargs.get(prop))
 
         super().__init__(*args, **kwargs)
@@ -966,7 +966,7 @@ class ByteRun(AbstractObject):
 
     def __repr__(self):
         parts = []
-        for prop in ByteRun._all_properties:
+        for prop in ByteRun._class_properties:
             val = getattr(self, prop)
             if not val is None:
                 parts.append("%s=%r" % (prop, val))
@@ -985,7 +985,7 @@ class ByteRun(AbstractObject):
         copied_attrib = copy.deepcopy(e.attrib)
 
         # Populate run properties from element attributes.
-        for prop in ByteRun._all_properties:
+        for prop in ByteRun._class_properties:
             if prop in copied_attrib:
                 val = copied_attrib.get(prop)
                 if not val is None:
@@ -1029,7 +1029,7 @@ class ByteRun(AbstractObject):
             for prop in sorted(ByteRun._hash_properties):
                 _append_hash(prop)
 
-        for prop in ByteRun._all_properties:
+        for prop in ByteRun._class_properties:
             val = getattr(self, prop)
 
             # Skip null properties.
@@ -1427,10 +1427,43 @@ class ByteRuns(AbstractObject):
         self._facet = val
 
 
-class DiskImageObject(AbstractParentObject, AbstractChildObject):
+class AbstractGeometricObject(AbstractObject):
+    """
+    This class is an abstract superclass of all *Object classes that have a .byte_runs property.
+    """
 
-    _all_properties = set([
-      "byte_runs",
+    _class_properties = set([
+      "byte_runs"
+    ])
+
+    def __init__(
+      self,
+      *args,
+      byte_runs : typing.Optional[ByteRuns] = None,
+      **kwargs
+    ) -> None:
+        self._byte_runs = byte_runs
+        super().__init__(*args, **kwargs)
+
+    @property
+    def byte_runs(
+      self
+    ) -> typing.Optional[ByteRuns]:
+        return self._byte_runs
+
+    @byte_runs.setter
+    def byte_runs(
+      self,
+      val : typing.Optional[ByteRuns]
+    ) -> None:
+        if not val is None:
+            _typecheck(val, ByteRuns)
+        self._byte_runs = val
+
+
+class DiskImageObject(AbstractParentObject, AbstractChildObject, AbstractGeometricObject):
+
+    _class_properties = set([
       "child_objects",
       "error",
       "externals",
@@ -1443,7 +1476,6 @@ class DiskImageObject(AbstractParentObject, AbstractChildObject):
     def __init__(self, *args, **kwargs) -> None:
         self.externals = kwargs.get("externals", OtherNSElementList())
 
-        self._byte_runs : typing.Optional[ByteRuns] = None
         self._error = None
         self._files : typing.List[FileObject] = []
         self._partition_systems : typing.List[PartitionSystemObject] = []
@@ -1462,7 +1494,7 @@ class DiskImageObject(AbstractParentObject, AbstractChildObject):
 
     def __repr__(self):
         parts = []
-        for prop in DiskImageObject._all_properties:
+        for prop in DiskImageObject._class_properties:
             if prop in {
               "child_objects",
               "externals",
@@ -1533,7 +1565,7 @@ class DiskImageObject(AbstractParentObject, AbstractChildObject):
             elif ctn == "byte_run":
                 # byte_runs' block recursively handles this element.
                 continue
-            elif ctn in DiskImageObject._all_properties:
+            elif ctn in DiskImageObject._class_properties:
                 setattr(self, ctn, ce.text)
             else:
                 if (cns, ctn, DiskImageObject) not in _warned_elements:
@@ -1638,21 +1670,6 @@ class DiskImageObject(AbstractParentObject, AbstractChildObject):
         return outel
 
     @property
-    def byte_runs(
-      self
-    ) -> typing.Optional[ByteRuns]:
-        return self._byte_runs
-
-    @byte_runs.setter
-    def byte_runs(
-      self,
-      val : typing.Optional[ByteRuns]
-    ) -> None:
-        if not val is None:
-            _typecheck(val, ByteRuns)
-        self._byte_runs = val
-
-    @property
     def error(self):
         return self._error
 
@@ -1684,11 +1701,10 @@ class DiskImageObject(AbstractParentObject, AbstractChildObject):
         return self._volumes
 
 
-class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
+class PartitionSystemObject(AbstractParentObject, AbstractChildObject, AbstractGeometricObject):
 
-    _all_properties = set([
+    _class_properties = set([
       "block_size",
-      "byte_runs",
       "child_objects",
       "error",
       "externals",
@@ -1702,7 +1718,6 @@ class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
     def __init__(self, *args, **kwargs) -> None:
         self.externals = kwargs.get("externals", OtherNSElementList())
 
-        self._byte_runs : typing.Optional[ByteRuns] = None
         self._error = None
         self._files : typing.List[FileObject] = []
         self._partitions : typing.List[PartitionObject] = []
@@ -1725,7 +1740,7 @@ class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
 
     def __repr__(self):
         parts = []
-        for prop in PartitionSystemObject._all_properties:
+        for prop in PartitionSystemObject._class_properties:
             if prop in {
               "child_objects",
               "externals",
@@ -1771,7 +1786,7 @@ class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
             elif ctn == "byte_run":
                 # byte_runs' block recursively handles this element.
                 continue
-            elif ctn in PartitionSystemObject._all_properties:
+            elif ctn in PartitionSystemObject._class_properties:
                 setattr(self, ctn, ce.text)
             elif cns not in [dfxml.XMLNS_DFXML, ""]:
                 # Put all non-DFXML-namespace elements into the externals list.
@@ -1918,21 +1933,6 @@ class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
         return outel
 
     @property
-    def byte_runs(
-      self
-    ) -> typing.Optional[ByteRuns]:
-        return self._byte_runs
-
-    @byte_runs.setter
-    def byte_runs(
-      self,
-      val : typing.Optional[ByteRuns]
-    ) -> None:
-        if not val is None:
-            _typecheck(val, ByteRuns)
-        self._byte_runs = val
-
-    @property
     def error(self):
         return self._error
 
@@ -1970,12 +1970,11 @@ class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
         self._pstype_str = _strcast(val)
 
 
-class PartitionObject(AbstractParentObject, AbstractChildObject):
+class PartitionObject(AbstractParentObject, AbstractChildObject, AbstractGeometricObject):
 
-    _all_properties = set([
+    _class_properties = set([
       "block_count",
       "block_size",
-      "byte_runs",
       "child_objects",
       "externals",
       "files",
@@ -1994,7 +1993,6 @@ class PartitionObject(AbstractParentObject, AbstractChildObject):
     def __init__(self, *args, **kwargs) -> None:
         self.externals = kwargs.get("externals", OtherNSElementList())
 
-        self._byte_runs : typing.Optional[ByteRuns] = None
         self._files : typing.List[FileObject] = []
         self._partition_index = None
         self._partition_systems : typing.List[PartitionSystemObject] = []
@@ -2023,7 +2021,7 @@ class PartitionObject(AbstractParentObject, AbstractChildObject):
 
     def __repr__(self):
         parts = []
-        for prop in PartitionObject._all_properties:
+        for prop in PartitionObject._class_properties:
             if prop in {
               "child_objects",
               "externals",
@@ -2075,7 +2073,7 @@ class PartitionObject(AbstractParentObject, AbstractChildObject):
             elif ctn == "byte_run":
                 # byte_runs' block recursively handles this element.
                 continue
-            elif ctn in PartitionObject._all_properties:
+            elif ctn in PartitionObject._class_properties:
                 setattr(self, ctn, ce.text)
             elif cns not in [dfxml.XMLNS_DFXML, ""]:
                 # Put all non-DFXML-namespace elements into the externals list.
@@ -2191,21 +2189,6 @@ class PartitionObject(AbstractParentObject, AbstractChildObject):
         return outel
 
     @property
-    def byte_runs(
-      self
-    ) -> typing.Optional[ByteRuns]:
-        return self._byte_runs
-
-    @byte_runs.setter
-    def byte_runs(
-      self,
-      val : typing.Optional[ByteRuns]
-    ) -> None:
-        if not val is None:
-            _typecheck(val, ByteRuns)
-        self._byte_runs = val
-
-    @property
     def externals(self):
         """(This property behaves the same as FileObject.externals.)"""
         return self._externals
@@ -2260,14 +2243,13 @@ class PartitionObject(AbstractParentObject, AbstractChildObject):
         return self._volumes
 
 
-class VolumeObject(AbstractParentObject, AbstractChildObject):
+class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricObject):
 
-    _all_properties = set([
+    _class_properties = set([
       "annos",
       "allocated_only",
       "block_count",
       "block_size",
-      "byte_runs",
       "child_objects",
       "disk_images",
       "error",
@@ -2305,7 +2287,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject):
         self._annos : typing.Set[str] = set()
         self._diffs : typing.Set[str] = set()
 
-        for prop in VolumeObject._all_properties:
+        for prop in VolumeObject._class_properties:
             if prop in {
               "annos",
               "child_objects",
@@ -2331,7 +2313,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject):
 
     def __repr__(self):
         parts = []
-        for prop in VolumeObject._all_properties:
+        for prop in VolumeObject._class_properties:
             # Skip outputting the files, file systems, and disk images lists.
             if prop in {
               "child_objects",
@@ -2365,7 +2347,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject):
         """Returns a set of all the properties found to differ."""
         _typecheck(other, VolumeObject)
         diffs = set()
-        for prop in VolumeObject._all_properties:
+        for prop in VolumeObject._class_properties:
             if prop in VolumeObject._incomparable_properties:
                 continue
             if ignore_original and prop == "original_volume":
@@ -2424,7 +2406,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject):
             elif ctn == "original_volume":
                 self.original_volume = VolumeObject()
                 self.original_volume.populate_from_Element(ce)
-            elif ctn in VolumeObject._all_properties:
+            elif ctn in VolumeObject._class_properties:
                 #_logger.debug("ce.text = %r" % ce.text)
                 setattr(self, ctn, ce.text)
                 #_logger.debug("getattr(self, %r) = %r" % (ctn, getattr(self, ctn)))
@@ -2650,21 +2632,6 @@ class VolumeObject(AbstractParentObject, AbstractChildObject):
         self._block_size = _intcast(val)
 
     @property
-    def byte_runs(
-      self
-    ) -> typing.Optional[ByteRuns]:
-        return self._byte_runs
-
-    @byte_runs.setter
-    def byte_runs(
-      self,
-      val : typing.Optional[ByteRuns]
-    ) -> None:
-        if not val is None:
-            _typecheck(val, ByteRuns)
-        self._byte_runs = val
-
-    @property
     def diffs(self):
         return self._diffs
 
@@ -2766,9 +2733,9 @@ class VolumeObject(AbstractParentObject, AbstractChildObject):
         return self._volumes
 
 
-class HiveObject(AbstractParentObject, AbstractChildObject):
+class HiveObject(AbstractParentObject, AbstractChildObject, AbstractGeometricObject):
 
-    _all_properties = set([
+    _class_properties = set([
       "annos",
       "mtime",
       "filename",
@@ -2793,7 +2760,7 @@ class HiveObject(AbstractParentObject, AbstractChildObject):
         self._annos = set()
         self._diffs = set()
 
-        for prop in HiveObject._all_properties:
+        for prop in HiveObject._class_properties:
             if prop in ["annos", "cells"]:
                 continue
             setattr(self, prop, kwargs.get(prop))
@@ -2820,7 +2787,7 @@ class HiveObject(AbstractParentObject, AbstractChildObject):
         """Returns a set of all the properties found to differ."""
         _typecheck(other, HiveObject)
         diffs = set()
-        for prop in HiveObject._all_properties:
+        for prop in HiveObject._class_properties:
             if prop in HiveObject._incomparable_properties:
                 continue
             if ignore_original and prop == "original_hive":
@@ -3107,7 +3074,7 @@ class TimestampObject(AbstractObject):
         return self._timestamp
 
 
-class FileObject(AbstractChildObject):
+class FileObject(AbstractChildObject, AbstractGeometricObject):
     """
     This class provides property accesses, an XML serializer (ElementTree-based), and a deserializer.
     The properties interface is NOT function calls, but simple accesses.  That is, the old _fileobject_ style:
@@ -3121,14 +3088,13 @@ class FileObject(AbstractChildObject):
         fi.mtime
     """
 
-    _all_properties = set([
+    _class_properties = set([
       "alloc",
       "alloc_inode",
       "alloc_name",
       "annos",
       "atime",
       "bkup_time",
-      "byte_runs",
       "compressed",
       "crtime",
       "ctime",
@@ -3207,7 +3173,7 @@ class FileObject(AbstractChildObject):
 
     def __init__(self, *args, **kwargs) -> None:
         # Prime all the properties.
-        for prop in FileObject._all_properties:
+        for prop in FileObject._class_properties:
             if prop == "annos":
                 continue
             elif prop == "externals":
@@ -3226,7 +3192,7 @@ class FileObject(AbstractChildObject):
         if not isinstance(other, FileObject):
             return False
 
-        for prop in FileObject._all_properties:
+        for prop in FileObject._class_properties:
             if prop in FileObject._incomparable_properties:
                 continue
             if getattr(self, prop) != getattr(other, prop):
@@ -3236,7 +3202,7 @@ class FileObject(AbstractChildObject):
     def __repr__(self):
         parts = []
 
-        for prop in sorted(FileObject._all_properties):
+        for prop in sorted(FileObject._class_properties):
             # Save data byte runs for the end, as their lists can get really long.  Skip parent-volume reference.
             if prop not in ["byte_runs", "data_brs", "externals", "volume_object"]:
                 value = getattr(self, prop)
@@ -3277,7 +3243,7 @@ class FileObject(AbstractChildObject):
 
         diffs = set()
 
-        for propname in FileObject._all_properties:
+        for propname in FileObject._class_properties:
             if propname in file_ignores:
                 continue
             if propname in FileObject._incomparable_properties:
@@ -3456,7 +3422,7 @@ class FileObject(AbstractChildObject):
             elif ctn in ["atime", "bkup_time", "crtime", "ctime", "dtime", "mtime"]:
                 setattr(self, ctn, TimestampObject())
                 getattr(self, ctn).populate_from_Element(ce)
-            elif ctn in FileObject._all_properties:
+            elif ctn in FileObject._class_properties:
                 setattr(self, ctn, ce.text)
             elif cns not in [dfxml.XMLNS_DFXML, ""]:
                 # Put all non-DFXML-namespace elements into the externals list.
@@ -3768,20 +3734,6 @@ class FileObject(AbstractChildObject):
             self._bkup_time = checked_val
 
     @property
-    def byte_runs(
-      self
-    ) -> typing.Optional[ByteRuns]:
-        """This property is now a synonym for the data byte runs (.data_brs)."""
-        return self.data_brs
-
-    @byte_runs.setter
-    def byte_runs(
-      self,
-      val : typing.Optional[ByteRuns]
-    ) -> None:
-        self.data_brs = val
-
-    @property
     def compressed(self):
         return self._compressed
 
@@ -3821,17 +3773,18 @@ class FileObject(AbstractChildObject):
     def data_brs(
       self
     ) -> typing.Optional[ByteRuns]:
-        """The byte runs that store the file's content."""
-        return self._data_brs
+        """
+        The byte runs that store the file's content.
+        This property is now a synonym for the data byte runs (.byte_runs).
+        """
+        return self.byte_runs
 
     @data_brs.setter
     def data_brs(
       self,
       val : typing.Optional[ByteRuns]
     ) -> None:
-        if not val is None:
-            _typecheck(val, ByteRuns)
-        self._data_brs = val
+        self.byte_runs = val
 
     @property
     def diffs(self):
@@ -4202,13 +4155,12 @@ class OtherNSElementList(list):
         super(OtherNSElementList, self).append(value)
 
 
-class CellObject(AbstractChildObject):
+class CellObject(AbstractChildObject, AbstractGeometricObject):
 
-    _all_properties = set([
+    _class_properties = set([
       "alloc",
       "annos",
       "basename",
-      "byte_runs",
       "cellpath",
       "data",
       "data_conversions",
@@ -4239,7 +4191,7 @@ class CellObject(AbstractChildObject):
         # These properties must be assigned first for sanity check dependencies.
         self.name_type = kwargs.get("name_type")
 
-        for prop in CellObject._all_properties:
+        for prop in CellObject._class_properties:
             if prop == "annos":
                 setattr(self, prop, kwargs.get(prop, set()))
             else:
@@ -4256,7 +4208,7 @@ class CellObject(AbstractChildObject):
         if not isinstance(other, CellObject):
             return False
 
-        for prop in CellObject._all_properties:
+        for prop in CellObject._class_properties:
             if prop in CellObject._incomparable_properties:
                 continue
             if getattr(self, prop) != getattr(other, prop):
@@ -4266,7 +4218,7 @@ class CellObject(AbstractChildObject):
     def __repr__(self):
         parts = []
 
-        for prop in sorted(list(CellObject._all_properties)):
+        for prop in sorted(list(CellObject._class_properties)):
             if not getattr(self, prop) is None:
                 parts.append("%s=%r" % (prop, getattr(self, prop)))
 
@@ -4280,7 +4232,7 @@ class CellObject(AbstractChildObject):
 
         diffs = set()
 
-        for propname in CellObject._all_properties:
+        for propname in CellObject._class_properties:
             if propname in CellObject._incomparable_properties:
                 continue
             if ignore_original and propname == "original_cellobject":
@@ -4495,21 +4447,6 @@ class CellObject(AbstractChildObject):
         if not val is None:
             _typecheck(val, str)
         self._basename = val
-
-    @property
-    def byte_runs(
-      self
-    ) -> typing.Optional[ByteRuns]:
-        return self._byte_runs
-
-    @byte_runs.setter
-    def byte_runs(
-      self,
-      val : typing.Optional[ByteRuns]
-    ) -> None:
-        if not val is None:
-            _typecheck(val, ByteRuns)
-        self._byte_runs = val
 
     @property
     def cellpath(self):
