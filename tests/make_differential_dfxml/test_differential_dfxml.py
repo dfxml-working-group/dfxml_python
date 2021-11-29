@@ -52,24 +52,24 @@ def srcdir() -> str:
     return retval
 
 @pytest.fixture
-def top_srcdir(srcdir) -> str:
+def top_srcdir(srcdir : str) -> str:
     retval = os.path.join(srcdir, "..", "..")
     assert os.path.exists(os.path.join(retval, "LICENSE.md")), "Hard-coded knowledge of file in top_srcdir is no longer correct."
     return retval
 
 @pytest.fixture
-def samples_srcdir(top_srcdir):
+def samples_srcdir(top_srcdir : str) -> str:
     return os.path.join(top_srcdir, "samples")
 
 @pytest.fixture
-def ddo_01_from_cli(srcdir) -> Objects.DFXMLObject:
+def ddo_01_from_cli(srcdir : str) -> Objects.DFXMLObject:
     retval = Objects.parse(os.path.join(srcdir, "differential_dfxml_test_01.dfxml"))
     if not isinstance(retval, Objects.DFXMLObject):
         raise TypeError()
     return retval
 
 @pytest.fixture
-def ddo_01_from_module(samples_srcdir) -> Objects.DFXMLObject:
+def ddo_01_from_module(samples_srcdir : str) -> Objects.DFXMLObject:
     retval = dfxml.bin.make_differential_dfxml.make_differential_dfxml(
       os.path.join(samples_srcdir, "difference_test_0.xml"),
       os.path.join(samples_srcdir, "difference_test_1.xml")
@@ -79,7 +79,7 @@ def ddo_01_from_module(samples_srcdir) -> Objects.DFXMLObject:
     return retval
 
 @pytest.fixture
-def ddo_01_from_serialization_1(ddo_01_from_module) -> Objects.DFXMLObject:
+def ddo_01_from_serialization_1(ddo_01_from_module : Objects.DFXMLObject) -> Objects.DFXMLObject:
     filename = None
     with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".dfxml") as tmp_fh:
         filename = tmp_fh.name
@@ -91,7 +91,7 @@ def ddo_01_from_serialization_1(ddo_01_from_module) -> Objects.DFXMLObject:
     return retval
 
 @pytest.fixture
-def ddo_01_from_serialization_2(ddo_01_from_serialization_1) -> Objects.DFXMLObject:
+def ddo_01_from_serialization_2(ddo_01_from_serialization_1 : Objects.DFXMLObject) -> Objects.DFXMLObject:
     filename = None
     with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".dfxml") as tmp_fh:
         filename = tmp_fh.name
@@ -103,7 +103,7 @@ def ddo_01_from_serialization_2(ddo_01_from_serialization_1) -> Objects.DFXMLObj
     return retval
 
 @pytest.fixture
-def ddo_23_from_cli(srcdir) -> Objects.DFXMLObject:
+def ddo_23_from_cli(srcdir : str) -> Objects.DFXMLObject:
     retval = Objects.parse(os.path.join(srcdir, "differential_dfxml_test_23.dfxml"))
     if not isinstance(retval, Objects.DFXMLObject):
         raise TypeError()
@@ -111,7 +111,7 @@ def ddo_23_from_cli(srcdir) -> Objects.DFXMLObject:
     return retval
 
 @pytest.fixture
-def ddo_23_from_module(samples_srcdir) -> Objects.DFXMLObject:
+def ddo_23_from_module(samples_srcdir : str) -> Objects.DFXMLObject:
     retval = dfxml.bin.make_differential_dfxml.make_differential_dfxml(
       os.path.join(samples_srcdir, "difference_test_2.xml"),
       os.path.join(samples_srcdir, "difference_test_3.xml")
@@ -122,7 +122,7 @@ def ddo_23_from_module(samples_srcdir) -> Objects.DFXMLObject:
     return retval
 
 @pytest.fixture
-def ddo_23_from_serialization_1(ddo_23_from_module) -> typing.Generator[Objects.DFXMLObject, None, None]:
+def ddo_23_from_serialization_1(ddo_23_from_module : Objects.DFXMLObject) -> typing.Generator[Objects.DFXMLObject, None, None]:
     filename = None
     with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".dfxml") as tmp_fh:
         filename = tmp_fh.name
@@ -139,7 +139,7 @@ def ddo_23_from_serialization_1(ddo_23_from_module) -> typing.Generator[Objects.
     #os.unlink(filename)
 
 @pytest.fixture
-def ddo_23_from_serialization_2(ddo_23_from_serialization_1) -> typing.Generator[Objects.DFXMLObject, None, None]:
+def ddo_23_from_serialization_2(ddo_23_from_serialization_1 : Objects.DFXMLObject) -> typing.Generator[Objects.DFXMLObject, None, None]:
     filename = None
     with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".dfxml") as tmp_fh:
         filename = tmp_fh.name
@@ -155,7 +155,7 @@ def ddo_23_from_serialization_2(ddo_23_from_serialization_1) -> typing.Generator
 
 def _test_dfxml_object_01(
   dfxml_object : Objects.DFXMLObject
-):
+) -> None:
     expected_fileobject_diffs = {
       "i_am_new.txt": set([]),
       "i_will_be_deleted.txt": set([]),
@@ -190,7 +190,7 @@ def _test_dfxml_object_01(
 
 def _test_dfxml_object_23(
   dfxml_object : Objects.DFXMLObject
-):
+) -> None:
     expected_partition_annos = {
       (1048576, "FAT16"): {"deleted"},
       (1073741824, "FAT32"): set(),
@@ -208,26 +208,26 @@ def _test_dfxml_object_23(
             computed_partition_annos[(obj.partition_offset, obj.ftype_str)] = obj.annos or set()
     assert expected_partition_annos == computed_partition_annos
 
-def test_dfxml_object_01_from_cli(ddo_01_from_cli):
+def test_dfxml_object_01_from_cli(ddo_01_from_cli : Objects.DFXMLObject) -> None:
     _test_dfxml_object_01(ddo_01_from_cli)
 
-def test_dfxml_object_01_from_module(ddo_01_from_module):
+def test_dfxml_object_01_from_module(ddo_01_from_module : Objects.DFXMLObject) -> None:
     _test_dfxml_object_01(ddo_01_from_module)
 
-def test_dfxml_object_01_from_serialization_1(ddo_01_from_serialization_1):
+def test_dfxml_object_01_from_serialization_1(ddo_01_from_serialization_1 : Objects.DFXMLObject) -> None:
     _test_dfxml_object_01(ddo_01_from_serialization_1)
 
-def test_dfxml_object_01_from_serialization_2(ddo_01_from_serialization_2):
+def test_dfxml_object_01_from_serialization_2(ddo_01_from_serialization_2 : Objects.DFXMLObject) -> None:
     _test_dfxml_object_01(ddo_01_from_serialization_2)
 
-def test_dfxml_object_23_from_cli(ddo_23_from_cli):
+def test_dfxml_object_23_from_cli(ddo_23_from_cli : Objects.DFXMLObject) -> None:
     _test_dfxml_object_23(ddo_23_from_cli)
 
-def test_dfxml_object_23_from_module(ddo_23_from_module):
+def test_dfxml_object_23_from_module(ddo_23_from_module : Objects.DFXMLObject) -> None:
     _test_dfxml_object_23(ddo_23_from_module)
 
-def test_dfxml_object_23_from_serialization_1(ddo_23_from_serialization_1):
+def test_dfxml_object_23_from_serialization_1(ddo_23_from_serialization_1 : Objects.DFXMLObject) -> None:
     _test_dfxml_object_23(ddo_23_from_serialization_1)
 
-def test_dfxml_object_23_from_serialization_2(ddo_23_from_serialization_2):
+def test_dfxml_object_23_from_serialization_2(ddo_23_from_serialization_2 : Objects.DFXMLObject) -> None:
     _test_dfxml_object_23(ddo_23_from_serialization_2)

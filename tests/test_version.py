@@ -13,5 +13,5 @@
 
 import dfxml
 
-def test_version():
+def test_version() -> None:
     assert not dfxml.__version__ is None

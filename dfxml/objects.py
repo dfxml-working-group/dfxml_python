@@ -22,7 +22,7 @@ With this module, reading disk images or DFXML files is done with the parse or i
 # Further explanation is on PEPs 484 and 563, via: https://stackoverflow.com/a/33533514
 from __future__ import annotations
 
-__version__ = "0.11.6"
+__version__ = "0.12.0"
 
 # Revision Log
 # 2018-07-22 @simsong - removed calls to logging, since this module shouldn't create log files.
@@ -34,6 +34,7 @@ __version__ = "0.11.6"
 # * User testing.
 # * Compatibility with the DFXML schema, version >1.1.1.
 
+import abc
 import logging
 import re
 import copy
@@ -174,7 +175,7 @@ def _strcast(
 
 def _typecheck(
   obj : object,
-  classinfo : typing.Union[type, typing.Tuple[type]]
+  classinfo : typing.Union[type, typing.Tuple[type, ...]]
 ) -> None:
     if not isinstance(obj, classinfo):
         _logger.info("obj = " + repr(obj))
@@ -184,14 +185,53 @@ def _typecheck(
         else:
             raise TypeError("Expecting object to be of type %r." % classinfo)
 
-class AbstractObject(object):
+
+class AbstractObject(abc.ABC):
     """
     This class is an abstract superclass of all of the *Object classes defined in objects.py, from DFXMLObject through to ByteRun.  It is provided for type-system convenience, particularly with parsing functions.
     """
-    pass
+
+    def __init__(self, *args, **kwargs) -> None:
+        # Match signature of object.__init__().
+        super().__init__()
 
 
-class DFXMLObject(AbstractObject):
+class AbstractChildObject(AbstractObject):
+    """
+    This abstract superclass represents Objects that can be contained in some parent layer, such as a file that can be in a file system.  It is designed to exclude the top "Document" object, DFXMLObject.
+    """
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+
+class AbstractParentObject(AbstractObject):
+    """
+    This abstract superclass represents "container" Objects, that is, objects that provide an append() method.
+    """
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._child_objects : typing.Sequence[AbstractChildObject] = []
+        super().__init__(*args, **kwargs)
+
+    @abc.abstractmethod
+    def append(
+      self,
+      value : AbstractChildObject
+    ) -> None:
+        """
+        Note that this abstract method defines a broad type interface for the value argument.  Subclasses will have to rely on runtime enforcement of more restrictive type signatures.  This is to avoid violation of the Liskov Substitution Principle.
+        https://mypy.readthedocs.io/en/stable/common_issues.html#incompatible-overrides
+        """
+        self.child_objects.append(value)
+
+    # No setter.
+    @property
+    def child_objects(self):
+        return self._child_objects
+
+
+class DFXMLObject(AbstractParentObject):
 
     def __init__(self, *args, **kwargs) -> None:
         self.command_line = kwargs.get("command_line")
@@ -204,13 +244,6 @@ class DFXMLObject(AbstractObject):
         self.diff_file_ignores = kwargs.get("diff_file_ignores", set())
 
         self._namespaces : typing.Dict[str, str] = dict()
-        self._child_objects : typing.List[typing.Union[
-          DiskImageObject,
-          PartitionSystemObject,
-          PartitionObject,
-          VolumeObject,
-          FileObject
-        ]] = []
         self._disk_images : typing.List[DiskImageObject] = []
         self._partition_systems : typing.List[PartitionSystemObject] = []
         self._partitions : typing.List[PartitionObject] = []
@@ -236,6 +269,8 @@ class DFXMLObject(AbstractObject):
         self.add_namespace("dc", dfxml.XMLNS_DC)
         self.add_namespace("dfxmlext", XMLNS_DFXML_EXT)
 
+        super().__init__(*args, **kwargs)
+
     def __iter__(self):
         """
         Recursively yields all child Objects directly attached to this DFXMLObject, in depth-first order.  E.g. yields DiskImageObjects, recursively their VolumeObjects, recursively their FileObjects; and then FileObjects directly attached to this DFXMLObject, in that order.
@@ -247,7 +282,7 @@ class DFXMLObject(AbstractObject):
         """
         for co in self.child_objects:
             yield co
-            if hasattr(co, "child_objects"):
+            if isinstance(co, AbstractParentObject):
                 for gco in co:
                     yield gco
 
@@ -283,7 +318,11 @@ class DFXMLObject(AbstractObject):
             ET.register_namespace(prefix, url)
             #_logger.debug("ET namespaces after registration: %r." % ET._namespace_map)
 
-    def append(self, value) -> None:
+    def append(
+      self,
+      value : AbstractChildObject
+    ) -> None:
+        _typecheck(value, (DiskImageObject, PartitionSystemObject, PartitionObject, VolumeObject, FileObject))
         if isinstance(value, DiskImageObject):
             self.disk_images.append(value)
         elif isinstance(value, PartitionSystemObject):
@@ -294,11 +333,7 @@ class DFXMLObject(AbstractObject):
             self.volumes.append(value)
         elif isinstance(value, FileObject):
             self.files.append(value)
-        else:
-            _logger.debug("value = %r" % value)
-            raise TypeError("Expecting a DiskImageObject, PartitionSystemObject, PartitionObject, VolumeObject, or a FileObject.  Got instead this type: %r." % type(value))
-
-        self.child_objects.append(value)
+        super().append(value)
 
     def iter_namespaces(self) -> typing.Iterator[typing.Tuple[str, str]]:
         """Yields (prefix, url) pairs of each namespace registered in this DFXMLObject."""
@@ -482,11 +517,6 @@ class DFXMLObject(AbstractObject):
 
         return outel
 
-    # No setter.
-    @property
-    def child_objects(self):
-        return self._child_objects
-
     @property
     def command_line(self):
         return self._command_line
@@ -613,6 +643,8 @@ class LibraryObject(AbstractObject):
         if len(args) >= 2:
             self.version = args[1]
 
+        super().__init__(*args, **kwargs)
+
     def __eq__(self, other : object) -> bool:
         """
         This equality function tests the name and version values strictly.  For less-strict testing, like allowing matching on missing versions, use relaxed_eq.
@@ -678,10 +710,9 @@ class LibraryObject(AbstractObject):
         self._version = _strcast(value)
 
 
-class RegXMLObject(AbstractObject):
+class RegXMLObject(AbstractParentObject):
 
     def __init__(self, *args, **kwargs):
-        self.child_objects = kwargs.get("child_objects", [])
         self.command_line = kwargs.get("command_line")
         self.interpreter = kwargs.get("interpreter")
         self.metadata = kwargs.get("metadata")
@@ -703,6 +734,8 @@ class RegXMLObject(AbstractObject):
         #TODO This will cause a problem when the Objects bindings are used for a DFXML document and RegXML document in the same program.
         self.add_namespace("", XMLNS_REGXML)
 
+        super().__init__(*args, **kwargs)
+
     def __iter__(self):
         """Yields all HiveObjects, recursively their CellObjects, and the CellObjects directly attached to this RegXMLObject, in that order."""
         for h in self._hives:
@@ -716,15 +749,16 @@ class RegXMLObject(AbstractObject):
         self._namespaces[prefix] = url
         ET.register_namespace(prefix, url)
 
-    def append(self, value) -> None:
+    def append(
+      self,
+      value : AbstractChildObject
+    ) -> None:
+        _typecheck(value, (HiveObject, CellObject))
         if isinstance(value, HiveObject):
             self._hives.append(value)
         elif isinstance(value, CellObject):
             self._cells.append(value)
-        else:
-            _logger.debug("value = %r" % value)
-            raise TypeError("Expecting a HiveObject or a CellObject.  Got instead this type: %r." % type(value))
-        self.child_objects.append(value)
+        super().append(value)
 
     def print_regxml(self, output_fh=sys.stdout):
         """Serializes and prints the entire object, without constructing the whole tree."""
@@ -846,10 +880,12 @@ class ByteRun(AbstractObject):
       "sha512"
     ])
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self._has_hash_property = False
         for prop in ByteRun._all_properties:
             setattr(self, prop, kwargs.get(prop))
+
+        super().__init__(*args, **kwargs)
 
     def __add__(self, other):
         """
@@ -1176,8 +1212,9 @@ class ByteRuns(AbstractObject):
     def __init__(
       self,
       run_list : typing.Optional[typing.List[ByteRun]] = None,
-      *,
-      facet : typing.Optional[str] = None
+      *args,
+      facet : typing.Optional[str] = None,
+      **kwargs
     ) -> None:
         self._facet = facet
         self._listdata : typing.List[ByteRun] = []
@@ -1185,6 +1222,8 @@ class ByteRuns(AbstractObject):
         if isinstance(run_list, list):
             for run in run_list:
                 self.append(run)
+
+        super().__init__(*args, **kwargs)
 
     def __delitem__(self, key):
         del self._listdata[key]
@@ -1236,7 +1275,10 @@ class ByteRuns(AbstractObject):
         _typecheck(value, ByteRun)
         self._listdata[key] = value
 
-    def append(self, value) -> None:
+    def append(
+      self,
+      value : ByteRun
+    ) -> None:
         """
         Appends a ByteRun object to this container's list.
         """
@@ -1385,7 +1427,7 @@ class ByteRuns(AbstractObject):
         self._facet = val
 
 
-class DiskImageObject(AbstractObject):
+class DiskImageObject(AbstractParentObject, AbstractChildObject):
 
     _all_properties = set([
       "byte_runs",
@@ -1398,22 +1440,23 @@ class DiskImageObject(AbstractObject):
       "volumes"
     ])
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.externals = kwargs.get("externals", OtherNSElementList())
 
-        self._byte_runs = None
-        self._child_objects = []
+        self._byte_runs : typing.Optional[ByteRuns] = None
         self._error = None
-        self._files = []
-        self._partition_systems = []
+        self._files : typing.List[FileObject] = []
+        self._partition_systems : typing.List[PartitionSystemObject] = []
         self._sector_size = None
-        self._volumes = []
+        self._volumes : typing.List[VolumeObject] = []
+
+        super().__init__(*args, **kwargs)
 
     def __iter__(self):
         """Recursively yields all child Objects in depth-first order."""
         for co in self.child_objects:
             yield co
-            if hasattr(co, "child_objects"):
+            if isinstance(co, AbstractParentObject):
                 for gco in co:
                     yield gco
 
@@ -1433,16 +1476,18 @@ class DiskImageObject(AbstractObject):
                 parts.append("%s=%s" % (prop, val))
         return "DiskImageObject(" + ", ".join(parts) + ")"
 
-    def append(self, obj) -> None:
-        if isinstance(obj, PartitionSystemObject):
-            self.partition_systems.append(obj)
-        elif isinstance(obj, VolumeObject):
-            self.volumes.append(obj)
-        elif isinstance(obj, FileObject):
-            self.files.append(obj)
-        else:
-            raise ValueError("Unexpected object type passed to DiskImageObject.append(): %r." % type(obj))
-        self.child_objects.append(obj)
+    def append(
+      self,
+      value : AbstractChildObject
+    ) -> None:
+        _typecheck(value, (PartitionSystemObject, VolumeObject, FileObject))
+        if isinstance(value, PartitionSystemObject):
+            self.partition_systems.append(value)
+        elif isinstance(value, VolumeObject):
+            self.volumes.append(value)
+        elif isinstance(value, FileObject):
+            self.files.append(value)
+        super().append(value)
 
     def pop_poststream_elements(self, diskimage_element):
         """
@@ -1595,7 +1640,7 @@ class DiskImageObject(AbstractObject):
     @property
     def byte_runs(
       self
-    ) -> ByteRuns:
+    ) -> typing.Optional[ByteRuns]:
         return self._byte_runs
 
     @byte_runs.setter
@@ -1606,10 +1651,6 @@ class DiskImageObject(AbstractObject):
         if not val is None:
             _typecheck(val, ByteRuns)
         self._byte_runs = val
-
-    @property
-    def child_objects(self):
-        return self._child_objects
 
     @property
     def error(self):
@@ -1643,7 +1684,7 @@ class DiskImageObject(AbstractObject):
         return self._volumes
 
 
-class PartitionSystemObject(AbstractObject):
+class PartitionSystemObject(AbstractParentObject, AbstractChildObject):
 
     _all_properties = set([
       "block_size",
@@ -1658,14 +1699,13 @@ class PartitionSystemObject(AbstractObject):
       "volume_name"
     ])
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.externals = kwargs.get("externals", OtherNSElementList())
 
-        self._byte_runs = None
-        self._child_objects = []
+        self._byte_runs : typing.Optional[ByteRuns] = None
         self._error = None
-        self._files = []
-        self._partitions = []
+        self._files : typing.List[FileObject] = []
+        self._partitions : typing.List[PartitionObject] = []
         self._pstype_str = None
 
         #TODO Make @property methods once properties listed in DFXML schema.
@@ -1673,11 +1713,13 @@ class PartitionSystemObject(AbstractObject):
         self.guid = None
         self.volume_name = None # (This might only appear on Solaris disklabels that are directly nested in a partition.)
 
+        super().__init__(*args, **kwargs)
+
     def __iter__(self):
         """Recursively yields all child Objects in depth-first order."""
         for co in self.child_objects:
             yield co
-            if hasattr(co, "child_objects"):
+            if isinstance(co, AbstractParentObject):
                 for gco in co:
                     yield gco
 
@@ -1696,19 +1738,21 @@ class PartitionSystemObject(AbstractObject):
                 parts.append("%s=%s" % (prop, val))
         return "PartitionSystemObject(" + ", ".join(parts) + ")"
 
-    def append(self, obj) -> None:
+    def append(
+      self,
+      value : AbstractChildObject
+    ) -> None:
         """
         Note that files appended directly to a PartitionSystemObject are expected to be slack space discoveries.  A warning is raised if an allocated file is appended.
         """
-        if isinstance(obj, PartitionObject):
-            self.partitions.append(obj)
-        elif isinstance(obj, FileObject):
-            if obj.is_allocated():
+        _typecheck(value, (PartitionObject, FileObject))
+        if isinstance(value, PartitionObject):
+            self.partitions.append(value)
+        elif isinstance(value, FileObject):
+            if value.is_allocated():
                 warnings.warn("A partition system has had an 'allocated' file appended directly to it.  This list of files is expected to be slack space discoveries.")
-            self.files.append(obj)
-        else:
-            raise ValueError("Unexpected object type passed to PartitionSystemObject.append(): %r." % type(obj))
-        self.child_objects.append(obj)
+            self.files.append(value)
+        super().append(value)
 
     def populate_from_Element(self, e):
         global _warned_elements
@@ -1876,7 +1920,7 @@ class PartitionSystemObject(AbstractObject):
     @property
     def byte_runs(
       self
-    ) -> ByteRuns:
+    ) -> typing.Optional[ByteRuns]:
         return self._byte_runs
 
     @byte_runs.setter
@@ -1887,11 +1931,6 @@ class PartitionSystemObject(AbstractObject):
         if not val is None:
             _typecheck(val, ByteRuns)
         self._byte_runs = val
-
-    # No setter.
-    @property
-    def child_objects(self):
-        return self._child_objects
 
     @property
     def error(self):
@@ -1931,7 +1970,7 @@ class PartitionSystemObject(AbstractObject):
         self._pstype_str = _strcast(val)
 
 
-class PartitionObject(AbstractObject):
+class PartitionObject(AbstractParentObject, AbstractChildObject):
 
     _all_properties = set([
       "block_count",
@@ -1952,16 +1991,15 @@ class PartitionObject(AbstractObject):
       "volumes"
     ])
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.externals = kwargs.get("externals", OtherNSElementList())
 
-        self._byte_runs = None
-        self._child_objects = [] # For maintaining order of objects of different types.
-        self._files = []
+        self._byte_runs : typing.Optional[ByteRuns] = None
+        self._files : typing.List[FileObject] = []
         self._partition_index = None
-        self._partition_systems = []
-        self._partitions = []
-        self._volumes = []
+        self._partition_systems : typing.List[PartitionSystemObject] = []
+        self._partitions : typing.List[PartitionObject] = []
+        self._volumes : typing.List[VolumeObject] = []
         self._ptype = None
         self._ptype_str = None
 
@@ -1973,11 +2011,13 @@ class PartitionObject(AbstractObject):
         self.partition_label = None
         self.partition_system_offset = None # Unit: bytes.  Offset within partition system.  Could also be byte_run/@ps_offset, if that were defined in the ByteRun class.
 
+        super().__init__(*args, **kwargs)
+
     def __iter__(self):
         """Recursively yields all child Objects in depth-first order."""
         for co in self.child_objects:
             yield co
-            if hasattr(co, "child_objects"):
+            if isinstance(co, AbstractParentObject):
                 for gco in co:
                     yield gco
 
@@ -1998,23 +2038,25 @@ class PartitionObject(AbstractObject):
                 parts.append("%s=%s" % (prop, val))
         return "PartitionObject(" + ", ".join(parts) + ")"
 
-    def append(self, obj) -> None:
+    def append(
+      self,
+      value : AbstractChildObject
+    ) -> None:
         """
         Note that files appended directly to a PartitionObject are expected to be slack space discoveries.  A warning is raised if an allocated file is appended.
         """
-        if isinstance(obj, PartitionSystemObject):
-            self.partition_systems.append(obj)
-        elif isinstance(obj, PartitionObject):
-            self.partitions.append(obj)
-        elif isinstance(obj, VolumeObject):
-            self.volumes.append(obj)
-        elif isinstance(obj, FileObject):
-            if obj.is_allocated():
+        _typecheck(value, (PartitionSystemObject, PartitionObject, VolumeObject, FileObject))
+        if isinstance(value, PartitionSystemObject):
+            self.partition_systems.append(value)
+        elif isinstance(value, PartitionObject):
+            self.partitions.append(value)
+        elif isinstance(value, VolumeObject):
+            self.volumes.append(value)
+        elif isinstance(value, FileObject):
+            if value.is_allocated():
                 warnings.warn("A partition has had an 'allocated' file appended directly to it.  This list of files is expected to be slack space discoveries.")
-            self.files.append(obj)
-        else:
-            raise ValueError("Unexpected object type passed to PartitionObject.append(): %r." % type(obj))
-        self.child_objects.append(obj)
+            self.files.append(value)
+        super().append(value)
 
     def populate_from_Element(self, e):
         global _warned_elements
@@ -2151,7 +2193,7 @@ class PartitionObject(AbstractObject):
     @property
     def byte_runs(
       self
-    ) -> ByteRuns:
+    ) -> typing.Optional[ByteRuns]:
         return self._byte_runs
 
     @byte_runs.setter
@@ -2162,11 +2204,6 @@ class PartitionObject(AbstractObject):
         if not val is None:
             _typecheck(val, ByteRuns)
         self._byte_runs = val
-
-    # No setter.
-    @property
-    def child_objects(self):
-        return self._child_objects
 
     @property
     def externals(self):
@@ -2223,7 +2260,7 @@ class PartitionObject(AbstractObject):
         return self._volumes
 
 
-class VolumeObject(AbstractObject):
+class VolumeObject(AbstractParentObject, AbstractChildObject):
 
     _all_properties = set([
       "annos",
@@ -2260,14 +2297,13 @@ class VolumeObject(AbstractObject):
       "volumes"
     ])
 
-    def __init__(self, *args, **kwargs):
-        self._child_objects = []
-        self._disk_images = []
-        self._files = []
-        self._volumes = []
+    def __init__(self, *args, **kwargs) -> None:
+        self._disk_images : typing.List[DiskImageObject] = []
+        self._files : typing.List[FileObject] = []
+        self._volumes : typing.List[VolumeObject] = []
 
-        self._annos = set()
-        self._diffs = set()
+        self._annos : typing.Set[str] = set()
+        self._diffs : typing.Set[str] = set()
 
         for prop in VolumeObject._all_properties:
             if prop in {
@@ -2283,11 +2319,13 @@ class VolumeObject(AbstractObject):
             else:
                 setattr(self, prop, kwargs.get(prop))
 
+        super().__init__(*args, **kwargs)
+
     def __iter__(self):
         """Recursively yields all child Objects in depth-first order."""
         for co in self.child_objects:
             yield co
-            if hasattr(co, "child_objects"):
+            if isinstance(co, AbstractParentObject):
                 for gco in co:
                     yield gco
 
@@ -2309,15 +2347,16 @@ class VolumeObject(AbstractObject):
 
     def append(
       self,
-      value : typing.Union[DiskImageObject, FileObject, VolumeObject]
+      value : AbstractChildObject
     ) -> None:
+        _typecheck(value, (DiskImageObject, FileObject, VolumeObject))
         if isinstance(value, DiskImageObject):
             self.disk_images.append(value)
         elif isinstance(value, VolumeObject):
             self.volumes.append(value)
         elif isinstance(value, FileObject):
             self.files.append(value)
-        self.child_objects.append(value)
+        super().append(value)
 
     def compare_to_original(self) -> None:
         self._diffs = self.compare_to_other(self.original_volume, True)
@@ -2625,11 +2664,6 @@ class VolumeObject(AbstractObject):
             _typecheck(val, ByteRuns)
         self._byte_runs = val
 
-    # No setter.
-    @property
-    def child_objects(self):
-        return self._child_objects
-
     @property
     def diffs(self):
         return self._diffs
@@ -2732,7 +2766,7 @@ class VolumeObject(AbstractObject):
         return self._volumes
 
 
-class HiveObject(AbstractObject):
+class HiveObject(AbstractParentObject, AbstractChildObject):
 
     _all_properties = set([
       "annos",
@@ -2764,14 +2798,20 @@ class HiveObject(AbstractObject):
                 continue
             setattr(self, prop, kwargs.get(prop))
 
+        super().__init__(*args, **kwargs)
+
     def __iter__(self):
         """Yields all CellObjects directly attached to this HiveObject."""
         for c in self._cells:
             yield c
 
-    def append(self, value) -> None:
+    def append(
+      self,
+      value : AbstractChildObject
+    ) -> None:
         _typecheck(value, CellObject)
         self._cells.append(value)
+        super().append(value)
 
     def compare_to_original(self):
         self._diffs = self.compare_to_other(self.original_hive, True)
@@ -2919,6 +2959,8 @@ class TimestampObject(AbstractObject):
 
         self._timestamp = None
 
+        super().__init__(*args, **kwargs)
+
     def __eq__(self, other : object) -> bool:
         # Check type.
         if other is None:
@@ -3065,7 +3107,7 @@ class TimestampObject(AbstractObject):
         return self._timestamp
 
 
-class FileObject(AbstractObject):
+class FileObject(AbstractChildObject):
     """
     This class provides property accesses, an XML serializer (ElementTree-based), and a deserializer.
     The properties interface is NOT function calls, but simple accesses.  That is, the old _fileobject_ style:
@@ -3174,6 +3216,8 @@ class FileObject(AbstractObject):
                 setattr(self, prop, kwargs.get(prop))
         self._annos : typing.Set[str] = set()
         self._diffs : typing.Set[str] = set()
+
+        super().__init__(*args, **kwargs)
 
     def __eq__(self, other : object) -> bool:
         if other is None:
@@ -4149,13 +4193,16 @@ class OtherNSElementList(list):
         OtherNSElementList._check_qname(value.tag)
         super(OtherNSElementList, self).__setitem__(idx, value)
 
-    def append(self, value) -> None:
+    def append(
+      self,
+      value : ET.Element
+    ) -> None:
         _typecheck(value, ET.Element)
         OtherNSElementList._check_qname(value.tag)
         super(OtherNSElementList, self).append(value)
 
 
-class CellObject(AbstractObject):
+class CellObject(AbstractChildObject):
 
     _all_properties = set([
       "alloc",
@@ -4199,6 +4246,8 @@ class CellObject(AbstractObject):
                 setattr(self, prop, kwargs.get(prop))
 
         self._diffs = set()
+
+        super().__init__(*args, **kwargs)
 
     def __eq__(self, other : object) -> bool:
         if other is None:
@@ -5145,12 +5194,14 @@ def iterparse(
     if need_cleanup:
         fh.close()
 
-def parse(filename):
+def parse(
+  filename : str
+) -> DFXMLObject:
     """
     Returns a DFXMLObject populated from the contents of the (string) filename argument.
     Internally, this function uses iterparse().  One key operational difference is this function also appends child objects emitted by iterparse() to parent objects; iterparse() does not handle parent-child relationships.
     """
-    object_stack = []
+    object_stack : typing.List[AbstractParentObject] = []
 
     for (event, obj) in iterparse(filename):
         #_logger.debug("(event, type(obj)) = %r." % ((event, type(obj)),))
@@ -5187,7 +5238,12 @@ def parse(filename):
                 raise NotImplementedError("parse:Unexpected object type with end-event: %r." % type(obj))
 
     #_logger.debug("len(object_stack) = %d." % len(object_stack))
-    if len(object_stack) > 0:
-        return object_stack[0]
-    else:
-        return None
+    if len(object_stack) == 0:
+        raise ValueError("Failed to parse DFXML data from file: %r." % filename)
+
+    bottom_object = object_stack[0]
+    if not isinstance(bottom_object, DFXMLObject):
+        # TODO - There might be use cases that call for .parse() to handle files that contain, say, only a <fileobject> as its root.  This is left for future work, as there might be complexities with the schema.
+        raise NotImplementedError("The parse() function expects to operate on files with a root element of <dfxml>.")
+
+    return bottom_object
