@@ -25,7 +25,7 @@ import libtest
 
 _logger = logging.getLogger(os.path.basename(__file__))
 
-def test_empty_object():
+def test_empty_object() -> None:
     dobj = Objects.DFXMLObject(version="1.2.0")
     fobj = Objects.FileObject()
     dobj.append(fobj)

@@ -96,6 +96,7 @@ check-mypy-strict: \
 	    ../dfxml/bin/idifference2.py \
 	    ../dfxml/bin/make_differential_dfxml.py \
 	    ../dfxml/bin/walk_to_dfxml.py \
+	    ../dfxml/tests/FileObject_test.py \
 	    ../dfxml/tests/storage_layers_test.py
 
 clean:
