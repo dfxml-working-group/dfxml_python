@@ -82,9 +82,7 @@ def filepath_to_fileobject(
             name_type = "p"
         elif stat.S_ISSOCK(sobj.st_mode):
             name_type = "s"
-        elif stat.S_ISWHT(sobj.st_mode):  # type: ignore
-            #TODO - That ignore-type directive can be removed on mypy importing this typeshed update:
-            # https://github.com/python/typeshed/pull/5955
+        elif stat.S_ISWHT(sobj.st_mode):
             name_type = "w"
         else:
             raise NotImplementedError("No reporting check written for file type of %r." % filepath)
