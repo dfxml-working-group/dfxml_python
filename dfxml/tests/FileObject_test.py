@@ -25,10 +25,29 @@ import libtest
 
 _logger = logging.getLogger(os.path.basename(__file__))
 
-def test_empty_object() -> None:
+
+def test_empty_file_object() -> None:
     dobj = Objects.DFXMLObject(version="1.2.0")
     fobj = Objects.FileObject()
     dobj.append(fobj)
+
+    # Do file I/O round trip.
+    (tmp_filename, dobj_reconst) = libtest.file_round_trip_dfxmlobject(dobj)
+    try:
+        fobj_reconst = dobj_reconst.files[0]
+        assert fobj == fobj_reconst
+    except:
+        _logger.debug("tmp_filename = %r." % tmp_filename)
+        raise
+    os.remove(tmp_filename)
+
+
+def test_blank_file_object_filename() -> None:
+    dobj = Objects.DFXMLObject(version="1.2.0")
+    fobj = Objects.FileObject()
+    dobj.append(fobj)
+
+    fobj.filename = ""
 
     # Do file I/O round trip.
     (tmp_filename, dobj_reconst) = libtest.file_round_trip_dfxmlobject(dobj)
