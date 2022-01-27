@@ -3405,6 +3405,9 @@ class FileObject(AbstractChildObject, AbstractGeometricObject):
                 else:
                     self.byte_runs = ByteRuns()
                     self.byte_runs.populate_from_Element(ce)
+            elif ctn == "filename":
+                # If the filename element is present, its contents should be interpreted as non-null.  ce.text being null in this case implies a 0-length string, not absence of the filename property-value.
+                self.filename = ce.text or ""
             elif ctn == "hashdigest":
                 type_lower = ce.attrib["type"].lower()
                 if type_lower in FileObject._hash_properties:
