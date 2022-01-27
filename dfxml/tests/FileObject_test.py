@@ -34,6 +34,7 @@ def test_empty_object() -> None:
     (tmp_filename, dobj_reconst) = libtest.file_round_trip_dfxmlobject(dobj)
     try:
         fobj_reconst = dobj_reconst.files[0]
+        assert fobj == fobj_reconst
     except:
         _logger.debug("tmp_filename = %r." % tmp_filename)
         raise
