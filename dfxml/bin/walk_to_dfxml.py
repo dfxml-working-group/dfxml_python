@@ -38,7 +38,7 @@ import dfxml.objects as Objects
 _logger = logging.getLogger(os.path.basename(__file__))
 
 #Exclude md6 from hash list borrowed from Objects.py - hashlib doesn't support md6.
-walk_default_hashes : typing.Set[str] = Objects.FileObject._hash_properties - {"md6"}
+walk_default_hashes : typing.Set[str] = set(Objects.FileObject._hash_properties) - {"md6"}
 
 def filepath_to_fileobject(
   filepath : str,

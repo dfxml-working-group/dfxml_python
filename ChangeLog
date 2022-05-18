@@ -1,3 +1,7 @@
+2022-05-18    <alexander.nelson@nist.gov>
+
+	* objects.py: Removed order-randomness in property serializations
+
 2021-11-29    <alexander.nelson@nist.gov>
 
 	* objects.py: Add abstract base classes for parents, children, and geometric objects

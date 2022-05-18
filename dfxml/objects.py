@@ -855,7 +855,7 @@ class RegXMLObject(AbstractParentObject):
 
 class ByteRun(AbstractObject):
 
-    _class_properties = set([
+    _class_properties: typing.List[str] = [
       "img_offset",
       "fs_offset",
       "file_offset",
@@ -869,16 +869,16 @@ class ByteRun(AbstractObject):
       "sha512",
       "type",
       "uncompressed_len"
-    ])
+    ]
 
-    _hash_properties : typing.Set[str] = set([
+    _hash_properties : typing.List[str] = [
       "md5",
       "sha1",
       "sha224",
       "sha256",
       "sha384",
       "sha512"
-    ])
+    ]
 
     def __init__(self, *args, **kwargs) -> None:
         self._has_hash_property = False
@@ -1432,9 +1432,9 @@ class AbstractGeometricObject(AbstractObject):
     This class is an abstract superclass of all *Object classes that have a .byte_runs property.
     """
 
-    _class_properties = set([
+    _class_properties: typing.List[str] = [
       "byte_runs"
-    ])
+    ]
 
     def __init__(
       self,
@@ -1463,7 +1463,7 @@ class AbstractGeometricObject(AbstractObject):
 
 class DiskImageObject(AbstractParentObject, AbstractChildObject, AbstractGeometricObject):
 
-    _class_properties = set([
+    _class_properties: typing.List[str] = [
       "child_objects",
       "error",
       "externals",
@@ -1471,7 +1471,7 @@ class DiskImageObject(AbstractParentObject, AbstractChildObject, AbstractGeometr
       "partition_systems",
       "sector_size",
       "volumes"
-    ])
+    ]
 
     def __init__(self, *args, **kwargs) -> None:
         self.externals = kwargs.get("externals", OtherNSElementList())
@@ -1703,7 +1703,7 @@ class DiskImageObject(AbstractParentObject, AbstractChildObject, AbstractGeometr
 
 class PartitionSystemObject(AbstractParentObject, AbstractChildObject, AbstractGeometricObject):
 
-    _class_properties = set([
+    _class_properties: typing.List[str] = [
       "block_size",
       "child_objects",
       "error",
@@ -1713,7 +1713,7 @@ class PartitionSystemObject(AbstractParentObject, AbstractChildObject, AbstractG
       "partitions",
       "pstype_str",
       "volume_name"
-    ])
+    ]
 
     def __init__(self, *args, **kwargs) -> None:
         self.externals = kwargs.get("externals", OtherNSElementList())
@@ -1972,7 +1972,7 @@ class PartitionSystemObject(AbstractParentObject, AbstractChildObject, AbstractG
 
 class PartitionObject(AbstractParentObject, AbstractChildObject, AbstractGeometricObject):
 
-    _class_properties = set([
+    _class_properties: typing.List[str] = [
       "block_count",
       "block_size",
       "child_objects",
@@ -1988,7 +1988,7 @@ class PartitionObject(AbstractParentObject, AbstractChildObject, AbstractGeometr
       "ptype",
       "ptype_str",
       "volumes"
-    ])
+    ]
 
     def __init__(self, *args, **kwargs) -> None:
         self.externals = kwargs.get("externals", OtherNSElementList())
@@ -2245,7 +2245,7 @@ class PartitionObject(AbstractParentObject, AbstractChildObject, AbstractGeometr
 
 class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricObject):
 
-    _class_properties = set([
+    _class_properties: typing.List[str] = [
       "annos",
       "allocated_only",
       "block_count",
@@ -2263,7 +2263,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
       "original_volume",
       "sector_size",
       "volumes"
-    ])
+    ]
 
     _diff_attr_names = {
       "new":"delta:new_volume",
@@ -2735,13 +2735,13 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
 
 class HiveObject(AbstractParentObject, AbstractChildObject, AbstractGeometricObject):
 
-    _class_properties = set([
+    _class_properties: typing.List[str] = [
       "annos",
       "mtime",
       "filename",
       "original_fileobject",
       "original_hive"
-    ])
+    ]
     # No child_objects property.  (This implementation doesn't support Objects attached to cells.)
 
     _diff_attr_names = {
@@ -3088,7 +3088,7 @@ class FileObject(AbstractChildObject, AbstractGeometricObject):
         fi.mtime
     """
 
-    _class_properties = set([
+    _class_properties: typing.List[str] = [
       "alloc",
       "alloc_inode",
       "alloc_name",
@@ -3133,7 +3133,7 @@ class FileObject(AbstractChildObject, AbstractGeometricObject):
       "unused",
       "used",
       "volume_object"
-    ])
+    ]
 
     _br_facet_to_property = {
       "data":"data_brs",
@@ -3141,7 +3141,7 @@ class FileObject(AbstractChildObject, AbstractGeometricObject):
       "name":"name_brs"
     }
 
-    _hash_properties = {
+    _hash_properties: typing.List[str] = [
       "md5",
       "md6",
       "sha1",
@@ -3149,7 +3149,7 @@ class FileObject(AbstractChildObject, AbstractGeometricObject):
       "sha256",
       "sha384",
       "sha512"
-    }
+    ]
 
     #TODO There may be need in the future to compare the annotations as well.  It complicates make_differential_dfxml too much for now.
     _incomparable_properties = set([
@@ -4161,7 +4161,7 @@ class OtherNSElementList(list):
 
 class CellObject(AbstractChildObject, AbstractGeometricObject):
 
-    _class_properties = set([
+    _class_properties: typing.List[str] = [
       "alloc",
       "annos",
       "basename",
@@ -4176,7 +4176,7 @@ class CellObject(AbstractChildObject, AbstractGeometricObject):
       "original_cellobject",
       "parent_object",
       "root"
-    ])
+    ]
 
     _diff_attr_names = {
       "new":"delta:new_cell",
