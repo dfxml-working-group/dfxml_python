@@ -3490,8 +3490,9 @@ class FileObject(AbstractChildObject, AbstractGeometricObject):
                 self.ctime = s.st_ctime
 
         if not _should_ignore("crtime"):
-            if "st_birthtime" in dir(s):
-                self.crtime = s.st_birthtime
+            if sys.platform == "darwin":
+                if "st_birthtime" in dir(s):
+                    self.crtime = s.st_birthtime
 
     def to_Element(self):
         """Creates an ElementTree Element with elements in DFXML schema order."""
