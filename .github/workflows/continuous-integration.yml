@@ -31,7 +31,9 @@ jobs:
 
       - name:  Install xmllint on ubuntu
         if: runner.os == 'Linux'
-        run: sudo apt install libxml2-utils
+        run: |
+          sudo apt update
+          sudo apt install --yes libxml2-utils
 
       - name: Make check
         run: make check
