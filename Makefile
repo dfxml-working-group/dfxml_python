@@ -29,27 +29,15 @@ all:
 
 clean:
 	find . -name '*~' -exec rm {} \;
-	(cd tests;make clean)
-	(cd dfxml/bin;make clean)
-	(cd dfxml/tests;make clean)
+	$(MAKE) \
+	  --directory tests \
+	  clean
 
 check: .git_submodule_init.done.log
 	$(MAKE) \
 	  SHELL=$(SHELL) \
 	  --directory tests \
 	  check
-	source tests/venv/bin/activate \
-	  && mypy \
-	    dfxml/tests
-	source tests/venv/bin/activate \
-	  && pytest \
-	    --log-level=DEBUG \
-	    dfxml/tests
 
 check-tools:
-	(cd dfxml/bin;make check)
-	@echo performing checks currently in Travis
-
-check-core:
-	cd dfxml
-	PYTHONPATH=./bin python3 -m pytest dfxml
+	(cd tests/misc_object_tests;make check)
