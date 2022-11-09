@@ -25,6 +25,7 @@ This is the part of dfxml that is dependent on fiwalk.py
 
 import os
 import sys
+import typing
 
 sys.path.append( os.path.join(os.path.dirname(__file__), ".."))
 
@@ -99,7 +100,7 @@ def fiwalk_xml_version(filename=None):
     return p.get_version(filename)
 
 ################################################################
-def E01_glob(fn):
+def E01_glob(fn: str) -> typing.List[str]:
     import os.path
     """If the filename ends .E01, then glob it. Currently only handles E01 through EZZ"""
     ret = [fn]
@@ -124,7 +125,12 @@ def E01_glob(fn):
     return ret
 
 
-def fiwalk_xml_stream(imagefile=None,flags=0,fiwalk="fiwalk",fiwalk_args=""):
+def fiwalk_xml_stream(
+    imagefile: typing.BinaryIO,
+    flags=0,
+    fiwalk: str = "fiwalk",
+    fiwalk_args: str = ""
+) -> typing.BinaryIO:
     """ Returns an fiwalk XML stream given a disk image by running fiwalk."""
     if flags & ALLOC_ONLY: fiwalk_args += "-O"
     from subprocess import call,Popen,PIPE
@@ -136,6 +142,7 @@ def fiwalk_xml_stream(imagefile=None,flags=0,fiwalk="fiwalk",fiwalk_args=""):
     cmd = [fiwalk,'-x']
     if fiwalk_args: cmd += fiwalk_args.split()
     p = Popen(cmd + E01_glob(imagefile.name),stdout=PIPE)
+    assert isinstance(p.stdout, typing.BinaryIO), "Failed to open pipe to subprocess stdout."
     return p.stdout
 
 def fiwalk_using_sax(imagefile=None,xmlfile=None,fiwalk="fiwalk",flags=0,callback=None,fiwalk_args=""):

@@ -2,7 +2,7 @@ import sys
 import io
 from dfxml import fiwalk
 
-def writeDfxml(imageFile, outFile):
+def writeDfxml(imageFile: str, outFile: str) -> None:
     """Generate filesystem metadata for disk image and and write resulting dfxml to file"""
 
     # Analyse image file
@@ -14,7 +14,7 @@ def writeDfxml(imageFile, outFile):
     with io.open(outFile, "wb") as fOut:
         fOut.write(fwOut)
 
-def main():
+def main() -> None:
     if len(sys.argv) < 3:
         print("Usage: {} <imageFile> <outFile>".format(sys.argv[0]))
         exit(1)
