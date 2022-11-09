@@ -1,5 +1,3 @@
-import py.test
-
 from dfxml import *
 
 def check_equal(a,b,want=None):

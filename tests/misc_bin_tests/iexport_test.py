@@ -1,6 +1,5 @@
 import sys
 import os
-import py.test
 
 from dfxml.bin.iexport import *
 

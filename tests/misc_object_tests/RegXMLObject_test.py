@@ -19,10 +19,10 @@ import sys
 
 import dfxml.objects as Objects
 
-def test_all():
-    import diffing_CellObject_test
-    import diffing_HiveObject_test
+import diffing_CellObject_test
+import diffing_HiveObject_test
 
+def test_all():
     ro = Objects.RegXMLObject(version="0.2")
     ho = Objects.HiveObject()
     ho.append(diffing_CellObject_test.get_co())

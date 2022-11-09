@@ -1,0 +1,1 @@
+The tests in this directory needed to be moved to address a new behavior in a deployed static type checker.  The intent is to empty this directory, moving its tests to appropriate locations under `/tests`.
