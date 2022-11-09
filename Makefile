@@ -29,9 +29,9 @@ all:
 
 clean:
 	find . -name '*~' -exec rm {} \;
-	(cd tests;make clean)
-	(cd tests/misc_bin_tests;make clean)
-	(cd tests/misc_object_tests;make clean)
+	$(MAKE) \
+	  --directory tests \
+	  clean
 
 check: .git_submodule_init.done.log
 	$(MAKE) \
@@ -41,8 +41,3 @@ check: .git_submodule_init.done.log
 
 check-tools:
 	(cd tests/misc_object_tests;make check)
-	@echo performing checks currently in Travis
-
-check-core:
-	cd dfxml
-	PYTHONPATH=./bin python3 -m pytest dfxml

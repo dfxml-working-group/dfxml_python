@@ -101,6 +101,9 @@ check-mypy-strict: \
 
 clean:
 	@$(MAKE) \
+	  --directory misc_object_tests \
+	  clean
+	@$(MAKE) \
 	  --directory make_differential_dfxml \
 	  clean
 	@$(MAKE) \

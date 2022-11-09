@@ -13,84 +13,79 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
-SHELL = /bin/bash
-PICK_PYTHONS = ../../tests/_pick_pythons.sh
-SAMPLES_DIR=../../../samples
+# Bash selection is described in the top-level Makefile.
+ifeq ($(shell basename $(SHELL)),sh)
+SHELL := $(shell which /bin/bash 2>/dev/null || which /usr/local/bin/bash)
+endif
 
-PYTHON2 = python2.7
-PYTHON3 = $(shell source $(PICK_PYTHONS) ; echo $$PYTHON3)
+top_srcdir := $(shell cd ../.. ; pwd)
 
-OBJECTS=../objects.py
+PYTHON3 ?= python3
+
+OBJECTS := $(top_srcdir)/dfxml/objects.py
+
+SAMPLES_DIR := $(top_srcdir)/samples
+
+TOOLS_DIR := $(top_srcdir)/dfxml/bin
 
 all: \
   check
 
 .PHONY: \
-  check-diff_file_ignore-py2 \
   check-diff_file_ignore-py3 \
-  check-py2 \
-  check-py3 \
   check-versioned
 
 check: \
-  check-py3 \
-	./cat_partitions_test.sh \
-
-check-diff_file_ignore-py2: \
-  diff_file_ignore_sample-py2.dfxml \
-  diff_file_ignore_test.py
-	$(PYTHON2) diff_file_ignore_test.py --debug diff_file_ignore_sample-py2.dfxml
+  check-diff_file_ignore-py3 \
+  check-libraries-py3 \
+  check-versioned
+	source $(top_srcdir)/tests/venv/bin/activate \
+	  && $(PYTHON3) "$(TOOLS_DIR)/cat_partitions.py" \
+	    12345678:$(SAMPLES_DIR)/difference_test_0.xml \
+	    87654321:$(SAMPLES_DIR)/difference_test_1.xml \
+	    > __cat_patterns_test.sh.dfxml
+	xmllint \
+	  --format \
+	  __cat_patterns_test.sh.dfxml \
+	  > _cat_patterns_test.sh.dfxml
+	rm \
+	  __cat_patterns_test.sh.dfxml
+	mv \
+	  _cat_patterns_test.sh.dfxml \
+	  cat_patterns_test.sh.dfxml
 
 check-diff_file_ignore-py3: \
   diff_file_ignore_sample-py3.dfxml \
   diff_file_ignore_test.py
-	$(PYTHON3) diff_file_ignore_test.py --debug diff_file_ignore_sample-py3.dfxml
-
-check-libraries-py2:
-	$(PYTHON2) LibraryObject_write_test.py LibraryObject_py2_test.dfxml
-	$(PYTHON2) LibraryObject_read_test.py LibraryObject_py2_test.dfxml
+	source $(top_srcdir)/tests/venv/bin/activate \
+	  && $(PYTHON3) diff_file_ignore_test.py --debug diff_file_ignore_sample-py3.dfxml
 
 check-libraries-py3:
-	$(PYTHON3) LibraryObject_write_test.py LibraryObject_py3_test.dfxml
-	$(PYTHON3) LibraryObject_read_test.py LibraryObject_py3_test.dfxml
-
-check-py2:
-	$(MAKE) \
-	  PY=$(PYTHON2) \
-	  check-diff_file_ignore-py2 \
-	  check-libraries-py2 \
-	  check-versioned
-
-check-py3:
-	$(MAKE) \
-	  PY=$(PYTHON3) \
-	  check-diff_file_ignore-py3 \
-	  check-libraries-py3 \
-	  check-versioned
+	source $(top_srcdir)/tests/venv/bin/activate \
+	  && $(PYTHON3) LibraryObject_write_test.py LibraryObject_py3_test.dfxml
+	source $(top_srcdir)/tests/venv/bin/activate \
+	  && $(PYTHON3) LibraryObject_read_test.py LibraryObject_py3_test.dfxml
 
 check-versioned:
-	@echo Testing Python: $$PY >&2
-	$$PY $(OBJECTS)
-	$$PY DFXMLObject_program_test.py $(SAMPLES_DIR)/difference_test_0.xml vi 8.0
+	$(PYTHON3) $(OBJECTS)
+	source $(top_srcdir)/tests/venv/bin/activate \
+	  && $(PYTHON3) DFXMLObject_program_test.py \
+	    $(SAMPLES_DIR)/difference_test_0.xml \
+	    vi \
+	    8.0
 
 clean:
 	rm -f difference_counts_test.py-d*
 	rm -f cat_partitions_test.sh.dfxml
-	rm -f diff_file_ignore_sample-py[23].dfxml
-	rm -f LibraryObject_py[23]_test.dfxml
+	rm -f diff_file_ignore_sample-py3.dfxml
+	rm -f LibraryObject_py3_test.dfxml
 	rm -f *~
 
-
-diff_file_ignore_sample-py2.dfxml: \
-  $(OBJECTS) \
-  diff_file_ignore_sample_dfxml_test.py
-	rm -f _$@
-	$(PYTHON2) diff_file_ignore_sample_dfxml_test.py --debug _$@
-	mv _$@ $@
 
 diff_file_ignore_sample-py3.dfxml: \
   $(OBJECTS) \
   diff_file_ignore_sample_dfxml_test.py
 	rm -f _$@
-	$(PYTHON3) diff_file_ignore_sample_dfxml_test.py --debug _$@
+	source $(top_srcdir)/tests/venv/bin/activate \
+	  && $(PYTHON3) diff_file_ignore_sample_dfxml_test.py --debug _$@
 	mv _$@ $@
