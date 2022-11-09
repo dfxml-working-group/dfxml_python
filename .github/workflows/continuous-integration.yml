@@ -42,4 +42,4 @@ jobs:
         run: make check-tools
 
       - name: Test with pytest
-        run: PYTHONPATH=./bin pytest --cov=./ --cov-report=xml dfxml
+        run: pytest --cov=dfxml --cov-report=xml .
