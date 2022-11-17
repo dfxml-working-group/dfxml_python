@@ -1,10 +1,18 @@
+#! /usr/bin/env python3
+"""
+This demo shows how to invoke Fiwalk as a subprocess, taking a disk image as
+input. Fiwalk's dfxml XML output is sent to an in-memory buffer, which is then
+written to an output file. Note that this may fail for very large disk images
+if the required buffer size exceeds available RAM!
+"""
+
 import sys
 import io
 from dfxml import fiwalk
 
 def writeDfxml(imageFile: str, outFile: str) -> None:
-    """Generate filesystem metadata for disk image and and write resulting dfxml to file"""
-
+    """Generate filesystem metadata for disk image and and write resulting
+    dfxml to file"""
     # Analyse image file
     with open(imageFile, "rb") as ifs:
         fwOutBuffer = fiwalk.fiwalk_xml_stream(imagefile=ifs)
