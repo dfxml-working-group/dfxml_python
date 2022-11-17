@@ -81,6 +81,7 @@ check-mypy: \
 	    ../dfxml/bin/idifference.py \
 	    ../dfxml/bin/summarize_differential_dfxml.py \
 	    ../dfxml/__init__.py \
+	    ../dfxml/fiwalk.py \
 	    ../dfxml/objects.py \
 	    misc_bin_tests \
 	    misc_object_tests
@@ -92,6 +93,7 @@ check-mypy-strict: \
 	source venv/bin/activate \
 	  && mypy \
 	    --strict \
+	    ../demos/demo_fiwalk_diskimage.py \
 	    ../dfxml/bin/idifference2.py \
 	    ../dfxml/bin/make_differential_dfxml.py \
 	    ../dfxml/bin/walk_to_dfxml.py \
