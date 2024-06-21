@@ -157,7 +157,7 @@ def _read_differential_annotations(annodict, element, annoset):
             annoset.add(_d[an])
     #_logger.debug("annoset, after: %r." % annoset)
 
-def _qsplit(tagname):
+def _qsplit(tagname: str) -> typing.Tuple[typing.Optional[str], str]:
     """Requires string input.  Returns namespace and local tag name as a pair.  I could've sworn this was a basic implementation gimme, but ET.QName ain't it."""
     _typecheck(tagname, str)
     if tagname[0] == "{":
@@ -2369,7 +2369,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
                     diffs.add(prop)
         return diffs
 
-    def populate_from_Element(self, e):
+    def populate_from_Element(self, e: ET.Element) -> None:
         global _warned_elements
         _typecheck(e, (ET.Element, ET.ElementTree))
         #_logger.debug("e = %r" % e)
@@ -2412,13 +2412,14 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
                 #_logger.debug("getattr(self, %r) = %r" % (ctn, getattr(self, ctn)))
             elif cns not in [dfxml.XMLNS_DFXML, ""]:
                 # Put all non-DFXML-namespace elements into the externals list.
+                _logger.debug("ce.tag = %r.", ce.tag)
                 self.externals.append(ce)
             else:
                 if (cns, ctn, VolumeObject) not in _warned_elements:
                     _warned_elements.add((cns, ctn, VolumeObject))
                     _logger.warning("Unsure what to do with this element in a VolumeObject: %r" % ce)
 
-    def pop_poststream_elements(self, volume_element):
+    def pop_poststream_elements(self, volume_element: ET.Element) -> typing.List[ET.Element]:
         """
         This function is a utility function for the two whole-object serialization methods, print_dfxml (to string) and to_Element (to ET.Element).
 
@@ -2426,9 +2427,18 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
 
         Returns a list of child elements in DFXML Schema order.  List might be empty.
 
-        This subroutine implements a re-serialization implementation decision: elements in extension namespaces can appear at the beginning or end of the volume XML child list, per the DFXML Schema.  All of the externals are put into the beginning of the element in to_partial_Element.  Hence, error will be the last child.
+        This subroutine implements a re-serialization implementation decision: elements in extension namespaces can appear only at the end of the volume XML child list, per the DFXML Schema.  All of the externals are put into the end of the element in to_partial_Element.
         """
-        retval = []
+        retval: typing.List[ET.Element] = []
+
+        # Find all non-DFXML-namespaced elements by working from back of list of child elements, stopping when list is empty, or when a DFXML-namespaced element is encountered.
+        while len(volume_element) > 0:
+            if _qsplit(volume_element[-1].tag)[0] in [None, dfxml.XMLNS_DFXML, ""]:
+                break
+            else:
+                # (ET.Element does not have pop().)
+                retval.insert(0, volume_element[-1])
+                del(volume_element[-1])
 
         errorel = None
         if not (self.error is None or self.error == ""):
@@ -2438,12 +2448,8 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
                 # (ET.Element does not have pop().)
                 errorel = volume_element[-1]
                 del(volume_element[-1])
-            else:
-                # This branch of code should only be reached in unit testing, as it depends on the output of self.to_partial_Element.
-                if volume_element.find("error"):
-                    raise ValueError("Inconsistent serialization state: Partial volume XML element has an immediate child named 'error', but not as the last child as expected from the schema.")
         if not errorel is None:
-            retval.append(errorel)
+            retval.insert(0, errorel)
 
         return retval
 
@@ -2494,7 +2500,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
 
         output_fh.write("\n")
 
-    def to_Element(self):
+    def to_Element(self) -> ET.Element:
         outel = self.to_partial_Element()
 
         poststream_elements = self.pop_poststream_elements(outel)
@@ -2515,7 +2521,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
 
         return outel
 
-    def to_partial_Element(self):
+    def to_partial_Element(self) -> ET.Element:
         """Returns the volume element with its properties, except for the child fileobjects.  Properties are appended in DFXML schema order."""
         outel = ET.Element("volume")
 
@@ -2530,13 +2536,10 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
         if len(annos_whittle_set) > 0:
             _logger.warning("Failed to export some differential annotations: %r." % annos_whittle_set)
 
-        for e in self.externals:
-            outel.append(e)
-
         if self.byte_runs:
             outel.append(self.byte_runs.to_Element())
 
-        def _append_el(prop, value):
+        def _append_el(prop: str, value: typing.Any) -> None:
             tmpel = ET.Element(prop)
             _keep = False
             if not value is None:
@@ -2549,7 +2552,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
             if _keep:
                 outel.append(tmpel)
 
-        def _append_str(prop):
+        def _append_str(prop: str) -> None:
             value = getattr(self, prop)
             _append_el(prop, value)
 
@@ -2589,8 +2592,10 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
             outel.append(tmpel)
 
         # Output the error property (which will be popped and re-appended after the file list in to_Element).
-        # The error should come last because of the two spots extended elements can be placed; this is to simplify the file-listing VolumeObject.to_Element() method.
         _append_str("error")
+
+        for e in self.externals:
+            outel.append(e)
 
         if len(diffs_whittle_set) > 0:
             _logger.warning("Did not annotate all of the differing properties of this volume.  Remaining properties:  %r." % diffs_whittle_set)
@@ -2649,12 +2654,12 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
         self._error = _strcast(val)
 
     @property
-    def externals(self):
+    def externals(self) -> OtherNSElementList:
         """(This property behaves the same as FileObject.externals.)"""
         return self._externals
 
     @externals.setter
-    def externals(self, val):
+    def externals(self, val: OtherNSElementList) -> None:
         _typecheck(val, OtherNSElementList)
         self._externals = val
 
@@ -3427,7 +3432,7 @@ class FileObject(AbstractChildObject, AbstractGeometricObject):
                 getattr(self, ctn).populate_from_Element(ce)
             elif ctn in FileObject._class_properties:
                 setattr(self, ctn, ce.text)
-            elif cns not in [dfxml.XMLNS_DFXML, ""]:
+            elif cns not in [None, dfxml.XMLNS_DFXML, ""]:
                 # Put all non-DFXML-namespace elements into the externals list.
                 self.externals.append(ce)
             else:
