@@ -37,6 +37,11 @@ jobs:
           sudo apt update
           sudo apt install --yes libxml2-utils
 
+      - name: Pre-commit Checks
+        run: |
+          pip -q install pre-commit
+          pre-commit run --all-files
+
       - name: Make check
         run: make check
 
