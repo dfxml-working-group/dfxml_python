@@ -2,9 +2,11 @@
 #
 # sync corpus based on DFXML files
 
+from collections import defaultdict
+
 import dfxml
 import dfxml.fiwalk as fiwalk
-from collections import defaultdict
+
 
 class CorpusDB:
     def __init__(self):
@@ -28,8 +30,8 @@ class CorpusDB:
         
 
 if __name__=="__main__":
-    from optparse import OptionParser
     from copy import deepcopy
+    from optparse import OptionParser
 
     parser = OptionParser()
     (options,args) = parser.parse_args()

@@ -2,20 +2,19 @@
 #
 # dfxml_gen.py: Generate DFXML
 #
-import sys
-import os
-import time
+import atexit
+import datetime
+import logging
 import os
 import pwd
-import sys
-import datetime
 import subprocess
+import sys
+import time
 import xml.etree.ElementTree as ET
 import xml.parsers.expat
+
 import __main__
-import atexit
 import psutil
-import logging
 
 __version__="0.1"
 
@@ -165,7 +164,7 @@ class DFXMLWriter:
             entities[chr(ch)] = "\\%03o" % ch
 
 
-        from xml.sax.saxutils import quoteattr,escape
+        from xml.sax.saxutils import escape, quoteattr
         for (name,value) in os.environ.items():
             ET.SubElement(env, 'var', {'name':escape(name,entities), 'value':escape(value,entities)})
 
@@ -277,10 +276,10 @@ class DFXMLWriter:
     def add_spark(self,node):
         """Connect to SPARK on local host and dump information.
         Uses requests. Note: disables HTTPS certificate warnings."""
-        import os
         import json
-        from   urllib.request import urlopen
+        import os
         import ssl
+        from urllib.request import urlopen
         if "SPARK_ENV_LOADED" not in os.environ:
             return        # no Spark
 
@@ -350,7 +349,7 @@ class DFXMLWriter:
         self.timestamp("done")
 
 if __name__=="__main__":
-    from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+    from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
     arg_parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter,
                                 description="""Demo program. Run DFXML for this program and print the results.
                                 If you run it on a system with SPARK, you get the spark DFXML too!""")

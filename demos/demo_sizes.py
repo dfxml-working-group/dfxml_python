@@ -4,10 +4,10 @@
 # Demo program that shows how to calculate the average size of file objects in a DFXML file
 #
 
-import math
-import sys
-import os
 import collections
+import math
+import os
+import sys
 
 sys.path.append( os.path.join(os.path.dirname(__file__), ".."))
 import dfxml

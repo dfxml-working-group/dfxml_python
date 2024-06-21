@@ -1,9 +1,12 @@
 #
 # Using two XML files make the current system look like the master
 #
-from filesdb import filesdb
-import dfxml
 import sys
+
+from filesdb import filesdb
+
+import dfxml
+
 #
 # test program. Reads a database and dumps it.
 #

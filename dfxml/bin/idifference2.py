@@ -19,15 +19,15 @@ DEVELOPMENT NOTE: This implementation will soon be replaced by what is currently
 
 __version__ = "2.0.0alpha2"
 
-import sys
 import logging
 import os
+import sys
 
 _logger = logging.getLogger(os.path.basename(__file__))
 
-import dfxml.objects as Objects
 import dfxml.bin.make_differential_dfxml
 import dfxml.bin.summarize_differential_dfxml
+import dfxml.objects as Objects
 
 INCLUDE_DOTDIRS = False
 

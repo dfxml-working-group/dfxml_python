@@ -13,11 +13,12 @@ Process:
    - For all of the sectors not used in the final version, note which sectors of the original files survive.
 """
 
-import dfxml
-import dfxml.fiwalk as fiwalk
 import sys
 import xml.dom.minidom
 from xml.dom.minidom import parseString
+
+import dfxml
+import dfxml.fiwalk as fiwalk
 
 # http://wiki.python.org/moin/MiniDom
 
@@ -107,8 +108,8 @@ def sector_from_file(imagefile,sector_number,sectorsize = 512):
     return imagefile.read(sectorsize)
 
 if __name__=="__main__":
-    from optparse import OptionParser
     from copy import deepcopy
+    from optparse import OptionParser
 
     parser = OptionParser()
     parser.usage = '%prog [options] [mapfile1.iso mapfile2.iso ...] masterfile.iso'

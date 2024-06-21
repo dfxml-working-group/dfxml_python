@@ -6,9 +6,11 @@ written to an output file. Note that this may fail for very large disk images
 if the required buffer size exceeds available RAM!
 """
 
-import sys
 import io
+import sys
+
 from dfxml import fiwalk
+
 
 def writeDfxml(imageFile: str, outFile: str) -> None:
     """Generate filesystem metadata for disk image and and write resulting

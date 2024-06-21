@@ -17,10 +17,11 @@ __version__ = "0.1.1"
 import os
 import sys
 
-import dfxml.objects as Objects
-
 import diffing_CellObject_test
 import diffing_HiveObject_test
+
+import dfxml.objects as Objects
+
 
 def test_all():
     ro = Objects.RegXMLObject(version="0.2")

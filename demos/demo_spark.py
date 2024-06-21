@@ -4,17 +4,18 @@
 # This program runs spark if it is not already running
 
 
-import sys
 import os
+import sys
 
 sys.path.append("../python")
 from dfxml_writer import DFXMLWriter
 
+
 def spark_demo():
     """A small spark program. Must be run under spark"""
-    from pyspark import SparkConf
-    from pyspark import SparkContext
     import operator
+
+    from pyspark import SparkConf, SparkContext
 
     conf = SparkConf()
     sc   = SparkContext(conf=conf)

@@ -1,13 +1,12 @@
 #!/usr/bin/python                                                                                                     
-import fiwalk
-import time
-
 import os
 import sys
+import time
+
+import fiwalk
 
 sys.path.append( os.path.join(os.path.dirname(__file__), ".."))
 import dfxml
-
 
 if __name__=="__main__":
     import sys

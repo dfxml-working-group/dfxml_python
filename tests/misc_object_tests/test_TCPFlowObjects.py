@@ -18,9 +18,10 @@ import sys
 
 import pytest
 
-import dfxml.objects as Objects
 #TODO - It seems TCPFlowObjects might be better served from /dfxml instead of /dfxml/bin.
 import dfxml.bin.TCPFlowObjects
+import dfxml.objects as Objects
+
 
 @pytest.fixture
 def top_srcdir() -> pathlib.Path:

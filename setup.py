@@ -15,4 +15,5 @@
 # We would appreciate acknowledgement if the software is used.
 
 import setuptools
+
 setuptools.setup()

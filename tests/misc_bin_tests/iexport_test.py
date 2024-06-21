@@ -1,7 +1,8 @@
-import sys
 import os
+import sys
 
 from dfxml.bin.iexport import *
+
 
 def test_iexport():
     r1 = Run(0,1000)

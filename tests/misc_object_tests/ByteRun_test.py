@@ -15,15 +15,15 @@
 
 __version__ = "0.2.0"
 
+import copy
+import hashlib
+import logging
 import os
 import sys
-import copy
-import logging
-import hashlib
-
-import dfxml.objects as Objects
 
 import libtest
+
+import dfxml.objects as Objects
 
 _logger = logging.getLogger(os.path.basename(__file__))
 

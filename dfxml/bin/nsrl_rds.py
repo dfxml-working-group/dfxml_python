@@ -7,7 +7,6 @@ RDS_SERVER = "https://domex.nps.edu/www-noauth/nsrl_rds.cgi"
 
 import xmlrpclib
 
-
 if __name__=="__main__":
     print("Demonstration of NSRL RDS service at %s\n" % RDS_SERVER)
     print("")

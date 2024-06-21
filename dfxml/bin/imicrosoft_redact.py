@@ -9,8 +9,9 @@ characters in the first 4096 bytes of the executable that are over hex 80 to
 hex FF
 """
 
-import os.path,sys
-from subprocess import Popen,call,PIPE
+import os.path
+import sys
+from subprocess import PIPE, Popen, call
 
 sys.path.append(os.getenv("DOMEX_HOME") + "/src/lib/") # add the library
 sys.path.append(os.getenv("DOMEX_HOME") + "/src/fiwalk/python/") # add the library
@@ -96,9 +97,10 @@ def redact(fi):
 
 
 if __name__=="__main__":
-    import sys,time
+    import sys
+    import time
     from optparse import OptionParser
-    from subprocess import Popen,PIPE
+    from subprocess import PIPE, Popen
     global options,xml_out
     from glob import glob
 

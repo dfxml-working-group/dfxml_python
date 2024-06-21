@@ -14,11 +14,12 @@
 
 __version__ = "0.1.1"
 
-import sys
 import logging
 import os
+import sys
 
 import dfxml.objects as Objects
+
 
 def test_all():
 

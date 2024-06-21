@@ -9,10 +9,11 @@ import os
 import sys
 
 sys.path.append( os.path.join(os.path.dirname(__file__), ".."))
+import collections
+import math
+import sys
+
 import dfxml
-
-
-import math,sys,collections
 
 
 class SectorCorrelator:

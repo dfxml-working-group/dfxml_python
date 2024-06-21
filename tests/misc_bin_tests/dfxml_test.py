@@ -1,5 +1,6 @@
 from dfxml import *
 
+
 def check_equal(a,b,want=None):
     da = dftime(a)
     db = dftime(b)

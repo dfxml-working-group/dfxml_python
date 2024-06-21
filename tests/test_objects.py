@@ -21,6 +21,7 @@ import pytest
 
 import dfxml.objects as Objects
 
+
 def test_AbstractHierarchyObject_append() -> None:
     """
     This test confirms expected append() behaviors, in lieu of static type checking enforcement.

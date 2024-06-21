@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 
-import zipfile,sys,os,os.path,datetime
+import datetime
+import os
+import os.path
+import sys
+import zipfile
 
 import dfxml
 import dfxml.fiwalk as fiwalk

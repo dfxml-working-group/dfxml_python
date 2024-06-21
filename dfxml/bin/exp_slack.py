@@ -6,11 +6,12 @@
 # (c) Martin Mulazzani, 2012
 # Additions by Simson Garfinkel
 
-import re
 import os
+import re
 import sys
 
 import dfxml.fiwalk as fiwalk
+
 
 def proc(fi):
     # Skip the virtual files?

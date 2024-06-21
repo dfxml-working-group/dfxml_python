@@ -19,6 +19,7 @@ import sys
 
 import dfxml.objects as Objects
 
+
 def test_all():
     fa1 = Objects.FileObject()
     fa1.alloc = True
