@@ -22,7 +22,7 @@ With this module, reading disk images or DFXML files is done with the parse or i
 # Further explanation is on PEPs 484 and 563, via: https://stackoverflow.com/a/33533514
 from __future__ import annotations
 
-__version__ = "0.12.0"
+__version__ = "0.13.0"
 
 # Revision Log
 # 2018-07-22 @simsong - removed calls to logging, since this module shouldn't create log files.
@@ -32,7 +32,7 @@ __version__ = "0.12.0"
 # Remaining roadmap to 1.0.0:
 # * Documentation.
 # * User testing.
-# * Compatibility with the DFXML schema, version >1.1.1.
+# * Compatibility with the DFXML schema, version >=2.0.0.
 
 import abc
 import logging
