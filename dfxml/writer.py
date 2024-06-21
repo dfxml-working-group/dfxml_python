@@ -17,7 +17,7 @@ import atexit
 import psutil
 import logging
 
-__version__="0.1"
+__version__="0.2.0"
 
 ###
 ### Code for working with Apache Spark
@@ -85,7 +85,7 @@ class DFXMLWriter:
         """
         self.t0 = time.time()
         self.tlast = time.time()
-        self.doc = ET.Element('dfxml')
+        self.doc = ET.Element('dfxml', {'version':'2.0.0-beta.0'})
         self.add_DFXML_creator(self.doc)
         self.filename = filename
         self.timers = {}
@@ -123,7 +123,7 @@ class DFXMLWriter:
 
     def add_DFXML_creator(self,e):
         import __main__
-        ee = ET.SubElement(e, 'creator', {'version':'1.0'})
+        ee = ET.SubElement(e, 'creator')
         try:
             ET.SubElement(ee, 'program').text    = str(__main__.__file__)
         except AttributeError as e:

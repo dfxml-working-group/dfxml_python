@@ -29,7 +29,7 @@ ERROR_1 = "Error 1"
 ERROR_2 = "Error 2"
 
 def test_empty_object():
-    dobj = Objects.DFXMLObject(version="1.2.0")
+    dobj = Objects.DFXMLObject(version="2.0.0-beta.0")
     diobj = Objects.DiskImageObject()
     dobj.append(diobj)
 
@@ -43,7 +43,7 @@ def test_empty_object():
     os.remove(tmp_filename)
 
 def test_sector_size():
-    dobj = Objects.DFXMLObject(version="1.2.0")
+    dobj = Objects.DFXMLObject(version="2.0.0-beta.0")
     diobj = Objects.DiskImageObject()
     dobj.append(diobj)
 
@@ -61,8 +61,7 @@ def test_sector_size():
     os.remove(tmp_filename)
 
 def test_error():
-    #TODO Bump version when feature branch merged into schema.
-    dobj = Objects.DFXMLObject(version="1.2.0+")
+    dobj = Objects.DFXMLObject(version="2.0.0-beta.0")
     diobj = Objects.DiskImageObject()
     dobj.append(diobj)
 
@@ -79,35 +78,30 @@ def test_error():
     os.remove(tmp_filename)
 
 def test_error_after_partition_system():
-    #TODO Bump version when feature branch merged into schema.
-    dobj = Objects.DFXMLObject(version="1.2.0+")
+    dobj = Objects.DFXMLObject(version="2.0.0-beta.0")
     diobj = Objects.DiskImageObject()
     dobj.append(diobj)
 
     diobj.error = ERROR_1
 
     psobj = Objects.PartitionSystemObject()
-    #TODO This should be uncommented after the branch add_partition_system_error is merged.
-    #psobj.error = ERROR_2
+    psobj.error = ERROR_2
     diobj.append(psobj)
 
     # Do file I/O round trip.
     (tmp_filename, dobj_reconst) = libtest.file_round_trip_dfxmlobject(dobj)
     try:
         diobj_reconst = dobj_reconst.disk_images[0]
-        #TODO This should be uncommented after the branch add_partition_system_error is merged.
-        #psobj_reconst = diobj_reconst.partitionsystems[0]
+        psobj_reconst = diobj_reconst.partition_systems[0]
         assert diobj_reconst.error == ERROR_1
-        #TODO This should be uncommented after the branch add_partition_system_error is merged.
-        #assert psobj_reconst.error == ERROR_2
+        assert psobj_reconst.error == ERROR_2
     except:
         _logger.debug("tmp_filename = %r." % tmp_filename)
         raise
     os.remove(tmp_filename)
 
 def test_error_after_file_system():
-    #TODO Bump version when feature branch merged into schema.
-    dobj = Objects.DFXMLObject(version="1.2.0+")
+    dobj = Objects.DFXMLObject(version="2.0.0-beta.0")
     diobj = Objects.DiskImageObject()
     dobj.append(diobj)
 
@@ -131,7 +125,7 @@ def test_error_after_file_system():
 
 def test_error_after_file():
     #TODO Bump version when feature branch merged into schema.
-    dobj = Objects.DFXMLObject(version="1.2.0+")
+    dobj = Objects.DFXMLObject(version="2.0.0-beta.0")
     diobj = Objects.DiskImageObject()
     dobj.append(diobj)
 

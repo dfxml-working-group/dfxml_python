@@ -31,7 +31,7 @@ Process:
 4. Replace the old maps with the new maps
 """
 
-__version__ = "0.2.0rfc6"
+__version__ = "0.3.0rfc7"
 
 import copy
 import logging
@@ -376,7 +376,7 @@ class DiskState:
         xmlfile.write("""\
 <?xml version="1.0" encoding="UTF-8"?>
 <dfxml
-  version="1.0"
+  version="2.0.0-beta.0"
   xmlns='%(XMLNS_DFXML)s'
   xmlns:dc='http://purl.org/dc/elements/1.1/'
   xmlns:delta='%(XMLNS_DELTA)s'

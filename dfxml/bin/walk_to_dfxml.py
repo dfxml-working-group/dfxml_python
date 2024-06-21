@@ -19,7 +19,7 @@ walk_to_dfxml
 Walk current directory, writing DFXML to stdout.
 """
 
-__version__ = "0.4.4"
+__version__ = "0.5.0"
 
 import argparse
 import collections
@@ -210,7 +210,7 @@ def main() -> None:
             using_threading = False
             _logger.warning("Python queue support not available.  (If running Ubuntu, this is in package python3-queuelib.)  Running in single thread only.")
 
-    dobj = Objects.DFXMLObject(version="1.2.0")
+    dobj = Objects.DFXMLObject(version="2.0.0-beta.0")
     dobj.program = sys.argv[0]
     dobj.program_version = __version__
     dobj.command_line = " ".join(sys.argv)

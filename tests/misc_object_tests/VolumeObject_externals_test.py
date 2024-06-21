@@ -101,7 +101,7 @@ def test_externals():
 
 def test_prefixed_externals_round_trip():
     _logger = logging.getLogger(os.path.basename(__file__))
-    dobj = Objects.DFXMLObject(version="1.2.0")
+    dobj = Objects.DFXMLObject(version="2.0.0-beta.0")
     vobj = Objects.VolumeObject()
     dobj.append(vobj)
 

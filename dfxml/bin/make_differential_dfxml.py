@@ -22,7 +22,7 @@ Produces a differential DFXML file as output.
 This program's main purpose is matching files correctly.  It only performs enough analysis to determine that a fileobject has changed at all.  (This is half of the work done by idifference.py.)
 """
 
-__version__ = "0.12.4"
+__version__ = "0.13.0"
 
 import argparse
 import collections
@@ -103,7 +103,7 @@ def make_differential_dfxml(
     _logger.debug("diff_mask_set = " + repr(diff_mask_set))
 
     #d: The container DFXMLObject, ultimately returned.
-    d = Objects.DFXMLObject(version="1.2.0")
+    d = Objects.DFXMLObject(version="2.0.0-beta.0")
     if sys.argv[0] == os.path.basename(__file__):
         d.program = sys.argv[0]
         d.program_version = __version__
