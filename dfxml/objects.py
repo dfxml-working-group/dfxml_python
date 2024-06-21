@@ -2412,7 +2412,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
                 #_logger.debug("getattr(self, %r) = %r" % (ctn, getattr(self, ctn)))
             elif cns not in [dfxml.XMLNS_DFXML, ""]:
                 # Put all non-DFXML-namespace elements into the externals list.
-                _logger.debug("ce.tag = %r.", ce.tag)
+                # _logger.debug("ce.tag = %r.", ce.tag)
                 self.externals.append(ce)
             else:
                 if (cns, ctn, VolumeObject) not in _warned_elements:
