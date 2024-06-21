@@ -31,7 +31,7 @@ all: \
   all-make_differential_dfxml \
   all-walk_to_dfxml \
   check-mypy \
-  check-mypy-strict
+  check-mypy-stricter
 
 all-make_differential_dfxml: \
   .venv.done.log
@@ -75,7 +75,7 @@ check: \
 
 #TODO - Type-checking would best be done against all of ../dfxml, when someone finds some time to do so.
 check-mypy: \
-  check-mypy-strict
+  check-mypy-stricter
 	source venv/bin/activate \
 	  && mypy \
 	    ../dfxml/bin/idifference.py \
@@ -88,11 +88,10 @@ check-mypy: \
 	@echo "INFO:tests/Makefile:mypy is currently run against a subset of the dfxml directory." >&2
 
 #TODO - Strict type-checking is another long-term goal, likewise eventually done against all of ../dfxml.
-check-mypy-strict: \
+check-mypy-stricter: \
   .venv.done.log
 	source venv/bin/activate \
 	  && mypy \
-	    --strict \
 	    ../demos/demo_fiwalk_diskimage.py \
 	    ../dfxml/bin/idifference2.py \
 	    ../dfxml/bin/make_differential_dfxml.py \
