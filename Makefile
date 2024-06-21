@@ -20,6 +20,10 @@ endif
 
 all:
 
+.PHONY: \
+  check-mypy \
+  check-supply-chain
+
 .git_submodule_init.done.log: .gitmodules
 	# Confirm dfxml_schema has been checked out at least once.
 	test -r dependencies/dfxml_schema/dfxml.xsd \
@@ -33,11 +37,22 @@ clean:
 	  --directory tests \
 	  clean
 
-check: .git_submodule_init.done.log
+check: \
+  check-mypy 
 	$(MAKE) \
 	  SHELL=$(SHELL) \
 	  --directory tests \
 	  check
+
+check-mypy: \
+  .git_submodule_init.done.log
+	$(MAKE) \
+	  SHELL=$(SHELL) \
+	  --directory tests \
+	  check-mypy
+
+check-supply-chain: \
+  check-mypy
 
 check-tools:
 	(cd tests/misc_object_tests;make check)
