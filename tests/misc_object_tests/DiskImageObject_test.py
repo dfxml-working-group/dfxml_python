@@ -15,13 +15,13 @@
 
 __version__ = "0.3.1"
 
+import logging
 import os
 import sys
-import logging
-
-import dfxml.objects as Objects
 
 import libtest
+
+import dfxml.objects as Objects
 
 _logger = logging.getLogger(os.path.basename(__file__))
 

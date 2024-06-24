@@ -29,9 +29,11 @@ import typing
 
 sys.path.append( os.path.join(os.path.dirname(__file__), ".."))
 
-import dfxml
+from subprocess import PIPE, Popen
 from sys import stderr
-from subprocess import Popen,PIPE
+
+import dfxml
+
 ALLOC_ONLY = 1
 
 fiwalk_cached_installed_version = None
@@ -40,8 +42,8 @@ def fiwalk_installed_version(fiwalk='fiwalk'):
     global fiwalk_cached_installed_version
     if fiwalk_cached_installed_version:
         return fiwalk_cached_installed_version
-    from subprocess import Popen,PIPE
     import re
+    from subprocess import PIPE, Popen
     for line in Popen([fiwalk,'-V'],stdout=PIPE).stdout.read().decode('utf-8').split("\n"):
         g = re.search("^FIWalk Version:\s+(.*)$",line)
         if g:
@@ -133,7 +135,8 @@ def fiwalk_xml_stream(
 ) -> typing.BinaryIO:
     """ Returns an fiwalk XML stream given a disk image by running fiwalk."""
     if flags & ALLOC_ONLY: fiwalk_args += "-O"
-    from subprocess import call,Popen,PIPE
+    from subprocess import PIPE, Popen, call
+
     # Make sure we have a valid fiwalk
     try:
         res = Popen([fiwalk,'-V'],stdout=PIPE).communicate()[0]

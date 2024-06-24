@@ -4,8 +4,9 @@ mem_info.py: report the memory used by a program that wrote results to a dfxml f
 """
 
 
-import xml.etree.ElementTree as ET
 import sys
+import xml.etree.ElementTree as ET
+
 
 def fmt(n):
     if args.h:
@@ -31,7 +32,7 @@ def process_dfxml(dfxml):
 
 
 if __name__=="__main__":
-    from argparse import ArgumentParser,ArgumentDefaultsHelpFormatter
+    from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
     parser = ArgumentParser( formatter_class = ArgumentDefaultsHelpFormatter,
                              description="report memory utilization from DFXML file" ) 
     parser.add_argument("--h", help="human format", action='store_true')

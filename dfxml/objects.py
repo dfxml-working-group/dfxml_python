@@ -35,23 +35,22 @@ __version__ = "0.13.0"
 # * Compatibility with the DFXML schema, version >=2.0.0.
 
 import abc
-import logging
-import re
 import copy
-import xml.etree.ElementTree as ET
-import subprocess
+import logging
 import os
-import sys
-import struct
 import platform
+import re
+import struct
+import subprocess
+import sys
 import typing
 import warnings
+import xml.etree.ElementTree as ET
 
 # The following allows us to import the dfxml module as dfxml
 # There may be a cleaner way to do this.
 sys.path.append( os.path.dirname(__file__) + "/..")
 import dfxml  # type: ignore
-
 
 _logger = logging.getLogger(os.path.basename(__file__))
 

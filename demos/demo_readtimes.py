@@ -1,15 +1,15 @@
 #!/usr/bin/python
 """Reads an fiwalk XML file and reports how many of the files are still in the image..."""
 
-import sys,os
-
 import os
 import sys
 
 sys.path.append( os.path.join(os.path.dirname(__file__), ".."))
+import time
+
 import dfxml
 import dfxml.fiwalk as fiwalk
-import time
+
 
 def calc_jumps(fis,title):
     print(title)
@@ -39,7 +39,7 @@ def calc_jumps(fis,title):
 if __name__=="__main__":
     import sys
     from optparse import OptionParser
-    from subprocess import Popen,PIPE
+    from subprocess import PIPE, Popen
     global options
 
     parser = OptionParser()

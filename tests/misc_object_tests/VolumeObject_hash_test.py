@@ -15,11 +15,12 @@
 
 __version__ = "0.1.1"
 
-import os
 import logging
+import os
 import sys
 
 import dfxml.objects as Objects
+
 
 def test_all():
     logging.basicConfig(level=logging.DEBUG)

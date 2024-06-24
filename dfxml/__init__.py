@@ -45,15 +45,14 @@ where encoding, if present, is 0 for raw, 1 for NTFS compressed.
 
 __version__ = "1.0.2"
 
-import sys
-import re
-from sys import stderr
-from subprocess import Popen,PIPE
 import base64
+import datetime
 import hashlib
 import os
-
-import datetime
+import re
+import sys
+from subprocess import PIPE, Popen
+from sys import stderr
 
 #slg: removed this, because the dfxml module shouldn't define a logger.
 #I don't even think that objects should define a logger...
@@ -90,7 +89,9 @@ def timestamp2iso8601(ts):
     import time
     return time.strftime("%FT%TZ",time.gmtime(ts))
 
-from datetime import tzinfo,timedelta
+from datetime import timedelta, tzinfo
+
+
 class GMTMIN(tzinfo):
     def __init__(self,minoffset):         # DST starts last Sunday in March
         self.minoffset = minoffset
@@ -417,6 +418,7 @@ class dftime(ComparableMixin):
     
     def timestamp(self):
         import time
+
         # Do we have a cached representation?
         try:
             return self.timestamp_
@@ -434,6 +436,7 @@ class dftime(ComparableMixin):
         
     def datetime(self):
         import datetime
+
         # return the datetime from parsing either iso8601 or from parsing timestamp
         try:
             self.datetime_ = self.ts2datetime(self.timestamp_)

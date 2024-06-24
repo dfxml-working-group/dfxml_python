@@ -1,8 +1,10 @@
-import sys,os.path
+import os.path
+import sys
 from optparse import OptionParser
 from sys import stdout
- 
+
 import dfxml.fiwalk as fiwalk
+
 
 def demo_dfxml_time_bug(filename):
     parser = OptionParser()

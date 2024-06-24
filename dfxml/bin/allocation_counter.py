@@ -22,14 +22,14 @@ __version__ = "0.1.1"
 # * Tabular output in HTML
 # * Tabular output in LaTeX
 
-import dfxml.objects as Objects
-import dfxml.bin.make_differential_dfxml
-
 import collections
 import logging
+import os
 import sys
 import xml.etree.ElementTree as ET
-import os
+
+import dfxml.bin.make_differential_dfxml
+import dfxml.objects as Objects
 
 _logger = logging.getLogger(os.path.basename(__file__))
 

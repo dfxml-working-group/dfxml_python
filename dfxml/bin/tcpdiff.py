@@ -23,13 +23,16 @@ Process:
 
 """
 
-import sys,time
+import sys
+import time
+
 if sys.version_info < (3,1):
     raise RuntimeError("rdifference.py requires Python 3.1 or above")
 
 import dfxml
-import dfxml.fiwalk as fiwalk
 import dfxml.dfxml_html as dfxml_html
+import dfxml.fiwalk as fiwalk
+
 
 def ptime(t):
     """Print the time in the requested format. T is a dfxml time value"""
@@ -72,8 +75,8 @@ class FlowState:
         dfxml_html.table(['Total Connections',str(len(self.connections))])
 
 if __name__=="__main__":
-    from optparse import OptionParser
     from copy import deepcopy
+    from optparse import OptionParser
     global options
 
     parser = OptionParser()

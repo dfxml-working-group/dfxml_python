@@ -2,15 +2,18 @@
 """Draw a quick histogram of the timestamps on the hard drive"""
 
 import matplotlib
+
 matplotlib.use('agg.pdf')
 
 
-import dfxml.fiwalk as fiwalk
 import datetime
-from matplotlib.dates import MonthLocator, WeekdayLocator, DateFormatter
-from matplotlib.dates import MONDAY,SATURDAY
 import time
+
+from matplotlib.dates import (MONDAY, SATURDAY, DateFormatter, MonthLocator,
+                              WeekdayLocator)
 from pylab import *
+
+import dfxml.fiwalk as fiwalk
 
 
 def get_dates_and_counts(times):
@@ -36,7 +39,8 @@ def version1(times):
 def version2(times):
     # see http://mail.python.org/pipermail/python-list/2003-November/236559.html
     # http://www.gossamer-threads.com/lists/python/python/665014
-    from matplotlib.pylab import plot, show, title, xlabel, ylabel, gca, bar, savefig, plot_date
+    from matplotlib.pylab import (bar, gca, plot, plot_date, savefig, show,
+                                  title, xlabel, ylabel)
     
     dates_and_counts = get_dates_and_counts(times)
     dates, counts = zip(*dates_and_counts)
@@ -48,11 +52,12 @@ def version2(times):
 
 def version3(times):
     import datetime
-    import numpy as np
+
     import matplotlib
-    import matplotlib.pyplot as pyplot
     import matplotlib.dates as mdates
     import matplotlib.mlab as mlab
+    import matplotlib.pyplot as pyplot
+    import numpy as np
 
     dates_and_counts = get_dates_and_counts(times)
     dates, counts = zip(*dates_and_counts)

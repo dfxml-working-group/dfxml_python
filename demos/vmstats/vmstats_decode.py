@@ -2,19 +2,21 @@
 #
 # plot vmstats output
 
+import datetime
+import json
 import os
 import os.path
-import sys
-import xml.etree.ElementTree as ET
-import psutil
-import time
-import json
-import statistics
 import shutil
-import datetime
+import statistics
+import sys
+import time
+import xml.etree.ElementTree as ET
+
+import psutil
 
 sys.path.append( os.path.join(os.path.dirname(__file__), "../python") )
 import dfxml
+
 
 def get_dfxml(fname):
     # Given a file, return dfxml objects
@@ -70,8 +72,9 @@ def html_filename(root):
 
 TEMPLATE_FILE = "vmstats_decode.html"
 def html_generate(root, *, prev_fname, next_fname):
-    import jinja2 
     import os.path
+
+    import jinja2
 
     stats   = get_stats(root)
     ps_list = list( get_processes(root) )
@@ -91,8 +94,8 @@ def html_generate(root, *, prev_fname, next_fname):
 
 
 if __name__=="__main__":
-    from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
     import time
+    from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument("fname",nargs="+", help="filename")
     parser.add_argument("--ps", help="Show the processes", action='store_true')
@@ -170,6 +173,7 @@ if __name__=="__main__":
 
     if args.plot:
         import datetime
+
         import matplotlib.pyplot as plt
         t0 = stats[0]['start_time']
         when = [ (st['start_time']-t0).total_seconds() for st in stats]

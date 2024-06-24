@@ -2,7 +2,11 @@
 #
 # dedup  - detect and optionally remove duplicates based on a DFXML file
 
-import os,dfxml,xml
+import os
+import xml
+
+import dfxml
+
 
 class dedup:
     def __init__(self):

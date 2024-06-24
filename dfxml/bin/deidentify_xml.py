@@ -14,7 +14,9 @@ ok_top_paths_mac = ["bin/","usr","etc","private","applications","developer",'bin
 ok_top_paths = ok_top_paths_win + ok_top_paths_mac + ['$orphanfiles']
 acceptable_extensions = ["exe","dll","sys","com","hlp"]
 
-import os.path, os, sys
+import os
+import os.path
+import sys
 
 partdir : typing.Dict[str, str] = dict()
 def sanitize_part(part):

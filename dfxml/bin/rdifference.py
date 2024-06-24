@@ -30,7 +30,9 @@ Process:
 
 #AJN This script does not call out duplicate paths, but they are reported.
 
-import sys,time
+import sys
+import time
+
 if sys.version_info < (3,1):
     raise RuntimeError("rdifference.py requires Python 3.1 or above")
 
@@ -244,7 +246,11 @@ class HiveState:
 
     def output_archive(self,tarname=None,zipname=None):
         """Write the changed and/or new files to a tarfile or a ZIP file. """
-        import zipfile, tarfile, StringIO, datetime
+        import datetime
+        import tarfile
+        import zipfile
+
+        import StringIO
 
         tfile = None
         zfile = None

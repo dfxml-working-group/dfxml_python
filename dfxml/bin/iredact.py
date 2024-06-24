@@ -64,11 +64,13 @@ KEY 12342343  (an encryption key)
 """
 
 
-import xml.parsers.expat
 import hashlib
 import os.path
-import dfxml.fiwalk as fiwalk
 import re
+import xml.parsers.expat
+
+import dfxml.fiwalk as fiwalk
+
 
 ################################################################
 def convert_fileglob_to_re(fileglob):
@@ -374,9 +376,10 @@ class RedactConfig:
             self.xmlfile.close()
 
 if __name__=="__main__":
-    import sys,time
+    import sys
+    import time
     from optparse import OptionParser
-    from subprocess import Popen,PIPE
+    from subprocess import PIPE, Popen
     global options
 
     parser = OptionParser()

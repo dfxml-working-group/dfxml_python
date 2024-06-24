@@ -11,3 +11,4 @@ python/demo.dfxml
 .pytest_cache
 *.egg-info
 *.log
+.venv-pre-commit

@@ -20,9 +20,8 @@ import copy
 import logging
 import os
 
-from dfxml import objects as Objects
-
 import dfxml.bin.idifference as idifference
+from dfxml import objects as Objects
 
 _logger = logging.getLogger(os.path.basename(__file__))
 

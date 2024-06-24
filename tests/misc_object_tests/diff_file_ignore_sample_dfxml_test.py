@@ -19,6 +19,7 @@ import sys
 
 import dfxml.objects as Objects
 
+
 def main():
     dobj = Objects.DFXMLObject()
     dobj.diff_file_ignores.add("atime")

@@ -19,10 +19,10 @@ This library provides functions for supporting the unit tests in this directory.
 
 __version__ = "0.1.1"
 
-import os
-import sys
 import logging
+import os
 import subprocess
+import sys
 import tempfile
 import typing
 import warnings
