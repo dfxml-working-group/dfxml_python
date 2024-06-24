@@ -16,7 +16,9 @@ import xml.parsers.expat
 import __main__
 import psutil
 
-__version__="0.1"
+from dfxml import DFXML_VERSION
+
+__version__="0.2.0"
 
 ###
 ### Code for working with Apache Spark
@@ -84,7 +86,7 @@ class DFXMLWriter:
         """
         self.t0 = time.time()
         self.tlast = time.time()
-        self.doc = ET.Element('dfxml')
+        self.doc = ET.Element('dfxml', {'version': DFXML_VERSION})
         self.add_DFXML_creator(self.doc)
         self.filename = filename
         self.timers = {}
@@ -122,7 +124,7 @@ class DFXMLWriter:
 
     def add_DFXML_creator(self,e):
         import __main__
-        ee = ET.SubElement(e, 'creator', {'version':'1.0'})
+        ee = ET.SubElement(e, 'creator')
         try:
             ET.SubElement(ee, 'program').text    = str(__main__.__file__)
         except AttributeError as e:

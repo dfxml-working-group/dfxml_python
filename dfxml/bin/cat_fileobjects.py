@@ -17,7 +17,7 @@
 Make a new DFXML file of all fileobjects in an input DFXML file.
 """
 
-__version__ = "0.3.1"
+__version__ = "0.4.0"
 
 import logging
 import os
@@ -39,7 +39,7 @@ def main():
 <dfxml
   xmlns="%s"
   xmlns:delta="%s"
-  version="1.2.0">
+  version="%s">
   <metadata/>
   <creator>
     <program>%s</program>
@@ -51,7 +51,7 @@ def main():
   <source>
     <image_filename>%s</image_filename>
   </source>\
-""" % (dfxml.XMLNS_DFXML, dfxml.XMLNS_DELTA, sys.argv[0], __version__, " ".join(sys.argv), args.filename))
+""" % (dfxml.XMLNS_DFXML, dfxml.XMLNS_DELTA, dfxml.DFXML_VERSION, sys.argv[0], __version__, " ".join(sys.argv), args.filename))
 
     ET.register_namespace("delta", dfxml.XMLNS_DELTA)
 

@@ -62,7 +62,7 @@ def _test_file_in_non_fs_levels_deep(
     """
     This test follows a simple, vertical storage layer stack, but adds a file at each layer.
     """
-    dobj = Objects.DFXMLObject(version="1.2.0")
+    dobj = Objects.DFXMLObject()
 
     # Add file to top-level document.
     fobj_dobj = Objects.FileObject()
@@ -184,7 +184,7 @@ def _test_file_in_non_fs_levels_flat(
     """
     This test follows a simple, horizontal storage layer stack (every container attached to top document object), and adds a file for each container.
     """
-    dobj = Objects.DFXMLObject(version="1.2.0")
+    dobj = Objects.DFXMLObject()
 
     # Add file to top-level document.
     fobj_dobj = Objects.FileObject()
@@ -284,7 +284,7 @@ def test_file_in_non_fs_levels_flat() -> None:
                         raise
 
 def test_solaris_ps_in_partition() -> None:
-    dobj = Objects.DFXMLObject(version="1.2.0")
+    dobj = Objects.DFXMLObject()
 
     psobj_outer = Objects.PartitionSystemObject()
     dobj.append(psobj_outer)
@@ -331,8 +331,7 @@ def test_solaris_ps_in_partition() -> None:
     os.remove(tmp_filename)
 
 def test_partition_in_partition() -> None:
-    #TODO Remove "+" on DFXML Schema 1.3.0 tracking.
-    dobj = Objects.DFXMLObject(version="1.2.0+")
+    dobj = Objects.DFXMLObject()
 
     psobj = Objects.PartitionSystemObject()
     psobj.pstype_str = "mbr"
@@ -357,7 +356,7 @@ def test_partition_in_partition() -> None:
     os.remove(tmp_filename)
 
 def test_hfsplus_in_hfs() -> None:
-    dobj = Objects.DFXMLObject(version="1.2.0")
+    dobj = Objects.DFXMLObject()
     vobj_outer = Objects.VolumeObject()
     vobj_outer.ftype_str = "hfs"
     dobj.append(vobj_outer)
@@ -380,7 +379,7 @@ def test_hfsplus_in_hfs() -> None:
     os.remove(tmp_filename)
 
 def test_disk_image_in_file_system() -> None:
-    dobj = Objects.DFXMLObject(version="1.2.0")
+    dobj = Objects.DFXMLObject()
 
     vobj = Objects.VolumeObject()
     vobj.ftype_str = "iso9660"

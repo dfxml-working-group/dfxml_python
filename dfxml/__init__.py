@@ -61,6 +61,9 @@ from sys import stderr
 
 tsk_virtual_filenames = set(['$FAT1','$FAT2'])
 
+# This version string is the version of the DFXML Schema.
+DFXML_VERSION = "2.0.0-beta.0"
+
 XMLNS_DC = "http://purl.org/dc/elements/1.1/"
 XMLNS_DFXML = "http://www.forensicswiki.org/wiki/Category:Digital_Forensics_XML"
 XMLNS_DELTA = "http://www.forensicswiki.org/wiki/Forensic_Disk_Differencing"

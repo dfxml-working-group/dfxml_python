@@ -30,7 +30,7 @@ XMLNS_TEST_EXTRA = "http://example.org/testextra#"
 _logger = logging.getLogger(os.path.basename(__file__))
 
 def test_volume_error_roundtrip_without_file():
-    dobj = Objects.DFXMLObject(version="1.2.0")
+    dobj = Objects.DFXMLObject()
     vobj = Objects.VolumeObject()
     dobj.append(vobj)
 
@@ -49,7 +49,7 @@ def test_volume_error_roundtrip_without_file():
     os.remove(tmp_filename)
 
 def test_file_error_roundtrip():
-    dobj = Objects.DFXMLObject(version="1.2.0")
+    dobj = Objects.DFXMLObject()
     fobj = Objects.FileObject()
     dobj.append(fobj)
 
@@ -68,7 +68,7 @@ def test_file_error_roundtrip():
     os.remove(tmp_filename)
 
 def test_volume_error_roundtrip_with_file():
-    dobj = Objects.DFXMLObject(version="1.2.0")
+    dobj = Objects.DFXMLObject()
     vobj = Objects.VolumeObject()
     dobj.append(vobj)
 
@@ -97,7 +97,7 @@ def test_volume_error_roundtrip_with_file():
     os.remove(tmp_filename)
 
 def test_volume_error_roundtrip_with_file_and_extns():
-    dobj = Objects.DFXMLObject(version="1.2.0")
+    dobj = Objects.DFXMLObject()
     vobj = Objects.VolumeObject()
     dobj.append(vobj)
 

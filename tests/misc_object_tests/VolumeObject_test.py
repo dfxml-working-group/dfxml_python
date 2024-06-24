@@ -26,7 +26,7 @@ import dfxml.objects as Objects
 _logger = logging.getLogger(os.path.basename(__file__))
 
 def test_empty_object():
-    dobj = Objects.DFXMLObject(version="1.2.0")
+    dobj = Objects.DFXMLObject()
     vobj = Objects.VolumeObject()
     dobj.append(vobj)
 

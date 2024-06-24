@@ -27,7 +27,7 @@ That is, this command:
 will create a single DFXML file with two volumes and their file objects contained.
 """
 
-__version__ = "0.2.2"
+__version__ = "0.3.0"
 
 import logging
 import os
@@ -39,7 +39,7 @@ import dfxml.objects as Objects
 _logger = logging.getLogger(os.path.basename(__file__))
 
 def main():
-    d = Objects.DFXMLObject(version="1.2.0")
+    d = Objects.DFXMLObject()
 
     d.program = sys.argv[0]
     d.program_version = __version__

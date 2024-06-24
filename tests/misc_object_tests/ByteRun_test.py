@@ -246,7 +246,7 @@ def test_glomming_fill():
         raise
 
 def test_hash_properties():
-    dobj = Objects.DFXMLObject(version="1.2.0")
+    dobj = Objects.DFXMLObject()
 
     fobj = Objects.FileObject()
     dobj.append(fobj)

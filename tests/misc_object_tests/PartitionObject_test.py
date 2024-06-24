@@ -26,7 +26,7 @@ import dfxml.objects as Objects
 _logger = logging.getLogger(os.path.basename(__file__))
 
 def test_empty_object():
-    dobj = Objects.DFXMLObject(version="1.2.0")
+    dobj = Objects.DFXMLObject()
     pobj = Objects.PartitionObject()
     dobj.append(pobj)
 
@@ -43,7 +43,7 @@ def test_cfreds_macwd_properties():
     """
     These were drawn from a CFReDS sample Mac disk image.
     """
-    dobj = Objects.DFXMLObject(version="1.2.0")
+    dobj = Objects.DFXMLObject()
     pobj = Objects.PartitionObject()
     dobj.append(pobj)
 
@@ -65,7 +65,7 @@ def test_bsd_disklabel_properties():
     """
     These were drawn from a BSD Disk Label sample image.
     """
-    dobj = Objects.DFXMLObject(version="1.2.0")
+    dobj = Objects.DFXMLObject()
     pobj_a = Objects.PartitionObject()
     pobj_c = Objects.PartitionObject()
     dobj.append(pobj_a)

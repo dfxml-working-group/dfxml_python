@@ -232,11 +232,11 @@ class AbstractParentObject(AbstractObject):
 
 class DFXMLObject(AbstractParentObject):
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: typing.Any, version: str = dfxml.DFXML_VERSION, **kwargs: typing.Any) -> None:
         self.command_line = kwargs.get("command_line")
         self.program = kwargs.get("program")
         self.program_version = kwargs.get("program_version")
-        self.version = kwargs.get("version")
+        self.version = version
         self.sources = kwargs.get("sources", [])
         self.dc = kwargs.get("dc", dict())
         self.externals = kwargs.get("externals", OtherNSElementList())
