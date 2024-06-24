@@ -15,11 +15,11 @@
 
 __version__ = "0.6.0"
 
+import copy
+import hashlib
+import logging
 import os
 import sys
-import logging
-import hashlib
-import copy
 import traceback
 
 _logger = logging.getLogger(os.path.basename(__file__))

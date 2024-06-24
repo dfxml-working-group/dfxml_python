@@ -18,6 +18,7 @@ import pytest
 import dfxml
 import dfxml.objects
 
+
 def nop(x : object) -> None:
     pass
 

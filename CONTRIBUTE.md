@@ -1,6 +1,25 @@
 # Contributing to DFXML's Python code base
 
 
+## Pre-commit
+
+This project uses [the `pre-commit` tool](https://pre-commit.com/) for linting.
+
+`pre-commit` hooks into Git's commit machinery to run a set of linters and static analyzers over each change. To install `pre-commit` into Git's hooks, run one (not both) of the following sets of commands:
+
+```bash
+pip install pre-commit
+pre-commit --version
+pre-commit install
+```
+
+Or:
+
+```bash
+make
+```
+
+
 ## Installable tools versus in-place scripts
 
 The [`dfxml/bin/`](dfxml/bin/) directory contains scripts for interacting with DFXML.  Some of the tools are installed in the command-line `$PATH` when the `dfxml` package is installed.

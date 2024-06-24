@@ -17,12 +17,12 @@ __version__ = "0.2.1"
 
 import logging
 import os
-import xml.etree.ElementTree as ET
 import sys
-
-import dfxml.objects as Objects
+import xml.etree.ElementTree as ET
 
 import libtest
+
+import dfxml.objects as Objects
 
 # Only register one of these namespaces in ET.
 XMLNS_TEST_CLAMSCAN = "file:///opt/local/bin/clamscan"

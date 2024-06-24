@@ -18,9 +18,10 @@
 
 # TODO Some of the tests in the Makefile are currently known to be redundantly called when using py.test.
 
-import subprocess
 import os
+import subprocess
 import sys
+
 
 def test_make_all():
     if sys.platform=='win32':

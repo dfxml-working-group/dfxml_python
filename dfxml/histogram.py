@@ -112,7 +112,6 @@ class histogram(dict):
         # called, or every 'graph' will simply be drawn on top of the
         # previous one.
         # make the figure tall and skinny
-
         #w,h = plot.figaspect(1.75)
         #fig = plot.figure(figsize=(w,h))
         fig = plot.figure()
@@ -221,8 +220,8 @@ if(__name__=='__main__'):
     j.print_info(1000)
     print("Histogram test routine...")
 
-    from datetime import date
     import time
+    from datetime import date
     j = histogram()
     j.add(date.fromtimestamp(time.time()),4)
     j.add(date(2005,3,1))

@@ -19,14 +19,16 @@ This program takes a differentially-annotated DFXML file as input, and outputs a
 
 __version__ = "0.2.2"
 
-import os
 import logging
+import os
 import sys
 
 _logger = logging.getLogger(os.path.basename(__file__))
 
-import dfxml.objects as Objects
 import make_differential_dfxml
+
+import dfxml.objects as Objects
+
 
 def main():
     d = Objects.DFXMLObject("1.2.0")

@@ -29,11 +29,12 @@ will create a single DFXML file with two volumes and their file objects containe
 
 __version__ = "0.3.0"
 
-import dfxml.objects as Objects
 import logging
 import os
 import sys
 import xml.etree.ElementTree as ET
+
+import dfxml.objects as Objects
 
 _logger = logging.getLogger(os.path.basename(__file__))
 

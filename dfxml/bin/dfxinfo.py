@@ -4,9 +4,9 @@
 Generates a report about what's up with a DFXML file.
 """
 
-import platform
 import os
 import os.path
+import platform
 import sys
 import time
 import xml

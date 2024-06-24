@@ -10,9 +10,8 @@ import dfxml.fiwalk as fiwalk
 ################################################################
 if __name__=="__main__":
     import sys
-    from sys import stdout
-
     from optparse import OptionParser
+    from sys import stdout
     parser = OptionParser()
     parser.usage = '%prog [options] image.iso '
     parser.add_option("-d","--debug",help="debug",action="store_true")

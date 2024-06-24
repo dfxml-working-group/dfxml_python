@@ -3,9 +3,12 @@
 # a module that holds a database of DFXML files
 #
 
-import dfxml
-from collections import defaultdict
 import sys
+from collections import defaultdict
+
+import dfxml
+
+
 class filesdb:
     def __init__(self,fname=None):
         self.sha1db   = defaultdict(list) # fi's by hashdb

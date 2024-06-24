@@ -8,21 +8,25 @@ Generate a Sluethkit 'body' file from fiwalk XML files.
 Dave Dittrich
 
 """
-import sys,time
-import dfxml
-import dfxml.fiwalk as fiwalk
+import sys
+import time
 
 import idifference
-
 # We are re-using code from idifference.py and over-riding
 # the process_fi method in the DiskState class.
 from idifference import DiskState
+
+import dfxml
+import dfxml.fiwalk as fiwalk
+
 
 def dprint(x):
     global options
     if options.debug: print(x)
 
 import stat
+
+
 def is_suid(mode):  return(mode & stat.S_ISUID == stat.S_ISUID)
 def is_sgid(mode):  return(mode & stat.S_ISGID == stat.S_ISGID)
 def is_svtx(mode):  return(mode & stat.S_ISVTX == stat.S_ISVTX)
@@ -127,8 +131,8 @@ def process_fi(self,fi):
 DiskState.process_fi = process_fi
 
 if __name__=="__main__":
-    from optparse import OptionParser
     from copy import deepcopy
+    from optparse import OptionParser
     global options
 
     parser = OptionParser()

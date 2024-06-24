@@ -20,6 +20,7 @@ import sys
 
 import dfxml.objects as Objects
 
+
 def main():
     dobj = Objects.parse(args.in_dfxml)
     assert dobj.program == args.expected_program

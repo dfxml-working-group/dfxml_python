@@ -22,9 +22,11 @@ Rows: Counts of instances of a property being changed per FileObject annotation.
 
 __version__ = "0.1.0"
 
-import dfxml.objects as Objects
-import sys
 import collections
+import sys
+
+import dfxml.objects as Objects
+
 
 def main():
     #Key: (annotation, histogram)

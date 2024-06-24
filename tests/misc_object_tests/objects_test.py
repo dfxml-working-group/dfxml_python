@@ -3,11 +3,12 @@
 
 __version__ = "0.1.1"
 
-import sys
 import os
+import sys
 
 from dfxml.objects import *
-from dfxml.objects import _intcast, _qsplit, _logger
+from dfxml.objects import _intcast, _logger, _qsplit
+
 
 def test_all():
     assert _intcast(-1) == -1

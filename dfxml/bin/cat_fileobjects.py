@@ -19,11 +19,12 @@ Make a new DFXML file of all fileobjects in an input DFXML file.
 
 __version__ = "0.4.0"
 
-import sys
-import xml.etree.ElementTree as ET
-import dfxml
 import logging
 import os
+import sys
+import xml.etree.ElementTree as ET
+
+import dfxml
 
 _logger = logging.getLogger(os.path.basename(__file__))
 

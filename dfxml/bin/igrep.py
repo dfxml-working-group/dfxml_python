@@ -3,11 +3,12 @@
 
 Reports the files in which files have the string.
 """
-import fiwalk,dfxml
+import fiwalk
+
+import dfxml
 
 if __name__=="__main__":
     import sys
-
     from optparse import OptionParser
     parser = OptionParser()
     parser.usage = '%prog [options] image.iso  s1'

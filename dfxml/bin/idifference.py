@@ -39,6 +39,7 @@ import os
 import sys
 import time
 import typing
+
 if sys.version_info < (3,1):
     raise RuntimeError("idifference.py now requires Python 3.1 or above")
 

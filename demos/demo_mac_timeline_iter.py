@@ -22,6 +22,7 @@ import sys
 sys.path.append( os.path.join(os.path.dirname(__file__), ".."))
 import dfxml
 
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: {} <filename.xml>".format(sys.argv[0]))

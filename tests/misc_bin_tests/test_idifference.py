@@ -3,7 +3,9 @@
 Test script. Evaluates idifference.py on a sequence of disk images.
 """
 
-import sys, os, subprocess
+import os
+import subprocess
+import sys
 
 if __name__ == "__main__":
     from optparse import OptionParser

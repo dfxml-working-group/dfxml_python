@@ -6,9 +6,10 @@
 import os
 import os.path
 import sys
-import xml.etree.ElementTree as ET
-import psutil
 import time
+import xml.etree.ElementTree as ET
+
+import psutil
 
 sys.path.append( os.path.join(os.path.dirname(__file__), "../../python") )
 
@@ -70,8 +71,8 @@ def write_process_dfxml_to_file(fname,prettyprint=False):
             f.write("\n")
 
 if __name__=="__main__":
-    from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
     import time
+    from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument("fname",help="filename")
     parser.add_argument("--repeat",help="Number of times to repeat",type=int,default=1)

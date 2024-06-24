@@ -33,8 +33,8 @@ The rounds of serialization are to affirm losslessness.
 __version__ = "0.2.2"
 
 import argparse
-import os
 import logging
+import os
 import sys
 import tempfile
 import typing

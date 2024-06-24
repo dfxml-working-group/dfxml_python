@@ -22,9 +22,9 @@
 
 __version__ = '1.0.0'
 
-import sys
-import os.path
 import hashlib
+import os.path
+import sys
 from xml.sax.saxutils import escape
 
 xmloutputversion = '0.3'
@@ -293,7 +293,7 @@ def extract(fn):
     
 
 if(__name__=='__main__'):
-    from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+    from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
     global args
 
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)

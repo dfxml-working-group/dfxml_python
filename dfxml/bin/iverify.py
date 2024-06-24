@@ -1,7 +1,10 @@
 #!/usr/bin/python
 """Reads an fiwalk XML file and reports how many of the files are still in the image..."""
 
-import hashlib, os.path, sys
+import hashlib
+import os.path
+import sys
+
 from dfxml import fiwalk
 
 present = []
@@ -24,7 +27,7 @@ def process_fi(fi):
 def main():
     import sys
     from optparse import OptionParser
-    from subprocess import Popen,PIPE
+    from subprocess import PIPE, Popen
     global options
 
     parser = OptionParser()

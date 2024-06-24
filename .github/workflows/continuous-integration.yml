@@ -12,7 +12,9 @@ jobs:
     strategy:
       matrix:
         os: ['ubuntu-latest', 'macos-latest']
-        python-version: [3.8, 3.9]
+        python-version:
+          - '3.8'
+          - '3.12'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,6 +36,11 @@ jobs:
         run: |
           sudo apt update
           sudo apt install --yes libxml2-utils
+
+      - name: Pre-commit Checks
+        run: |
+          pip -q install pre-commit
+          pre-commit run --all-files
 
       - name: Make check
         run: make check

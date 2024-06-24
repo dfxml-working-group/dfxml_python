@@ -2,16 +2,23 @@
 #
 # Print the stats from a DFXML file
 
-import sys,os,shelve
+import os
+import shelve
+import sys
 
 sys.path.append(os.getenv("HOME")+"/slg/src/python")
 sys.path.append(os.getenv("DOMEX_HOME")+"/src/lib")
 
-from histogram2d import histogram2d
+import re
+
+import fiwalk
 from histogram import histogram
+from histogram2d import histogram2d
 from statbag import statbag
 from ttable import ttable
-import re,dfxml,fiwalk
+
+import dfxml
+
 
 def process_files(fn):
     drive_files = {}                         # index of drives
@@ -172,8 +179,8 @@ def process_files(fn):
 
     
 def main():
-    from optparse import OptionParser
     from copy import deepcopy
+    from optparse import OptionParser
     global options
 
     parser = OptionParser()

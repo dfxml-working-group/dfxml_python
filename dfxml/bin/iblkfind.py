@@ -3,8 +3,9 @@
 
 Reports the files in which sectors s1, s2, s3... are located.
 """
-import dfxml,sys
+import sys
 
+import dfxml
 
 if __name__=="__main__":
     from optparse import OptionParser

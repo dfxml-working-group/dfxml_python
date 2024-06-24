@@ -14,11 +14,12 @@
 
 __version__ = "0.3.0"
 
-import dfxml.objects as Objects
+import hashlib
 import logging
 import os
-import hashlib
 import sqlite3
+
+import dfxml.objects as Objects
 
 _logger = logging.getLogger(os.path.basename(__file__))
 
