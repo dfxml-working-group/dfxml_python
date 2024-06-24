@@ -1,4 +1,3 @@
-
 # This software was developed at the National Institute of Standards
 # and Technology in whole or in part by employees of the Federal
 # Government in the course of their official duties. Pursuant to
@@ -49,7 +48,7 @@ def test_all():
     v2.populate_from_Element(e0)
 
     v1.block_size = 512
-    v2.partition_offset = v0.partition_offset + v0.block_count*v0.block_size
+    v2.partition_offset = v0.partition_offset + v0.block_count * v0.block_size
 
     d01 = v0.compare_to_other(v1)
     d02 = v0.compare_to_other(v2)

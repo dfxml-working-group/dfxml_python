@@ -18,7 +18,7 @@ import sys
 
 import pytest
 
-#TODO - It seems TCPFlowObjects might be better served from /dfxml instead of /dfxml/bin.
+# TODO - It seems TCPFlowObjects might be better served from /dfxml instead of /dfxml/bin.
 import dfxml.bin.TCPFlowObjects
 import dfxml.objects as Objects
 
@@ -28,16 +28,19 @@ def top_srcdir() -> pathlib.Path:
     srcdir = pathlib.Path(__file__).parent
     return srcdir / ".." / ".."
 
-def test_TCPFlowObjects(top_srcdir : pathlib.Path) -> None:
-    path_to_sample = top_srcdir / "samples" / "tcpflow_zip_generic_header.xml"
-    assert path_to_sample.exists(), "Hard-coded path from test to sample is no longer valid."
 
-    for (event, obj) in Objects.iterparse(str(path_to_sample)):
+def test_TCPFlowObjects(top_srcdir: pathlib.Path) -> None:
+    path_to_sample = top_srcdir / "samples" / "tcpflow_zip_generic_header.xml"
+    assert (
+        path_to_sample.exists()
+    ), "Hard-coded path from test to sample is no longer valid."
+
+    for event, obj in Objects.iterparse(str(path_to_sample)):
         if not isinstance(obj, Objects.FileObject):
             continue
         results = dfxml.bin.TCPFlowObjects.scanner_results_from_FileObject(obj)
         assert len(results) == 1
-        #TODO - This could do with a better presentation in relation to the pytest framework.
+        # TODO - This could do with a better presentation in relation to the pytest framework.
         print("Flow name: %r." % obj.filename)
         for result in results:
             result.print_report()

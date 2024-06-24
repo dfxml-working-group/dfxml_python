@@ -24,6 +24,7 @@ def writeDfxml(imageFile: str, outFile: str) -> None:
     with io.open(outFile, "wb") as fOut:
         fOut.write(fwOut)
 
+
 def main() -> None:
     if len(sys.argv) < 3:
         print("Usage: {} <imageFile> <outFile>".format(sys.argv[0]))
@@ -31,6 +32,7 @@ def main() -> None:
     imageFile = sys.argv[1]
     outFile = sys.argv[2]
     writeDfxml(imageFile, outFile)
+
 
 if __name__ == "__main__":
     main()

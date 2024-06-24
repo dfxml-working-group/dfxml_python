@@ -25,6 +25,7 @@ import dfxml.objects as Objects
 
 _logger = logging.getLogger(os.path.basename(__file__))
 
+
 def test_empty_object():
     dobj = Objects.DFXMLObject()
     pobj = Objects.PartitionObject()
@@ -38,6 +39,7 @@ def test_empty_object():
         _logger.debug("tmp_filename = %r." % tmp_filename)
         raise
     os.remove(tmp_filename)
+
 
 def test_cfreds_macwd_properties():
     """
@@ -60,6 +62,7 @@ def test_cfreds_macwd_properties():
         _logger.debug("tmp_filename = %r." % tmp_filename)
         raise
     os.remove(tmp_filename)
+
 
 def test_bsd_disklabel_properties():
     """

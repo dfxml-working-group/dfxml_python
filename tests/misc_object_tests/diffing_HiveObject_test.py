@@ -1,4 +1,3 @@
-
 # This software was developed at the National Institute of Standards
 # and Technology in whole or in part by employees of the Federal
 # Government in the course of their official duties. Pursuant to
@@ -26,6 +25,7 @@ def get_ho():
     ho = Objects.HiveObject()
     ho.mtime = "2010-01-02T03:45:00Z"
     return ho
+
 
 def test_all():
     _logger = logging.getLogger(os.path.basename(__file__))

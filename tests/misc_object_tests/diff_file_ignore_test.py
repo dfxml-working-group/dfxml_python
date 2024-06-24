@@ -25,11 +25,13 @@ def main():
     assert not dobj is None
     _logger = logging.getLogger(os.path.basename(__file__))
     _logger.debug("dobj.diff_file_ignores = %r." % dobj.diff_file_ignores)
-    assert "atime"  in dobj.diff_file_ignores
+    assert "atime" in dobj.diff_file_ignores
     assert "crtime" in dobj.diff_file_ignores
+
 
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--debug", action="store_true")
     parser.add_argument("in_dfxml")

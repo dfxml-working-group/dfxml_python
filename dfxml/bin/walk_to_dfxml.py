@@ -37,13 +37,14 @@ import dfxml.objects as Objects
 
 _logger = logging.getLogger(os.path.basename(__file__))
 
-#Exclude md6 from hash list borrowed from Objects.py - hashlib doesn't support md6.
-walk_default_hashes : typing.Set[str] = set(Objects.FileObject._hash_properties) - {"md6"}
+# Exclude md6 from hash list borrowed from Objects.py - hashlib doesn't support md6.
+walk_default_hashes: typing.Set[str] = set(Objects.FileObject._hash_properties) - {
+    "md6"
+}
+
 
 def filepath_to_fileobject(
-  filepath : str,
-  *,
-  ignore_properties : typing.Dict[str, typing.Set[str]] = dict()
+    filepath: str, *, ignore_properties: typing.Dict[str, typing.Set[str]] = dict()
 ) -> Objects.FileObject:
     """
     Optional arguments:
@@ -52,10 +53,10 @@ def filepath_to_fileobject(
     global walk_default_hashes
     fobj = Objects.FileObject()
 
-    #_logger.debug("ignore_properties = %r." % ignore_properties)
+    # _logger.debug("ignore_properties = %r." % ignore_properties)
 
-    name_type : typing.Optional[str]
-    #Determine type - done in three steps.
+    name_type: typing.Optional[str]
+    # Determine type - done in three steps.
     if os.path.islink(filepath):
         name_type = "l"
     elif os.path.isdir(filepath):
@@ -63,7 +64,7 @@ def filepath_to_fileobject(
     elif os.path.isfile(filepath):
         name_type = "r"
     else:
-        #Nop. Need to finish type determinations with stat structure.
+        # Nop. Need to finish type determinations with stat structure.
         name_type = None
 
     # Retrieve stat struct for file to finish determining name type, and later to populate properties.
@@ -71,7 +72,7 @@ def filepath_to_fileobject(
         sobj = os.lstat(filepath)
     else:
         sobj = os.stat(filepath)
-    #_logger.debug(sobj)
+    # _logger.debug(sobj)
 
     if name_type is None:
         if stat.S_ISCHR(sobj.st_mode):
@@ -85,20 +86,24 @@ def filepath_to_fileobject(
         elif stat.S_ISWHT(sobj.st_mode):
             name_type = "w"
         else:
-            raise NotImplementedError("No reporting check written for file type of %r." % filepath)
+            raise NotImplementedError(
+                "No reporting check written for file type of %r." % filepath
+            )
 
-    def _should_ignore(
-      x : str
-    ) -> bool:
-        return Objects.FileObject._should_ignore_property(ignore_properties, name_type, x)
+    def _should_ignore(x: str) -> bool:
+        return Objects.FileObject._should_ignore_property(
+            ignore_properties, name_type, x
+        )
 
     if not _should_ignore("name_type"):
         fobj.name_type = name_type
 
-    #Prime fileobjects from Stat data (lstat for soft links).
-    fobj.populate_from_stat(sobj, ignore_properties=ignore_properties, name_type=name_type)
+    # Prime fileobjects from Stat data (lstat for soft links).
+    fobj.populate_from_stat(
+        sobj, ignore_properties=ignore_properties, name_type=name_type
+    )
 
-    #Hard-coded information: Name, and assumed allocation status.
+    # Hard-coded information: Name, and assumed allocation status.
     if not _should_ignore("filename"):
         fobj.filename = filepath
     if not _should_ignore("alloc"):
@@ -108,15 +113,12 @@ def filepath_to_fileobject(
         if name_type == "l":
             fobj.link_target = os.readlink(filepath)
 
-    #Add hashes for (mostly regular) files.
+    # Add hashes for (mostly regular) files.
     if name_type in ["-", "r", "v"]:
         # Check total OR
         if functools.reduce(
-          lambda y, z: y or z,
-          map(
-            lambda x: not _should_ignore(x),
-            walk_default_hashes
-          )
+            lambda y, z: y or z,
+            map(lambda x: not _should_ignore(x), walk_default_hashes),
         ):
             try:
                 with open(filepath, "rb") as in_fh:
@@ -179,49 +181,74 @@ def filepath_to_fileobject(
                         fobj.error += "\n" + str(e.args)
     return fobj
 
+
 def main() -> None:
     global walk_default_hashes
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--debug", action="store_true")
-    parser.add_argument("-i", "--ignore", action="append", help="Do not track named property on file objects.  E.g. '-i inode' will exclude inode numbers from DFXML manifest.  Can be given multiple times.  To exclude a fileobject property of a specific file type (e.g. regular, directory, device), supply the name_type value in addition; for example, to ignore mtime of a directory, '-i mtime@d'.")
-    parser.add_argument("--ignore-hashes", action="store_true", help="Do not calculate any hashes.  Equivalent to passing -i for each of %s." % (", ".join(sorted(walk_default_hashes))))
-    parser.add_argument("-j", "--jobs", type=int, default=1, help="Number of file-processing threads to run.")
+    parser.add_argument(
+        "-i",
+        "--ignore",
+        action="append",
+        help="Do not track named property on file objects.  E.g. '-i inode' will exclude inode numbers from DFXML manifest.  Can be given multiple times.  To exclude a fileobject property of a specific file type (e.g. regular, directory, device), supply the name_type value in addition; for example, to ignore mtime of a directory, '-i mtime@d'.",
+    )
+    parser.add_argument(
+        "--ignore-hashes",
+        action="store_true",
+        help="Do not calculate any hashes.  Equivalent to passing -i for each of %s."
+        % (", ".join(sorted(walk_default_hashes))),
+    )
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        type=int,
+        default=1,
+        help="Number of file-processing threads to run.",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
 
     if args.jobs <= 0:
-        raise ValueError("If requesting multiple jobs, please request 1 or more worker threads.")
+        raise ValueError(
+            "If requesting multiple jobs, please request 1 or more worker threads."
+        )
 
-    #Determine whether we're going in threading mode or not.  (Some modules are not available by default.)
+    # Determine whether we're going in threading mode or not.  (Some modules are not available by default.)
     using_threading = False
     if args.jobs > 1:
-        using_threading = True  #(unless supporting modules are absent)
+        using_threading = True  # (unless supporting modules are absent)
         try:
             import threading
         except:
             using_threading = False
-            _logger.warning("Threading support not available.  Running in single thread only.")
+            _logger.warning(
+                "Threading support not available.  Running in single thread only."
+            )
 
         try:
             import queue
         except:
             using_threading = False
-            _logger.warning("Python queue support not available.  (If running Ubuntu, this is in package python3-queuelib.)  Running in single thread only.")
+            _logger.warning(
+                "Python queue support not available.  (If running Ubuntu, this is in package python3-queuelib.)  Running in single thread only."
+            )
 
     dobj = Objects.DFXMLObject()
     dobj.program = sys.argv[0]
     dobj.program_version = __version__
     dobj.command_line = " ".join(sys.argv)
     dobj.dc["type"] = "File system walk"
-    dobj.add_creator_library("Python", ".".join(map(str, sys.version_info[0:3]))) #A bit of a bend, but gets the major version information out.
+    dobj.add_creator_library(
+        "Python", ".".join(map(str, sys.version_info[0:3]))
+    )  # A bit of a bend, but gets the major version information out.
     dobj.add_creator_library("Objects.py", Objects.__version__)
     dobj.add_creator_library("dfxml.py", dfxml.__version__)
 
     # Key: property.
     # Value: set of name_types that should have the property ignored.  "*" indicates all.  No sets should be empty by the end of this setup.
-    ignore_properties : typing.Dict[str, typing.Set[str]] = collections.defaultdict(set)
+    ignore_properties: typing.Dict[str, typing.Set[str]] = collections.defaultdict(set)
     if args.ignore:
         for property_descriptor in args.ignore:
             property_descriptor_parts = property_descriptor.split("@")
@@ -233,26 +260,26 @@ def main() -> None:
     if args.ignore_hashes:
         for property_name in walk_default_hashes:
             ignore_properties[property_name].add("*")
-    #_logger.debug("ignore_properties = %r." % ignore_properties)
+    # _logger.debug("ignore_properties = %r." % ignore_properties)
 
     filepaths = set()
     filepaths.add(".")
-    for (dirpath, dirnames, filenames) in os.walk("."):
+    for dirpath, dirnames, filenames in os.walk("."):
         dirent_names = set()
         for dirname in dirnames:
             dirent_names.add(dirname)
         for filename in filenames:
             dirent_names.add(filename)
         for dirent_name in sorted(dirent_names):
-            #The relpath wrapper removes "./" from the head of the path.
+            # The relpath wrapper removes "./" from the head of the path.
             filepath = os.path.relpath(os.path.join(dirpath, dirent_name))
             filepaths.add(filepath)
 
-    fileobjects_by_filepath : typing.Dict[str, Objects.FileObject] = dict()
+    fileobjects_by_filepath: typing.Dict[str, Objects.FileObject] = dict()
 
     if using_threading:
-        #Threading syntax c/o: https://docs.python.org/3.5/library/queue.html
-        q : queue.Queue[typing.Optional[str]] = queue.Queue()
+        # Threading syntax c/o: https://docs.python.org/3.5/library/queue.html
+        q: queue.Queue[typing.Optional[str]] = queue.Queue()
         threads = []
 
         def _worker() -> None:
@@ -261,7 +288,9 @@ def main() -> None:
                 if filepath is None:
                     break
                 try:
-                    fobj = filepath_to_fileobject(filepath, ignore_properties=ignore_properties)
+                    fobj = filepath_to_fileobject(
+                        filepath, ignore_properties=ignore_properties
+                    )
                 except FileNotFoundError as e:
                     fobj = Objects.FileObject()
                     fobj.filename = filepath
@@ -287,15 +316,16 @@ def main() -> None:
             q.put(None)
         for t in threads:
             t.join()
-    else: #Not threading.
+    else:  # Not threading.
         for filepath in sorted(filepaths):
             fobj = filepath_to_fileobject(filepath, ignore_properties=ignore_properties)
             fileobjects_by_filepath[filepath] = fobj
 
-    #Build output DFXML tree.
+    # Build output DFXML tree.
     for filepath in sorted(fileobjects_by_filepath.keys()):
         dobj.append(fileobjects_by_filepath[filepath])
     dobj.print_dfxml()
+
 
 if __name__ == "__main__":
     main()

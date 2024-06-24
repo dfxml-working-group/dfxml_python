@@ -25,8 +25,9 @@ from dfxml import objects as Objects
 
 _logger = logging.getLogger(os.path.basename(__file__))
 
-#Only issue a potentially verbose warning once
+# Only issue a potentially verbose warning once
 _nagged_timestamp_format = False
+
 
 class FOCounter(object):
     "Counter for FileObjects.  Does not count differences (differential annotations)."
@@ -35,8 +36,8 @@ class FOCounter(object):
         self._inodes = set()
         self._fo_tally = 0
         self._fo_unalloc_unmatch_tally = 0
-        self._fo_allocation_tallies_inode = {True:0, False:0, None:0}
-        self._fo_allocation_tallies_name = {True:0, False:0, None:0}
+        self._fo_allocation_tallies_inode = {True: 0, False: 0, None: 0}
+        self._fo_allocation_tallies_name = {True: 0, False: 0, None: 0}
 
     def add(self, obj):
         assert isinstance(obj, Objects.FileObject)
@@ -84,6 +85,7 @@ class FOCounter(object):
     def fo_tally_unalloc_name(self):
         return self._fo_allocation_tallies_name[False]
 
+
 def report(dfxmlobject, sort_by=None, summary=None, timestamp=None):
     new_files = []
     deleted_files = []
@@ -94,7 +96,9 @@ def report(dfxmlobject, sort_by=None, summary=None, timestamp=None):
     renamed_files_regular = []
     renamed_files_other = []
     renamed_files_type_changed = []
-    renamed_files_type_changes = collections.defaultdict(int) #Key: (old name_type, new name_type); value: counter
+    renamed_files_type_changes = collections.defaultdict(
+        int
+    )  # Key: (old name_type, new name_type); value: counter
     renamed_files_content_matches = []
     modified_files = []
     changed_files = []
@@ -107,13 +111,13 @@ def report(dfxmlobject, sort_by=None, summary=None, timestamp=None):
         _matched = "matched" in obj.annos
         return _matched
 
-    #Group objects by differential annotations
+    # Group objects by differential annotations
     for obj in dfxmlobject:
         if isinstance(obj, Objects.FileObject):
             if "matched" in obj.annos:
                 matched_files_tally += 1
 
-            #_logger.debug("Inspecting %s for changes" % obj)
+            # _logger.debug("Inspecting %s for changes" % obj)
             if "new" in obj.annos:
                 new_files.append(obj)
             elif "deleted" in obj.annos:
@@ -123,14 +127,16 @@ def report(dfxmlobject, sort_by=None, summary=None, timestamp=None):
                 else:
                     deleted_files_unmatched.append(obj)
             elif "renamed" in obj.annos:
-                #Count content matches
+                # Count content matches
                 if obj.original_fileobject.sha1 == obj.sha1:
                     renamed_files_content_matches.append(obj)
 
                 renamed_files.append(obj)
                 if obj.name_type != obj.original_fileobject.name_type:
                     renamed_files_type_changed.append(obj)
-                    renamed_files_type_changes[(obj.original_fileobject.name_type or "", obj.name_type or "")] += 1
+                    renamed_files_type_changes[
+                        (obj.original_fileobject.name_type or "", obj.name_type or "")
+                    ] += 1
                 elif obj.name_type == "r":
                     renamed_files_regular.append(obj)
                 elif obj.name_type == "d":
@@ -144,41 +150,45 @@ def report(dfxmlobject, sort_by=None, summary=None, timestamp=None):
             else:
                 unchanged_files.append(obj)
 
-            #Count files of the post image
+            # Count files of the post image
             if "deleted" in obj.annos:
-                #Don't count the "Ghost" files created for deleted files that weren't matched between images
+                # Don't count the "Ghost" files created for deleted files that weren't matched between images
                 if _is_matched(obj):
                     obj_alloc_counters[1].add(obj)
             else:
                 obj_alloc_counters[1].add(obj)
-            #Count files of the baseline image
+            # Count files of the baseline image
             if obj.original_fileobject:
                 obj_alloc_counters[0].add(obj.original_fileobject)
         elif isinstance(obj, Objects.VolumeObject):
-            #TODO
+            # TODO
             pass
 
     def _sortkey_singlefi():
         """Return a sorting key function, fit for use in sorted() on a list of FileObjects."""
+
         def _key_by_path(fi):
             return (
-              fi.filename or "",
-              str(fi.mtime) or "n/a",
-              (fi.original_fileobject and fi.original_fileobject.filename) or "",
-              (fi.original_fileobject and str(fi.original_fileobject.mtime)) or "n/a"
+                fi.filename or "",
+                str(fi.mtime) or "n/a",
+                (fi.original_fileobject and fi.original_fileobject.filename) or "",
+                (fi.original_fileobject and str(fi.original_fileobject.mtime)) or "n/a",
             )
+
         def _key_by_times(fi):
             return (
-              str(fi.mtime) or "n/a",
-              str(fi.crtime) or "n/a",
-              fi.filename,
-              (fi.original_fileobject and str(fi.original_fileobject.mtime)) or "n/a",
-              (fi.original_fileobject and str(fi.original_fileobject.crtime)) or "n/a",
-              (fi.original_fileobject and fi.original_fileobject.filename) or ""
+                str(fi.mtime) or "n/a",
+                str(fi.crtime) or "n/a",
+                fi.filename,
+                (fi.original_fileobject and str(fi.original_fileobject.mtime)) or "n/a",
+                (fi.original_fileobject and str(fi.original_fileobject.crtime))
+                or "n/a",
+                (fi.original_fileobject and fi.original_fileobject.filename) or "",
             )
+
         if sort_by == "path":
             return _key_by_path
-        else: #Default: "times"
+        else:  # Default: "times"
             return _key_by_times
 
     def _format_timestamp(t):
@@ -198,39 +208,47 @@ def report(dfxmlobject, sort_by=None, summary=None, timestamp=None):
 
     idifference.h2("New files:")
     new_files_sorted = sorted(new_files, key=_sortkey_singlefi())
-    res = [(_format_timestamp(obj.mtime), obj.filename or "", obj.filesize) for obj in new_files_sorted]
+    res = [
+        (_format_timestamp(obj.mtime), obj.filename or "", obj.filesize)
+        for obj in new_files_sorted
+    ]
     idifference.table(res)
 
     idifference.h2("Deleted files:")
     deleted_files_sorted = sorted(deleted_files, key=_sortkey_singlefi())
-    res = [(
-      obj.original_fileobject.mtime,
-      obj.original_fileobject.filename or "",
-      obj.original_fileobject.filesize
-    ) for obj in deleted_files_sorted]
+    res = [
+        (
+            obj.original_fileobject.mtime,
+            obj.original_fileobject.filename or "",
+            obj.original_fileobject.filesize,
+        )
+        for obj in deleted_files_sorted
+    ]
     idifference.table(res)
 
     def _sortkey_renames():
         def _key_by_path(fi):
             return (
-              fi.original_fileobject.filename or "",
-              fi.filename or "",
-              str(fi.mtime) or "",
-              str(fi.original_fileobject.mtime) or ""
+                fi.original_fileobject.filename or "",
+                fi.filename or "",
+                str(fi.mtime) or "",
+                str(fi.original_fileobject.mtime) or "",
             )
+
         def _key_by_times(fi):
             return (
-              str(fi.mtime) or "n/a",
-              str(fi.ctime) or "n/a",
-              str(fi.atime) or "n/a",
-              str(fi.dtime) or "n/a",
-              str(fi.crtime) or "n/a",
-              fi.original_fileobject.filename or "",
-              fi.filename or ""
+                str(fi.mtime) or "n/a",
+                str(fi.ctime) or "n/a",
+                str(fi.atime) or "n/a",
+                str(fi.dtime) or "n/a",
+                str(fi.crtime) or "n/a",
+                fi.original_fileobject.filename or "",
+                fi.filename or "",
             )
+
         if sort_by == "path":
             return _key_by_path
-        else: #Default: "times"
+        else:  # Default: "times"
             return _key_by_times
 
     def _enumerated_changes(filelist):
@@ -239,26 +257,39 @@ def report(dfxmlobject, sort_by=None, summary=None, timestamp=None):
             diffs_remaining = copy.deepcopy(fi.diffs)
             if "filename" in diffs_remaining:
                 diffs_remaining -= {"filename"}
-                res.append(("Renamed", "", fi.original_fileobject.filename, "renamed to", fi.filename))
+                res.append(
+                    (
+                        "Renamed",
+                        "",
+                        fi.original_fileobject.filename,
+                        "renamed to",
+                        fi.filename,
+                    )
+                )
             for timeattr in Objects.TimestampObject.timestamp_name_list:
                 if timeattr in diffs_remaining:
                     diffs_remaining -= {timeattr}
-                    res.append((
-                      fi.filename or "",
-                      "%s changed, " % timeattr, 
-                      _format_timestamp(getattr(fi.original_fileobject, timeattr)),
-                      "->", 
-                      _format_timestamp(getattr(fi, timeattr))
-                    ))
+                    res.append(
+                        (
+                            fi.filename or "",
+                            "%s changed, " % timeattr,
+                            _format_timestamp(
+                                getattr(fi.original_fileobject, timeattr)
+                            ),
+                            "->",
+                            _format_timestamp(getattr(fi, timeattr)),
+                        )
+                    )
             for diff in sorted(diffs_remaining):
                 diffs_remaining -= {diff}
-                res.append((
-                  fi.filename or "",
-                  "%s changed, " % diff, 
-                  getattr(fi.original_fileobject, diff) or ""
-                  "->", 
-                  getattr(fi, diff) or "", 
-                ))
+                res.append(
+                    (
+                        fi.filename or "",
+                        "%s changed, " % diff,
+                        getattr(fi.original_fileobject, diff) or "" "->",
+                        getattr(fi, diff) or "",
+                    )
+                )
         return res
 
     idifference.h2("Renamed files:")
@@ -279,68 +310,105 @@ def report(dfxmlobject, sort_by=None, summary=None, timestamp=None):
     if summary:
         idifference.h2("Summary:")
         summ_recs = [
-          ("Prior image's file (file object) tally", str(obj_alloc_counters[0].fo_tally)),
-          ("  Inode allocation", ""),
-          ("    Allocated", str(obj_alloc_counters[0].fo_tally_alloc_inode)),
-          ("    Unallocated", str(obj_alloc_counters[0].fo_tally_unalloc_inode)),
-          ("    Unknown", str(obj_alloc_counters[0].fo_tally_nullalloc_inode)),
-          ("  Name allocation", ""),
-          ("    Allocated", str(obj_alloc_counters[0].fo_tally_alloc_name)),
-          ("    Unallocated", str(obj_alloc_counters[0].fo_tally_unalloc_name)),
-          ("    Unknown", str(obj_alloc_counters[0].fo_tally_nullalloc_name)),
-          ("  Unallocated, unmatched", obj_alloc_counters[0].fo_unalloc_unmatch_tally),
-          ("Prior image's file (inode) tally", str(obj_alloc_counters[0].inode_tally)),
-          ("Current image's file (file object) tally", str(obj_alloc_counters[1].fo_tally)),
-          ("  Inode allocation", ""),
-          ("    Allocated", str(obj_alloc_counters[1].fo_tally_alloc_inode)),
-          ("    Unallocated", str(obj_alloc_counters[1].fo_tally_unalloc_inode)),
-          ("    Unknown", str(obj_alloc_counters[1].fo_tally_nullalloc_inode)),
-          ("  Name allocation", ""),
-          ("    Allocated", str(obj_alloc_counters[1].fo_tally_alloc_name)),
-          ("    Unallocated", str(obj_alloc_counters[1].fo_tally_unalloc_name)),
-          ("    Unknown", str(obj_alloc_counters[1].fo_tally_nullalloc_name)),
-          ("  Unallocated, unmatched", obj_alloc_counters[1].fo_unalloc_unmatch_tally),
-          ("Current image's file (inode) tally", str(obj_alloc_counters[1].inode_tally)),
-          ("Matched files", str(matched_files_tally)),
-          ("", ""),
-          ("New files", str(len(new_files))),
-          ("Deleted files", str(len(deleted_files))),
-          ("  Unmatched", str(len(deleted_files_unmatched))),
-          ("  Matched", str(len(deleted_files_matched))),
-          ("Renamed files", str(len(renamed_files))),
-          ("  Directories", str(len(renamed_files_directory))),
-          ("  Regular files", str(len(renamed_files_regular))),
-          ("  Other", str(len(renamed_files_other))),
-          ("  Type changed", str(len(renamed_files_type_changed))),
+            (
+                "Prior image's file (file object) tally",
+                str(obj_alloc_counters[0].fo_tally),
+            ),
+            ("  Inode allocation", ""),
+            ("    Allocated", str(obj_alloc_counters[0].fo_tally_alloc_inode)),
+            ("    Unallocated", str(obj_alloc_counters[0].fo_tally_unalloc_inode)),
+            ("    Unknown", str(obj_alloc_counters[0].fo_tally_nullalloc_inode)),
+            ("  Name allocation", ""),
+            ("    Allocated", str(obj_alloc_counters[0].fo_tally_alloc_name)),
+            ("    Unallocated", str(obj_alloc_counters[0].fo_tally_unalloc_name)),
+            ("    Unknown", str(obj_alloc_counters[0].fo_tally_nullalloc_name)),
+            (
+                "  Unallocated, unmatched",
+                obj_alloc_counters[0].fo_unalloc_unmatch_tally,
+            ),
+            (
+                "Prior image's file (inode) tally",
+                str(obj_alloc_counters[0].inode_tally),
+            ),
+            (
+                "Current image's file (file object) tally",
+                str(obj_alloc_counters[1].fo_tally),
+            ),
+            ("  Inode allocation", ""),
+            ("    Allocated", str(obj_alloc_counters[1].fo_tally_alloc_inode)),
+            ("    Unallocated", str(obj_alloc_counters[1].fo_tally_unalloc_inode)),
+            ("    Unknown", str(obj_alloc_counters[1].fo_tally_nullalloc_inode)),
+            ("  Name allocation", ""),
+            ("    Allocated", str(obj_alloc_counters[1].fo_tally_alloc_name)),
+            ("    Unallocated", str(obj_alloc_counters[1].fo_tally_unalloc_name)),
+            ("    Unknown", str(obj_alloc_counters[1].fo_tally_nullalloc_name)),
+            (
+                "  Unallocated, unmatched",
+                obj_alloc_counters[1].fo_unalloc_unmatch_tally,
+            ),
+            (
+                "Current image's file (inode) tally",
+                str(obj_alloc_counters[1].inode_tally),
+            ),
+            ("Matched files", str(matched_files_tally)),
+            ("", ""),
+            ("New files", str(len(new_files))),
+            ("Deleted files", str(len(deleted_files))),
+            ("  Unmatched", str(len(deleted_files_unmatched))),
+            ("  Matched", str(len(deleted_files_matched))),
+            ("Renamed files", str(len(renamed_files))),
+            ("  Directories", str(len(renamed_files_directory))),
+            ("  Regular files", str(len(renamed_files_regular))),
+            ("  Other", str(len(renamed_files_other))),
+            ("  Type changed", str(len(renamed_files_type_changed))),
         ]
         for key in sorted(renamed_files_type_changes.keys()):
-            summ_recs.append(("    %s -> %s" % key, str(renamed_files_type_changes[key])))
+            summ_recs.append(
+                ("    %s -> %s" % key, str(renamed_files_type_changes[key]))
+            )
         summ_recs += [
-          ("  Content matches", str(len(renamed_files_content_matches))),
-          ("Files with modified content", str(len(modified_files))),
-          ("Files with changed file properties", str(len(changed_files)))
+            ("  Content matches", str(len(renamed_files_content_matches))),
+            ("Files with modified content", str(len(modified_files))),
+            ("Files with changed file properties", str(len(changed_files))),
         ]
 
         idifference.table(summ_recs)
+
 
 def main():
     global args
     dfxmlobject = Objects.parse(args.infile)
     report(dfxmlobject, sort_by=args.sort_by, summary=args.summary)
 
+
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--debug", action="store_true")
-    parser.add_argument("--sort-by", help="Sorts file lists.  Pass one of these arguments: \"times\" or \"path\".")
-    parser.add_argument("--summary",help="output summary statistics of file system changes",action="store_true", default=False)
-    parser.add_argument("infile", help="A differential DFXML file.  Should include the optional 'delta:matched' attributes for counts to work correctly.")
+    parser.add_argument(
+        "--sort-by",
+        help='Sorts file lists.  Pass one of these arguments: "times" or "path".',
+    )
+    parser.add_argument(
+        "--summary",
+        help="output summary statistics of file system changes",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "infile",
+        help="A differential DFXML file.  Should include the optional 'delta:matched' attributes for counts to work correctly.",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
 
     if not args.infile.endswith("xml"):
-        raise Exception("Input file should be a DFXML file, and should end with 'xml': %r." % args.infile)
+        raise Exception(
+            "Input file should be a DFXML file, and should end with 'xml': %r."
+            % args.infile
+        )
 
     if not os.path.exists(args.infile):
         raise Exception("Input file does not exist: %r." % args.infile)

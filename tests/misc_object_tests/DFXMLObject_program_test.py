@@ -26,8 +26,10 @@ def main():
     assert dobj.program == args.expected_program
     assert dobj.program_version == args.expected_program_version
 
+
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("in_dfxml")
     parser.add_argument("expected_program")

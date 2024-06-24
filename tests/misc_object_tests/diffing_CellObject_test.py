@@ -1,4 +1,3 @@
-
 # This software was developed at the National Institute of Standards
 # and Technology in whole or in part by employees of the Federal
 # Government in the course of their official duties. Pursuant to
@@ -41,9 +40,10 @@ def get_co():
     _logger.debug("co.to_regxml() = %r" % co.to_regxml())
     return co
 
+
 def get_nco():
     _logger = logging.getLogger(os.path.basename(__file__))
-    co  = get_co()
+    co = get_co()
     coe = co.to_Element()
     nco = Objects.CellObject()
     nco.populate_from_Element(coe)
@@ -52,7 +52,7 @@ def get_nco():
     _logger.debug("diffs = %r" % diffs)
     assert co == nco
 
-    #Modify
+    # Modify
     nco.basename = "(Doubled)"
     nco.root = False
     nco.original_cellobject = co
@@ -62,11 +62,12 @@ def get_nco():
     _logger.debug("nco.diffs = %r" % nco.diffs)
     return nco
 
+
 def test_all():
     logging.basicConfig(level=logging.DEBUG)
 
     get_nco()
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     test_all()
-    

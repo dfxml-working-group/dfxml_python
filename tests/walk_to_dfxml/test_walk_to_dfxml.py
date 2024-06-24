@@ -24,20 +24,26 @@ import dfxml.objects as Objects
 
 _logger = logging.getLogger(os.path.basename(__file__))
 
+
 @pytest.fixture
 def srcdir() -> str:
     retval = os.path.dirname(__file__)
     return retval
 
-def test_walk_ignore_genprops(srcdir : str) -> None:
+
+def test_walk_ignore_genprops(srcdir: str) -> None:
     files_encountered = 0
-    for (event, obj) in Objects.iterparse(os.path.join(srcdir, "walk_ignore_genprops.dfxml")):
+    for event, obj in Objects.iterparse(
+        os.path.join(srcdir, "walk_ignore_genprops.dfxml")
+    ):
         if not isinstance(obj, Objects.FileObject):
             continue
         files_encountered += 1
-        for propname in [ "atime", "ctime", "crtime", "gid", "inode", "mtime", "uid" ]:
+        for propname in ["atime", "ctime", "crtime", "gid", "inode", "mtime", "uid"]:
             try:
-                assert getattr(obj, propname) is None, "Found property that should have been ignored."
+                assert (
+                    getattr(obj, propname) is None
+                ), "Found property that should have been ignored."
             except:
                 if propname == "mtime" and obj.name_type != "d":
                     continue
@@ -46,15 +52,20 @@ def test_walk_ignore_genprops(srcdir : str) -> None:
                 raise
     assert files_encountered > 0, "Encountered no files in walk_ignore_genprops.dfxml."
 
-def test_walk_ignore_hashes(srcdir : str) -> None:
+
+def test_walk_ignore_hashes(srcdir: str) -> None:
     files_encountered = 0
-    for (event, obj) in Objects.iterparse(os.path.join(srcdir, "walk_ignore_hashes.dfxml")):
+    for event, obj in Objects.iterparse(
+        os.path.join(srcdir, "walk_ignore_hashes.dfxml")
+    ):
         if not isinstance(obj, Objects.FileObject):
             continue
         files_encountered += 1
         for propname in Objects.FileObject._hash_properties:
             try:
-                assert getattr(obj, propname) is None, "Found hash property when none was expected."
+                assert (
+                    getattr(obj, propname) is None
+                ), "Found hash property when none was expected."
             except:
                 _logger.error("obj.filename = %r.", obj.filename)
                 _logger.error("propname = %r.", propname)

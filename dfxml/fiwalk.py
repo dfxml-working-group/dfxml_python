@@ -14,7 +14,7 @@
 #
 # We would appreciate acknowledgement if the software is used.
 
-__version__="0.7.0"
+__version__ = "0.7.0"
 
 
 """fiwalk module
@@ -27,7 +27,7 @@ import os
 import sys
 import typing
 
-sys.path.append( os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from subprocess import PIPE, Popen
 from sys import stderr
@@ -37,63 +37,83 @@ import dfxml
 ALLOC_ONLY = 1
 
 fiwalk_cached_installed_version = None
-def fiwalk_installed_version(fiwalk='fiwalk'):
+
+
+def fiwalk_installed_version(fiwalk="fiwalk"):
     """Return the current version of fiwalk that is installed"""
     global fiwalk_cached_installed_version
     if fiwalk_cached_installed_version:
         return fiwalk_cached_installed_version
     import re
     from subprocess import PIPE, Popen
-    for line in Popen([fiwalk,'-V'],stdout=PIPE).stdout.read().decode('utf-8').split("\n"):
-        g = re.search("^FIWalk Version:\s+(.*)$",line)
+
+    for line in (
+        Popen([fiwalk, "-V"], stdout=PIPE).stdout.read().decode("utf-8").split("\n")
+    ):
+        g = re.search("^FIWalk Version:\s+(.*)$", line)
         if g:
             fiwalk_cached_installed_version = g.group(1)
             return fiwalk_cached_installed_version
-        g = re.search("^SleuthKit Version:\s+(.*)$",line)
+        g = re.search("^SleuthKit Version:\s+(.*)$", line)
         if g:
             fiwalk_cached_installed_version = g.group(1)
             return fiwalk_cached_installed_version
     return None
 
+
 class XMLDone(Exception):
-    def __init__(self,value):
+    def __init__(self, value):
         self.value = value
+
 
 class version:
     def __init__(self):
         self.cdata = ""
         self.in_element = []
         self.version = None
-    def start_element(self,name,attrs):
-        if(name=='volume'):     # too far?
+
+    def start_element(self, name, attrs):
+        if name == "volume":  # too far?
             raise XMLDone(None)
         self.in_element += [name]
         self.cdata = ""
-    def end_element(self,name):
-        if ("fiwalk" in self.in_element) and ("creator" in self.in_element) and ("version" in self.in_element):
+
+    def end_element(self, name):
+        if (
+            ("fiwalk" in self.in_element)
+            and ("creator" in self.in_element)
+            and ("version" in self.in_element)
+        ):
             raise XMLDone(self.cdata)
         if ("fiwalk" in self.in_element) and ("fiwalk_version" in self.in_element):
             raise XMLDone(self.cdata)
-        if ("version" in self.in_element) and ("dfxml" in self.in_element) and ("creator" in self.in_element):
+        if (
+            ("version" in self.in_element)
+            and ("dfxml" in self.in_element)
+            and ("creator" in self.in_element)
+        ):
             raise XMLDone(self.cdata)
         self.in_element.pop()
         self.cdata = ""
-    def char_data(self,data):
+
+    def char_data(self, data):
         self.cdata += data
 
-    def get_version(self,fn):
+    def get_version(self, fn):
         import xml.parsers.expat
+
         p = xml.parsers.expat.ParserCreate()
-        p.StartElementHandler  = self.start_element
-        p.EndElementHandler    = self.end_element
+        p.StartElementHandler = self.start_element
+        p.EndElementHandler = self.end_element
         p.CharacterDataHandler = self.char_data
         try:
-            p.ParseFile(open(fn,'rb'))
+            p.ParseFile(open(fn, "rb"))
         except XMLDone as e:
             return e.value
         except xml.parsers.expat.ExpatError:
-            return None             # XML error
-        
+            return None  # XML error
+
+
 def fiwalk_xml_version(filename=None):
     """Returns the fiwalk version that was used to create an XML file.
     Uses the "quick and dirty" approach to getting to getting out the XML version."""
@@ -101,86 +121,115 @@ def fiwalk_xml_version(filename=None):
     p = version()
     return p.get_version(filename)
 
+
 ################################################################
 def E01_glob(fn: str) -> typing.List[str]:
     import os.path
+
     """If the filename ends .E01, then glob it. Currently only handles E01 through EZZ"""
     ret = [fn]
     if fn.endswith(".E01") and os.path.exists(fn):
-        fmt = fn.replace(".E01",".E%02d")
-        for i in range(2,100):
+        fmt = fn.replace(".E01", ".E%02d")
+        for i in range(2, 100):
             f2 = fmt % i
             if os.path.exists(f2):
                 ret.append(f2)
             else:
                 return ret
         # Got through E99, now do EAA through EZZ
-        fmt = fn.replace(".E01",".E%c%c")
-        for i in range(0,26):
-            for j in range(0,26):
-                f2 = fmt % (i+ord('A'),j+ord('A'))
+        fmt = fn.replace(".E01", ".E%c%c")
+        for i in range(0, 26):
+            for j in range(0, 26):
+                f2 = fmt % (i + ord("A"), j + ord("A"))
                 if os.path.exists(f2):
                     ret.append(f2)
                 else:
                     return ret
-        return ret              # don't do F01 through F99, etc.
+        return ret  # don't do F01 through F99, etc.
     return ret
 
 
 def fiwalk_xml_stream(
-    imagefile: typing.BinaryIO,
-    flags=0,
-    fiwalk: str = "fiwalk",
-    fiwalk_args: str = ""
+    imagefile: typing.BinaryIO, flags=0, fiwalk: str = "fiwalk", fiwalk_args: str = ""
 ) -> typing.BinaryIO:
-    """ Returns an fiwalk XML stream given a disk image by running fiwalk."""
-    if flags & ALLOC_ONLY: fiwalk_args += "-O"
+    """Returns an fiwalk XML stream given a disk image by running fiwalk."""
+    if flags & ALLOC_ONLY:
+        fiwalk_args += "-O"
     from subprocess import PIPE, Popen, call
 
     # Make sure we have a valid fiwalk
     try:
-        res = Popen([fiwalk,'-V'],stdout=PIPE).communicate()[0]
+        res = Popen([fiwalk, "-V"], stdout=PIPE).communicate()[0]
     except OSError:
-        raise RuntimeError("Cannot execute fiwalk executable: "+fiwalk)
-    cmd = [fiwalk,'-x']
-    if fiwalk_args: cmd += fiwalk_args.split()
-    p = Popen(cmd + E01_glob(imagefile.name),stdout=PIPE)
-    assert isinstance(p.stdout, typing.BinaryIO), "Failed to open pipe to subprocess stdout."
+        raise RuntimeError("Cannot execute fiwalk executable: " + fiwalk)
+    cmd = [fiwalk, "-x"]
+    if fiwalk_args:
+        cmd += fiwalk_args.split()
+    p = Popen(cmd + E01_glob(imagefile.name), stdout=PIPE)
+    assert isinstance(
+        p.stdout, typing.BinaryIO
+    ), "Failed to open pipe to subprocess stdout."
     return p.stdout
 
-def fiwalk_using_sax(imagefile=None,xmlfile=None,fiwalk="fiwalk",flags=0,callback=None,fiwalk_args=""):
+
+def fiwalk_using_sax(
+    imagefile=None,
+    xmlfile=None,
+    fiwalk="fiwalk",
+    flags=0,
+    callback=None,
+    fiwalk_args="",
+):
     """Processes an image using expat, calling a callback for every file object encountered.
     If xmlfile is provided, use that as the xmlfile, otherwise runs fiwalk."""
     import dfxml
-    if xmlfile==None:
-        xmlfile = fiwalk_xml_stream(imagefile=imagefile,flags=flags,fiwalk=fiwalk,fiwalk_args=fiwalk_args)
+
+    if xmlfile == None:
+        xmlfile = fiwalk_xml_stream(
+            imagefile=imagefile, flags=flags, fiwalk=fiwalk, fiwalk_args=fiwalk_args
+        )
     r = dfxml.fileobject_reader(flags=flags)
     r.imagefile = imagefile
-    r.process_xml_stream(xmlfile,callback)
+    r.process_xml_stream(xmlfile, callback)
 
-def fileobjects_using_sax(imagefile=None,xmlfile=None,fiwalk="fiwalk",flags=0):
+
+def fileobjects_using_sax(imagefile=None, xmlfile=None, fiwalk="fiwalk", flags=0):
     ret = []
-    fiwalk_using_sax(imagefile=imagefile,xmlfile=xmlfile,fiwalk=fiwalk,flags=flags,
-                     callback = lambda fi:ret.append(fi))
+    fiwalk_using_sax(
+        imagefile=imagefile,
+        xmlfile=xmlfile,
+        fiwalk=fiwalk,
+        flags=flags,
+        callback=lambda fi: ret.append(fi),
+    )
     return ret
 
-def fileobjects_using_dom(imagefile=None,xmlfile=None,fiwalk="fiwalk",flags=0,callback=None):
+
+def fileobjects_using_dom(
+    imagefile=None, xmlfile=None, fiwalk="fiwalk", flags=0, callback=None
+):
     """Processes an image using expat, calling a callback for every file object encountered.
     If xmlfile is provided, use that as the xmlfile, otherwise runs fiwalk."""
     import dfxml
-    if xmlfile==None:
-        xmlfile = fiwalk_xml_stream(imagefile=imagefile,flags=flags,fiwalk=fiwalk)
-    return dfxml.fileobjects_dom(xmlfile=xmlfile,imagefile=imagefile,flags=flags)
+
+    if xmlfile == None:
+        xmlfile = fiwalk_xml_stream(imagefile=imagefile, flags=flags, fiwalk=fiwalk)
+    return dfxml.fileobjects_dom(xmlfile=xmlfile, imagefile=imagefile, flags=flags)
+
 
 ctr = 0
+
+
 def cb_count(fn):
     global ctr
     ctr += 1
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     import sys
+
     for fn in sys.argv[1:]:
-        print("{} contains fiwalk version {}".format(fn,fiwalk_xml_version(fn)))
+        print("{} contains fiwalk version {}".format(fn, fiwalk_xml_version(fn)))
         # Count the number of files
-        fiwalk_using_sax(xmlfile=open(fn,'rb'),callback=cb_count)
+        fiwalk_using_sax(xmlfile=open(fn, "rb"), callback=cb_count)
         print("Files: {}".format(ctr))

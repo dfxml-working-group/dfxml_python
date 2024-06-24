@@ -27,8 +27,10 @@ def main():
     with open(args.out_dfxml, "w") as fh:
         dobj.print_dfxml(fh)
 
+
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--debug", action="store_true")
     parser.add_argument("out_dfxml")

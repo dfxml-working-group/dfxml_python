@@ -22,8 +22,6 @@ import dfxml.objects as Objects
 
 
 def test_all():
-
-
     _logger = logging.getLogger(os.path.basename(__file__))
     logging.basicConfig(level=logging.DEBUG)
 
@@ -53,13 +51,13 @@ def test_all():
     assert f1.name_brs[0].img_offset == 4
 
     e1 = f1.to_Element()
-    #_logger.debug(f1)
-    #_logger.debug(ET.tostring(e1))
+    # _logger.debug(f1)
+    # _logger.debug(ET.tostring(e1))
 
     f2 = Objects.FileObject()
 
     f2.populate_from_Element(e1)
-    #_logger.debug(f2)
+    # _logger.debug(f2)
 
     assert f2.data_brs[0].img_offset == 1
     assert f2.inode_brs[0].img_offset == 2

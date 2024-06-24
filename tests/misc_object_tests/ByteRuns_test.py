@@ -1,4 +1,3 @@
-
 # This software was developed at the National Institute of Standards
 # and Technology in whole or in part by employees of the Federal
 # Government in the course of their official duties. Pursuant to
@@ -33,7 +32,6 @@ def test_all():
     br2 = Objects.ByteRun()
     br2.img_offset = 50
     br2.len = 20
-
 
     brs_contiguous = Objects.ByteRuns()
     brs_contiguous.append(br0)

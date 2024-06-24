@@ -29,6 +29,7 @@ _logger = logging.getLogger(os.path.basename(__file__))
 
 TEST_BYTE_STRING = b"test"
 
+
 def test_fill():
     _logger = logging.getLogger(os.path.basename(__file__))
     logging.basicConfig(level=logging.DEBUG)
@@ -38,29 +39,30 @@ def test_fill():
 
     assert br.fill is None
 
-    br.fill = b'\x00'
+    br.fill = b"\x00"
     _logger.debug("br.fill = %r." % br.fill)
-    assert br.fill == b'\x00'
+    assert br.fill == b"\x00"
 
-    #Catch current implementation decision.
+    # Catch current implementation decision.
     multibyte_failed = None
     try:
-        br.fill = b'\x00\x01'
+        br.fill = b"\x00\x01"
     except NotImplementedError as e:
         multibyte_failed = True
     assert multibyte_failed
 
     br.fill = 0
     _logger.debug("br.fill = %r." % br.fill)
-    assert br.fill == b'\x00'
+    assert br.fill == b"\x00"
 
     br.fill = "0"
     _logger.debug("br.fill = %r." % br.fill)
-    assert br.fill == b'\x00'
+    assert br.fill == b"\x00"
 
     br.fill = 1
     _logger.debug("br.fill = %r." % br.fill)
-    assert br.fill == b'\x01'
+    assert br.fill == b"\x01"
+
 
 def _gen_glom_samples(offset_property="img_offset"):
     """
@@ -89,18 +91,15 @@ def _gen_glom_samples(offset_property="img_offset"):
 
     return (br0, br1, br2)
 
+
 def test_glomming_simple():
-    for offset_property in [
-      "img_offset",
-      "fs_offset",
-      "file_offset"
-    ]:
+    for offset_property in ["img_offset", "fs_offset", "file_offset"]:
         (br0, br1, br2) = _gen_glom_samples(offset_property)
-        br0_br0      = br0 + br0
-        br0_br1      = br0 + br1
-        br0_br2      = br0 + br2
-        br1_br0      = br1 + br0
-        br1_br2      = br1 + br2
+        br0_br0 = br0 + br0
+        br0_br1 = br0 + br1
+        br0_br2 = br0 + br2
+        br1_br0 = br1 + br0
+        br1_br2 = br1 + br2
 
         try:
             assert br0_br0 is None
@@ -124,7 +123,7 @@ def test_glomming_simple():
         try:
             assert br1_br0 is None
         except:
-            _logger.debug("br1_br0  = %r." % br1_br0 )
+            _logger.debug("br1_br0  = %r." % br1_br0)
             raise
 
         try:
@@ -149,6 +148,7 @@ def test_glomming_simple():
         except:
             _logger.debug("br0_br1__br2 = %r." % br0_br1__br2)
             raise
+
 
 def test_glom_fragmented_file_outoforder():
     """
@@ -186,6 +186,7 @@ def test_glom_fragmented_file_outoforder():
         _logger.debug("br1_br2 = %r." % br1_br2)
         raise
 
+
 def test_glom_fragmented_file_discontiguous():
     """
     Three out-of-order sectors of the file on disk, f0_f1_f2, are at discontiguous offsets i0, i0+1KiB, i0+1MiB.
@@ -222,12 +223,13 @@ def test_glom_fragmented_file_discontiguous():
         _logger.debug("br1_br2 = %r." % br1_br2)
         raise
 
+
 def test_glomming_fill():
     (br0, br1, br2) = _gen_glom_samples()
 
-    br0.fill = b'\x00'
-    br1.fill = b'\x01'
-    br2.fill = b'\x01'
+    br0.fill = b"\x00"
+    br1.fill = b"\x01"
+    br2.fill = b"\x01"
 
     br0_br1 = br0 + br1
     br1_br2 = br1 + br2
@@ -245,6 +247,7 @@ def test_glomming_fill():
         _logger.debug("br1_br2 = %r." % br1_br2)
         raise
 
+
 def test_hash_properties():
     dobj = Objects.DFXMLObject()
 
@@ -258,14 +261,7 @@ def test_hash_properties():
     fobj.filesize = len(TEST_BYTE_STRING)
     br.len = len(TEST_BYTE_STRING)
 
-    hash_functions = {
-      "md5",
-      "sha1",
-      "sha224",
-      "sha256",
-      "sha384",
-      "sha512"
-    }
+    hash_functions = {"md5", "sha1", "sha224", "sha256", "sha384", "sha512"}
 
     # Key: Hash function.
     # Value: Hash of the byte string b"test".
@@ -275,7 +271,9 @@ def test_hash_properties():
         hash_object = getattr(hashlib, hash_function)()
         hash_object.update(TEST_BYTE_STRING)
         hash_values[hash_function] = hash_object.hexdigest()
-        _logger.debug("hash_values[%r] = %r." % (hash_function, hash_values[hash_function]))
+        _logger.debug(
+            "hash_values[%r] = %r." % (hash_function, hash_values[hash_function])
+        )
 
         setattr(fobj, hash_function, hash_values[hash_function])
         setattr(br, hash_function, hash_values[hash_function])
@@ -296,6 +294,7 @@ def test_hash_properties():
         raise
     os.remove(tmp_filename)
 
+
 def test_glomming_hash():
     (br0, br1, br2) = _gen_glom_samples()
 
@@ -310,4 +309,3 @@ def test_glomming_hash():
     except:
         _logger.debug("br0_br1 = %r." % br0_br1)
         raise
-

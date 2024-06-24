@@ -19,7 +19,7 @@
 import os
 import sys
 
-sys.path.append( os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import dfxml
 import dfxml.objects as Objects
 
@@ -31,19 +31,24 @@ def main():
 
     timeline = []
 
-    for (event, obj) in Objects.iterparse( sys.argv[1] ):
-        #Only work on FileObjects
+    for event, obj in Objects.iterparse(sys.argv[1]):
+        # Only work on FileObjects
         if not isinstance(obj, Objects.FileObject):
             continue
-        if not obj.mtime is None:  timeline.append([obj.mtime, obj.filename," modified"])
-        if not obj.crtime is None: timeline.append([obj.crtime,obj.filename," created"])
-        if not obj.ctime is None:  timeline.append([obj.ctime, obj.filename," changed"])
-        if not obj.atime is None:  timeline.append([obj.atime, obj.filename," accessed"])
+        if not obj.mtime is None:
+            timeline.append([obj.mtime, obj.filename, " modified"])
+        if not obj.crtime is None:
+            timeline.append([obj.crtime, obj.filename, " created"])
+        if not obj.ctime is None:
+            timeline.append([obj.ctime, obj.filename, " changed"])
+        if not obj.atime is None:
+            timeline.append([obj.atime, obj.filename, " accessed"])
 
     timeline.sort()
 
     for record in timeline:
-        print("\t".join( map(str, record)) )
+        print("\t".join(map(str, record)))
+
 
 if __name__ == "__main__":
     main()

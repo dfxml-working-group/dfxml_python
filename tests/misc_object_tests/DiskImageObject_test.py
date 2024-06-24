@@ -28,6 +28,7 @@ _logger = logging.getLogger(os.path.basename(__file__))
 ERROR_1 = "Error 1"
 ERROR_2 = "Error 2"
 
+
 def test_empty_object():
     dobj = Objects.DFXMLObject()
     diobj = Objects.DiskImageObject()
@@ -41,6 +42,7 @@ def test_empty_object():
         _logger.debug("tmp_filename = %r." % tmp_filename)
         raise
     os.remove(tmp_filename)
+
 
 def test_sector_size():
     dobj = Objects.DFXMLObject()
@@ -60,6 +62,7 @@ def test_sector_size():
         raise
     os.remove(tmp_filename)
 
+
 def test_error():
     dobj = Objects.DFXMLObject()
     diobj = Objects.DiskImageObject()
@@ -76,6 +79,7 @@ def test_error():
         _logger.debug("tmp_filename = %r." % tmp_filename)
         raise
     os.remove(tmp_filename)
+
 
 def test_error_after_partition_system():
     dobj = Objects.DFXMLObject()
@@ -100,6 +104,7 @@ def test_error_after_partition_system():
         raise
     os.remove(tmp_filename)
 
+
 def test_error_after_file_system():
     dobj = Objects.DFXMLObject()
     diobj = Objects.DiskImageObject()
@@ -123,8 +128,9 @@ def test_error_after_file_system():
         raise
     os.remove(tmp_filename)
 
+
 def test_error_after_file():
-    #TODO Bump version when feature branch merged into schema.
+    # TODO Bump version when feature branch merged into schema.
     dobj = Objects.DFXMLObject()
     diobj = Objects.DiskImageObject()
     dobj.append(diobj)

@@ -10,14 +10,16 @@ import dfxml
 #
 # test program. Reads a database and dumps it.
 #
-if __name__=="__main__":
+if __name__ == "__main__":
     from argparse import ArgumentParser
 
-    parser = ArgumentParser(description='Test the files database with one or more DFXML files')
-    parser.add_argument('xmlfiles',help='XML files to process',nargs='+')
+    parser = ArgumentParser(
+        description="Test the files database with one or more DFXML files"
+    )
+    parser.add_argument("xmlfiles", help="XML files to process", nargs="+")
 
     args = parser.parse_args()
-    db0   = None
+    db0 = None
     for fn in args.xmlfiles:
         db1 = filesdb()
         db1.fname = fn
@@ -28,5 +30,3 @@ if __name__=="__main__":
             print("")
             print("Difference from {}".format(db0.fname))
         db0 = db1
-
-

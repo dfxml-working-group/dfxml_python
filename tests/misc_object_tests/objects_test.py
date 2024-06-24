@@ -13,16 +13,22 @@ from dfxml.objects import _intcast, _logger, _qsplit
 def test_all():
     assert _intcast(-1) == -1
     assert _intcast("-1") == -1
-    assert _qsplit("{http://www.w3.org/2001/XMLSchema}all") == ("http://www.w3.org/2001/XMLSchema","all")
-    assert _qsplit("http://www.w3.org/2001/XMLSchema}all") == (None, "http://www.w3.org/2001/XMLSchema}all")
+    assert _qsplit("{http://www.w3.org/2001/XMLSchema}all") == (
+        "http://www.w3.org/2001/XMLSchema",
+        "all",
+    )
+    assert _qsplit("http://www.w3.org/2001/XMLSchema}all") == (
+        None,
+        "http://www.w3.org/2001/XMLSchema}all",
+    )
 
     fi = FileObject()
 
-    #Check property setting
+    # Check property setting
     fi.mtime = "1999-12-31T23:59:59Z"
     _logger.debug("fi = %r" % fi)
 
-    #Check bad property setting
+    # Check bad property setting
     failed = None
     try:
         fi.mtime = "Not a timestamp"
@@ -31,7 +37,7 @@ def test_all():
         failed = True
     _logger.debug("fi = %r" % fi)
     _logger.debug("failed = %r" % failed)
-    assert failed==True
+    assert failed == True
 
     t0 = TimestampObject(prec="100ns", name="mtime")
     _logger.debug("t0 = %r" % t0)
@@ -41,5 +47,3 @@ def test_all():
     _logger.debug("t1 = %r" % t1)
     assert t1.prec[0] == 2
     assert t1.prec[1] == "s"
-
-

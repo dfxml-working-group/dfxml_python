@@ -19,23 +19,30 @@ import dfxml
 import dfxml.objects
 
 
-def nop(x : object) -> None:
+def nop(x: object) -> None:
     pass
+
 
 @pytest.fixture
 def top_srcdir() -> str:
     srcdir = os.path.dirname(__file__)
     retval = os.path.join(srcdir, "..")
-    assert os.path.isdir(os.path.join(retval, "samples")), "Hard-coded expected path not found, '${top_srcdir}/samples/'."
+    assert os.path.isdir(
+        os.path.join(retval, "samples")
+    ), "Hard-coded expected path not found, '${top_srcdir}/samples/'."
     return retval
+
 
 @pytest.fixture
-def difference_test_0_filepath(top_srcdir : str) -> str:
+def difference_test_0_filepath(top_srcdir: str) -> str:
     retval = os.path.join(top_srcdir, "samples", "difference_test_0.xml")
-    assert os.path.exists(retval), "Hard-coded path to file did not find expected file, '${top_srcdir}/samples/difference_test_0.xml'."
+    assert os.path.exists(
+        retval
+    ), "Hard-coded path to file did not find expected file, '${top_srcdir}/samples/difference_test_0.xml'."
     return retval
 
-def test_read_dfxml(difference_test_0_filepath : str) -> None:
+
+def test_read_dfxml(difference_test_0_filepath: str) -> None:
     """
     This test confirms that the DFXML pip-managed packaging exposes the dfxml package and the objects.py module.
     """
@@ -43,9 +50,9 @@ def test_read_dfxml(difference_test_0_filepath : str) -> None:
         dfxml.read_dfxml(fh, callback=nop)
 
 
-def test_objects_iterparse(difference_test_0_filepath : str) -> None:
+def test_objects_iterparse(difference_test_0_filepath: str) -> None:
     """
     This test confirms that the DFXML pip-managed packaging exposes the dfxml package's objects.py module.
     """
-    for (event, obj) in dfxml.objects.iterparse(difference_test_0_filepath):
+    for event, obj in dfxml.objects.iterparse(difference_test_0_filepath):
         pass
