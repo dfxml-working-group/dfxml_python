@@ -12,6 +12,7 @@ import sys
 import time
 
 import idifference
+
 # We are re-using code from idifference.py and over-riding
 # the process_fi method in the DiskState class.
 from idifference import DiskState

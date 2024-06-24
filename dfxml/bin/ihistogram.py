@@ -9,8 +9,13 @@ matplotlib.use('agg.pdf')
 import datetime
 import time
 
-from matplotlib.dates import (MONDAY, SATURDAY, DateFormatter, MonthLocator,
-                              WeekdayLocator)
+from matplotlib.dates import (
+    MONDAY,
+    SATURDAY,
+    DateFormatter,
+    MonthLocator,
+    WeekdayLocator,
+)
 from pylab import *
 
 import dfxml.fiwalk as fiwalk
@@ -39,8 +44,17 @@ def version1(times):
 def version2(times):
     # see http://mail.python.org/pipermail/python-list/2003-November/236559.html
     # http://www.gossamer-threads.com/lists/python/python/665014
-    from matplotlib.pylab import (bar, gca, plot, plot_date, savefig, show,
-                                  title, xlabel, ylabel)
+    from matplotlib.pylab import (
+        bar,
+        gca,
+        plot,
+        plot_date,
+        savefig,
+        show,
+        title,
+        xlabel,
+        ylabel,
+    )
     
     dates_and_counts = get_dates_and_counts(times)
     dates, counts = zip(*dates_and_counts)
