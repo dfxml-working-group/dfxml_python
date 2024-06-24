@@ -39,7 +39,7 @@ def main():
 <dfxml
   xmlns="%s"
   xmlns:delta="%s"
-  version="2.0.0-beta.0">
+  version="%s">
   <metadata/>
   <creator>
     <program>%s</program>
@@ -51,7 +51,7 @@ def main():
   <source>
     <image_filename>%s</image_filename>
   </source>\
-""" % (dfxml.XMLNS_DFXML, dfxml.XMLNS_DELTA, sys.argv[0], __version__, " ".join(sys.argv), args.filename))
+""" % (dfxml.XMLNS_DFXML, dfxml.XMLNS_DELTA, dfxml.DFXML_VERSION, sys.argv[0], __version__, " ".join(sys.argv), args.filename))
 
     ET.register_namespace("delta", dfxml.XMLNS_DELTA)
 

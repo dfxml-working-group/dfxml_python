@@ -365,6 +365,7 @@ class DiskState:
             exit(1)
 
         metadict = dict()
+        metadict["DFXML_VERSION"] = dfxml.DFXML_VERSION
         metadict["XMLNS_DFXML"] = dfxml.XMLNS_DFXML
         metadict["XMLNS_DELTA"] = dfxml.XMLNS_DELTA
         metadict["program"] = sys.argv[0]
@@ -377,7 +378,7 @@ class DiskState:
         xmlfile.write("""\
 <?xml version="1.0" encoding="UTF-8"?>
 <dfxml
-  version="2.0.0-beta.0"
+  version="%(DFXML_VERSION)s"
   xmlns='%(XMLNS_DFXML)s'
   xmlns:dc='http://purl.org/dc/elements/1.1/'
   xmlns:delta='%(XMLNS_DELTA)s'

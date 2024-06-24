@@ -39,7 +39,7 @@ import dfxml.objects as Objects
 _logger = logging.getLogger(os.path.basename(__file__))
 
 def main():
-    d = Objects.DFXMLObject(version="2.0.0-beta.0")
+    d = Objects.DFXMLObject()
 
     d.program = sys.argv[0]
     d.program_version = __version__

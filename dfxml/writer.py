@@ -16,6 +16,8 @@ import xml.parsers.expat
 import __main__
 import psutil
 
+from dfxml import DFXML_VERSION
+
 __version__="0.2.0"
 
 ###
@@ -84,7 +86,7 @@ class DFXMLWriter:
         """
         self.t0 = time.time()
         self.tlast = time.time()
-        self.doc = ET.Element('dfxml', {'version':'2.0.0-beta.0'})
+        self.doc = ET.Element('dfxml', {'version': DFXML_VERSION})
         self.add_DFXML_creator(self.doc)
         self.filename = filename
         self.timers = {}

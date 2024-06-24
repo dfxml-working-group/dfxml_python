@@ -27,7 +27,7 @@ _logger = logging.getLogger(os.path.basename(__file__))
 
 
 def test_empty_file_object() -> None:
-    dobj = Objects.DFXMLObject(version="2.0.0-beta.0")
+    dobj = Objects.DFXMLObject()
     fobj = Objects.FileObject()
     dobj.append(fobj)
 
@@ -43,7 +43,7 @@ def test_empty_file_object() -> None:
 
 
 def test_blank_file_object_filename() -> None:
-    dobj = Objects.DFXMLObject(version="2.0.0-beta.0")
+    dobj = Objects.DFXMLObject()
     fobj = Objects.FileObject()
     dobj.append(fobj)
 

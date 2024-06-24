@@ -29,7 +29,7 @@ ERROR_1 = "Error 1"
 ERROR_2 = "Error 2"
 
 def test_empty_object():
-    dobj = Objects.DFXMLObject(version="2.0.0-beta.0")
+    dobj = Objects.DFXMLObject()
     diobj = Objects.DiskImageObject()
     dobj.append(diobj)
 
@@ -43,7 +43,7 @@ def test_empty_object():
     os.remove(tmp_filename)
 
 def test_sector_size():
-    dobj = Objects.DFXMLObject(version="2.0.0-beta.0")
+    dobj = Objects.DFXMLObject()
     diobj = Objects.DiskImageObject()
     dobj.append(diobj)
 
@@ -61,7 +61,7 @@ def test_sector_size():
     os.remove(tmp_filename)
 
 def test_error():
-    dobj = Objects.DFXMLObject(version="2.0.0-beta.0")
+    dobj = Objects.DFXMLObject()
     diobj = Objects.DiskImageObject()
     dobj.append(diobj)
 
@@ -78,7 +78,7 @@ def test_error():
     os.remove(tmp_filename)
 
 def test_error_after_partition_system():
-    dobj = Objects.DFXMLObject(version="2.0.0-beta.0")
+    dobj = Objects.DFXMLObject()
     diobj = Objects.DiskImageObject()
     dobj.append(diobj)
 
@@ -101,7 +101,7 @@ def test_error_after_partition_system():
     os.remove(tmp_filename)
 
 def test_error_after_file_system():
-    dobj = Objects.DFXMLObject(version="2.0.0-beta.0")
+    dobj = Objects.DFXMLObject()
     diobj = Objects.DiskImageObject()
     dobj.append(diobj)
 
@@ -125,7 +125,7 @@ def test_error_after_file_system():
 
 def test_error_after_file():
     #TODO Bump version when feature branch merged into schema.
-    dobj = Objects.DFXMLObject(version="2.0.0-beta.0")
+    dobj = Objects.DFXMLObject()
     diobj = Objects.DiskImageObject()
     dobj.append(diobj)
 

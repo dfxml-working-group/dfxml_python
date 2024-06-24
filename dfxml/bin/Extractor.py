@@ -70,7 +70,7 @@ def extract_files(image_path, outdir, dfxml_path=None, file_predicate=is_file, f
     _path_for_iterparse = dfxml_path or image_path
 
     #Set up base manifest to track extracted files
-    base_manifest = Objects.DFXMLObject(version="2.0.0-beta.0")
+    base_manifest = Objects.DFXMLObject()
     base_manifest.program = sys.argv[0]
     if sys.argv[0] == os.path.basename(__file__):
         base_manifest.program_version = __version__

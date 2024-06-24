@@ -103,7 +103,7 @@ def make_differential_dfxml(
     _logger.debug("diff_mask_set = " + repr(diff_mask_set))
 
     #d: The container DFXMLObject, ultimately returned.
-    d = Objects.DFXMLObject(version="2.0.0-beta.0")
+    d = Objects.DFXMLObject()
     if sys.argv[0] == os.path.basename(__file__):
         d.program = sys.argv[0]
         d.program_version = __version__
