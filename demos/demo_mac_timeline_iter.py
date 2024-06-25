@@ -19,7 +19,7 @@
 import os
 import sys
 
-sys.path.append( os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import dfxml
 
 
@@ -30,16 +30,21 @@ def main():
 
     timeline = []
 
-    for fi in dfxml.iter_dfxml( xmlfile=open(sys.argv[1],"rb") ):
-        if fi.mtime()!=None: timeline.append([fi.mtime(),fi.filename()," modified"])
-        if fi.crtime()!=None: timeline.append([fi.crtime(),fi.filename()," created"])
-        if fi.ctime()!=None: timeline.append([fi.ctime(),fi.filename()," changed"])
-        if fi.atime()!=None: timeline.append([fi.atime(),fi.filename()," accessed"])
+    for fi in dfxml.iter_dfxml(xmlfile=open(sys.argv[1], "rb")):
+        if fi.mtime() != None:
+            timeline.append([fi.mtime(), fi.filename(), " modified"])
+        if fi.crtime() != None:
+            timeline.append([fi.crtime(), fi.filename(), " created"])
+        if fi.ctime() != None:
+            timeline.append([fi.ctime(), fi.filename(), " changed"])
+        if fi.atime() != None:
+            timeline.append([fi.atime(), fi.filename(), " accessed"])
 
     timeline.sort()
 
     for record in timeline:
-        print("\t".join( map(str, record)) )
+        print("\t".join(map(str, record)))
+
 
 if __name__ == "__main__":
     main()

@@ -24,13 +24,14 @@ import sys
 
 
 def test_make_all():
-    if sys.platform=='win32':
-        return                  # don't run on win32
-    os.chdir( os.path.dirname(__file__) )
-    subprocess.call(['make','check'])
+    if sys.platform == "win32":
+        return  # don't run on win32
+    os.chdir(os.path.dirname(__file__))
+    subprocess.call(["make", "check"])
+
 
 def test_make_clean():
-    if sys.platform=='win32':
-        return                  # don't run on win32
-    os.chdir( os.path.dirname(__file__) )
-    subprocess.call(['make','clean'])
+    if sys.platform == "win32":
+        return  # don't run on win32
+    os.chdir(os.path.dirname(__file__))
+    subprocess.call(["make", "clean"])

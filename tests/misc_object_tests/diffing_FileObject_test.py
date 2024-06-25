@@ -60,21 +60,21 @@ def test_all():
     f0.sha1 = "866e1f426b2380aaf74a091aa0f39f62ae8a2de7"
     f0.sha256 = "4bc5996997ab9196b2d998b05ef302ed1dc167d74ec881533ee35008b5168630"
     f0.sha384 = "2ec378692eeae4b855f58832664f95bb85411caac8dcebe7cd3916e915559d3f0ccda688a1fad1e3f47801fe15298ac0"
-    #fo.brs = brs #TODO
+    # fo.brs = brs #TODO
     _logger.debug("f0 = %r" % f0)
     _logger.debug("f0.to_dfxml() = %r" % f0.to_dfxml())
 
     e0 = f0.to_Element()
     _logger.debug("e0 = %r" % e0)
 
-    #f1 = eval(repr(f0)) #TODO The recursive evals cause namespace confusion (Objects.foo); replace the next two lines when that's settled.
+    # f1 = eval(repr(f0)) #TODO The recursive evals cause namespace confusion (Objects.foo); replace the next two lines when that's settled.
     f1 = Objects.FileObject()
     f1.populate_from_Element(e0)
 
     f2 = Objects.FileObject()
     f2.populate_from_Element(e0)
 
-    #The id property should not be included in the comparisons
+    # The id property should not be included in the comparisons
     f1.id = 111
     f1.alloc = False
 
@@ -99,8 +99,8 @@ def test_all():
     _logger.debug("f2.diffs = %r" % f2.diffs)
     assert f2.diffs == d02
 
-    #TODO include byte_runs
+    # TODO include byte_runs
 
-    
-if __name__=="__main__":
+
+if __name__ == "__main__":
     test_all()

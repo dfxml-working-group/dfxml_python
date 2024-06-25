@@ -1,4 +1,3 @@
-
 # This software was developed at the National Institute of Standards
 # and Technology in whole or in part by employees of the Federal
 # Government in the course of their official duties. Pursuant to
@@ -22,7 +21,6 @@ import dfxml.objects as Objects
 
 
 def test_all():
-
     logging.basicConfig(level=logging.DEBUG)
     _logger = logging.getLogger(os.path.basename(__file__))
 

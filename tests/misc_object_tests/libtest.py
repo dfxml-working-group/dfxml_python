@@ -31,7 +31,8 @@ import dfxml.objects as Objects
 
 _logger = logging.getLogger(os.path.basename(__file__))
 
-def confirm_schema_conformance(dfxml_path : str) -> None:
+
+def confirm_schema_conformance(dfxml_path: str) -> None:
     """
     This function takes a path to a DFXML file, and tests its conformance to the DFXML schema at the version tracked in this Git repository.
     This function is potentially a NOP - if the schema is not downloaded (with 'make schema-init' run at the top of this repository), then to keep local unit testing operating smoothly, the test *will not* fail because of schema absence.  However, testing in the CI environment *will* use the schema.  If the schema is present, schema conformance will be checked regardless of the environment.
@@ -42,7 +43,7 @@ def confirm_schema_conformance(dfxml_path : str) -> None:
 
     # Handle the desired error not existing before Python 3.3.
     #   Via: https://stackoverflow.com/a/21368457
-    if sys.version_info < (3,3):
+    if sys.version_info < (3, 3):
         _FileNotFoundError = IOError
     else:
         _FileNotFoundError = FileNotFoundError
@@ -50,7 +51,10 @@ def confirm_schema_conformance(dfxml_path : str) -> None:
     # Confirm this function is acting from the expected directory relative to the repository root.
     top_srcdir = os.path.join(os.path.dirname(__file__), "..", "..")
     if not os.path.exists(os.path.join(top_srcdir, "CONTRIBUTE.md")):
-        raise _FileNotFoundError("This script (%r) tries to refer to the top Git-tracked DFXML directory, but could not find it based on looking for CONTRIBUTE.md." % os.path.basename(__file__))
+        raise _FileNotFoundError(
+            "This script (%r) tries to refer to the top Git-tracked DFXML directory, but could not find it based on looking for CONTRIBUTE.md."
+            % os.path.basename(__file__)
+        )
 
     # Use the schema file if it is present.
     #   - Testing in the CI environment should require the file be present.
@@ -59,29 +63,36 @@ def confirm_schema_conformance(dfxml_path : str) -> None:
     if os.path.exists(schema_path):
         command = ["xmllint", "--noout", "--schema", schema_path, dfxml_path]
         try:
-            subprocess.check_call(command, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+            subprocess.check_call(
+                command, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL
+            )
         except:
             subprocess.check_call(command)
     else:
         # This variable is set in .travis.yml.
         if os.environ.get("PYTEST_REQUIRES_DFXML_SCHEMA") == "1":
-            raise _FileNotFoundError("Tracked DFXML schema not found.  To retrieve it, run 'make schema-init' in the top-level source directory.")
+            raise _FileNotFoundError(
+                "Tracked DFXML schema not found.  To retrieve it, run 'make schema-init' in the top-level source directory."
+            )
+
 
 def file_round_trip_dfxmlobject(
-  dobj : Objects.DFXMLObject
+    dobj: Objects.DFXMLObject,
 ) -> typing.Tuple[str, Objects.DFXMLObject]:
     """
     Serializes the DFXMLObject (dobj) to a temporary file.  Parses that temporary file into a new DFXMLObject.
     For debugging review, the temporary file is left in place, and it is the caller's responsibility to delete this file (if OS cleanup is not expected to automatically handle it).
 
     Returns pair:
-    * Path of temporary file.  
+    * Path of temporary file.
     * DFXMLObject, reconstituted from parsing that temporary file.
     """
     tmp_filename = None
     dobj_reconst = None
     try:
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".dfxml", delete=False) as out_fh:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".dfxml", delete=False
+        ) as out_fh:
             tmp_filename = out_fh.name
             dobj.print_dfxml(output_fh=out_fh)
         confirm_schema_conformance(tmp_filename)

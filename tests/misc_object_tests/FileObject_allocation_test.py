@@ -1,4 +1,3 @@
-
 # This software was developed at the National Institute of Standards
 # and Technology in whole or in part by employees of the Federal
 # Government in the course of their official duties. Pursuant to
@@ -76,4 +75,3 @@ def test_all():
     fin9.alloc_inode = None
     fin9.alloc_name = None
     assert fin9.is_allocated() == None
-

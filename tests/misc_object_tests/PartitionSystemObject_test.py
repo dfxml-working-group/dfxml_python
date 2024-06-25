@@ -25,6 +25,7 @@ import dfxml.objects as Objects
 
 _logger = logging.getLogger(os.path.basename(__file__))
 
+
 def test_empty_object():
     dobj = Objects.DFXMLObject()
     psobj = Objects.PartitionSystemObject()
@@ -38,6 +39,7 @@ def test_empty_object():
         _logger.debug("tmp_filename = %r." % tmp_filename)
         raise
     os.remove(tmp_filename)
+
 
 def test_error_element_order():
     dobj = Objects.DFXMLObject()

@@ -29,6 +29,7 @@ XMLNS_TEST_CLAMSCAN = "file:///opt/local/bin/clamscan"
 XMLNS_TEST_UNREGGED = "file:///dev/random"
 ET.register_namespace("clam", XMLNS_TEST_CLAMSCAN)
 
+
 def test_externals():
     _logger = logging.getLogger(os.path.basename(__file__))
     logging.basicConfig(level=logging.DEBUG)
@@ -83,14 +84,22 @@ def test_externals():
     vobj.externals.append(e)
 
     # Test serialization to Element (file I/O done in separate test).
-    s = Objects._ET_tostring(vobj.to_Element()) #TODO Maybe this should be more than an internal function.
+    s = Objects._ET_tostring(
+        vobj.to_Element()
+    )  # TODO Maybe this should be more than an internal function.
     _logger.debug(s)
     if s.find("scan_results") == -1:
-        raise ValueError("Serialization did not output other-namespace element 'scan_results'.")
+        raise ValueError(
+            "Serialization did not output other-namespace element 'scan_results'."
+        )
     if s.find("clam:version") == -1:
-        raise ValueError("Serialization did not output prefixed element 'clam:version'.")
+        raise ValueError(
+            "Serialization did not output prefixed element 'clam:version'."
+        )
     if s.find("test2") == -1:
-        raise ValueError("Serialization did not output unregistered-prefix element 'test2'.")
+        raise ValueError(
+            "Serialization did not output unregistered-prefix element 'test2'."
+        )
 
     # Test de-serialization.
     vor = Objects.VolumeObject()
@@ -98,6 +107,7 @@ def test_externals():
     vor.populate_from_Element(x)
     _logger.debug("De-serialized: %r." % vor.externals)
     assert len(vor.externals) == 3
+
 
 def test_prefixed_externals_round_trip():
     _logger = logging.getLogger(os.path.basename(__file__))
@@ -133,7 +143,7 @@ def test_prefixed_externals_round_trip():
         raise
     os.remove(tmp_filename)
 
+
 if __name__ == "__main__":
     test_externals()
     test_prefixed_externals_round_trip()
-

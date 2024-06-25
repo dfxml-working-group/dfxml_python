@@ -27,68 +27,64 @@ def test_AbstractHierarchyObject_append() -> None:
     This test confirms expected append() behaviors, in lieu of static type checking enforcement.
     """
 
-    hierarchy_object_classes : typing.List[type] = [
-      Objects.DFXMLObject,
-      Objects.RegXMLObject,
-      Objects.DiskImageObject,
-      Objects.PartitionSystemObject,
-      Objects.PartitionObject,
-      Objects.VolumeObject,
-      Objects.HiveObject,
-      Objects.FileObject,
-      Objects.CellObject
+    hierarchy_object_classes: typing.List[type] = [
+        Objects.DFXMLObject,
+        Objects.RegXMLObject,
+        Objects.DiskImageObject,
+        Objects.PartitionSystemObject,
+        Objects.PartitionObject,
+        Objects.VolumeObject,
+        Objects.HiveObject,
+        Objects.FileObject,
+        Objects.CellObject,
     ]
 
-    parent_object_classes : typing.List[type] = [
-      Objects.DFXMLObject,
-      Objects.RegXMLObject,
-      Objects.DiskImageObject,
-      Objects.PartitionSystemObject,
-      Objects.PartitionObject,
-      Objects.VolumeObject,
-      Objects.HiveObject
+    parent_object_classes: typing.List[type] = [
+        Objects.DFXMLObject,
+        Objects.RegXMLObject,
+        Objects.DiskImageObject,
+        Objects.PartitionSystemObject,
+        Objects.PartitionObject,
+        Objects.VolumeObject,
+        Objects.HiveObject,
     ]
     for parent_object_class in parent_object_classes:
         assert issubclass(parent_object_class, Objects.AbstractParentObject)
 
-    matrix_expected : typing.Dict[type, typing.Set[type]] = {
-      Objects.DFXMLObject: {
-        Objects.DiskImageObject,
-        Objects.PartitionSystemObject,
-        Objects.PartitionObject,
-        Objects.VolumeObject,
-        Objects.FileObject
-      },
-      Objects.RegXMLObject: {
-        Objects.HiveObject,
-        Objects.CellObject
-      },
-      Objects.DiskImageObject: {
-        Objects.PartitionSystemObject,
-        Objects.VolumeObject,
-        Objects.FileObject
-      },
-      Objects.PartitionSystemObject: {
-        Objects.PartitionObject,
-        Objects.FileObject
-      },
-      Objects.PartitionObject: {
-        Objects.PartitionSystemObject,
-        Objects.PartitionObject,
-        Objects.VolumeObject,
-        Objects.FileObject
-      },
-      Objects.VolumeObject: {
-        Objects.DiskImageObject,
-        Objects.VolumeObject,
-        Objects.FileObject
-      },
-      Objects.HiveObject: {
-        Objects.CellObject
-      }
+    matrix_expected: typing.Dict[type, typing.Set[type]] = {
+        Objects.DFXMLObject: {
+            Objects.DiskImageObject,
+            Objects.PartitionSystemObject,
+            Objects.PartitionObject,
+            Objects.VolumeObject,
+            Objects.FileObject,
+        },
+        Objects.RegXMLObject: {Objects.HiveObject, Objects.CellObject},
+        Objects.DiskImageObject: {
+            Objects.PartitionSystemObject,
+            Objects.VolumeObject,
+            Objects.FileObject,
+        },
+        Objects.PartitionSystemObject: {Objects.PartitionObject, Objects.FileObject},
+        Objects.PartitionObject: {
+            Objects.PartitionSystemObject,
+            Objects.PartitionObject,
+            Objects.VolumeObject,
+            Objects.FileObject,
+        },
+        Objects.VolumeObject: {
+            Objects.DiskImageObject,
+            Objects.VolumeObject,
+            Objects.FileObject,
+        },
+        Objects.HiveObject: {Objects.CellObject},
     }
-    matrix_computed_PASS : typing.Dict[type, typing.Set[type]] = collections.defaultdict(set)
-    matrix_computed_XFAIL : typing.Dict[type, typing.Set[type]] = collections.defaultdict(set)
+    matrix_computed_PASS: typing.Dict[type, typing.Set[type]] = collections.defaultdict(
+        set
+    )
+    matrix_computed_XFAIL: typing.Dict[type, typing.Set[type]] = (
+        collections.defaultdict(set)
+    )
 
     for parent_class in parent_object_classes:
         for child_class in hierarchy_object_classes:
@@ -105,18 +101,23 @@ def test_AbstractHierarchyObject_append() -> None:
     logging.debug(matrix_computed_XFAIL)
     assert matrix_expected == matrix_computed_PASS
 
-@pytest.mark.xfail(strict=True, reason="print_dfxml currently requires a text, not binary, writer.")
+
+@pytest.mark.xfail(
+    strict=True, reason="print_dfxml currently requires a text, not binary, writer."
+)
 def test_serialization_to_binary_file() -> None:
     dobj = Objects.DFXMLObject()
     with tempfile.NamedTemporaryFile(mode="w+b", suffix=".dfxml") as temp_fh:
         logging.debug("temp_fh.name = %r.", temp_fh.name)
         dobj.print_dfxml(temp_fh)  # type: ignore
 
+
 def test_serialization_to_text_file() -> None:
     dobj = Objects.DFXMLObject()
     with tempfile.NamedTemporaryFile(mode="w", suffix=".dfxml") as temp_fh:
         logging.debug("temp_fh.name = %r.", temp_fh.name)
         dobj.print_dfxml(temp_fh)
+
 
 def test_warn_append_allocated_file_to_pobj() -> None:
     # Example source c/o:
@@ -131,6 +132,7 @@ def test_warn_append_allocated_file_to_pobj() -> None:
         assert len(w) == 1
         assert issubclass(w[-1].category, UserWarning) == 1
 
+
 def test_warn_append_allocated_file_to_psobj() -> None:
     # Example source c/o:
     # https://docs.python.org/3/library/warnings.html#testing-warnings
@@ -143,6 +145,7 @@ def test_warn_append_allocated_file_to_psobj() -> None:
         psobj.append(fobj)
         assert len(w) == 1
         assert issubclass(w[-1].category, UserWarning) == 1
+
 
 def test_instance_isolation_byte_runs() -> None:
     """
@@ -165,6 +168,7 @@ def test_instance_isolation_byte_runs() -> None:
 
     assert len(fobj1.byte_runs) == 1
     assert len(fobj2.byte_runs) == 1
+
 
 def test_instance_isolation_child_objects() -> None:
     """

@@ -74,185 +74,253 @@ import dfxml.fiwalk as fiwalk
 
 ################################################################
 def convert_fileglob_to_re(fileglob):
-    regex = fileglob.replace(".","[.]").replace("*",".*").replace("?",".?")
+    regex = fileglob.replace(".", "[.]").replace("*", ".*").replace("?", ".?")
     return re.compile(regex)
 
+
 class redact_rule:
-    """ Instances of this class are objects that can decide whether or not to redact."""
-    def __init__(self,line):
+    """Instances of this class are objects that can decide whether or not to redact."""
+
+    def __init__(self, line):
         self.line = line
-        self.complete = True               # by default, redacts everything
-    def should_redact(self,fileobject):
+        self.complete = True  # by default, redacts everything
+
+    def should_redact(self, fileobject):
         """Returns True if this fileobject should be redacted"""
-        raise ValueError("redact method of redact_rule super class should not be called")
+        raise ValueError(
+            "redact method of redact_rule super class should not be called"
+        )
+
     def __str__(self):
-        return "action<"+self.line+">"
-    def runs_to_redact(self,fi):
+        return "action<" + self.line + ">"
+
+    def runs_to_redact(self, fi):
         """Returns the byte_runs of the source which match the rule.
         By default this is the entire object."""
         return fi.byte_runs()
 
 
 class redact_rule_md5(redact_rule):
-    """ redact if the MD5 matches"""
-    def __init__(self,line,val):
-        redact_rule.__init__(self,line)
+    """redact if the MD5 matches"""
+
+    def __init__(self, line, val):
+        redact_rule.__init__(self, line)
         self.md5val = val.lower()
-    def should_redact(self,fi):
-        return self.md5val == fi.tag('md5')
+
+    def should_redact(self, fi):
+        return self.md5val == fi.tag("md5")
+
 
 class redact_rule_sha1(redact_rule):
-    """ redact if the SHA1 matches"""
-    def __init__(self,line,val):
-        redact_rule.__init__(self,line)
+    """redact if the SHA1 matches"""
+
+    def __init__(self, line, val):
+        redact_rule.__init__(self, line)
         self.sha1val = val.lower()
-    def should_redact(self,fi):
-        return self.sha1val == fi.tag('sha1')
+
+    def should_redact(self, fi):
+        return self.sha1val == fi.tag("sha1")
+
 
 class redact_rule_filepat(redact_rule):
-    def __init__(self,line,filepat):
+    def __init__(self, line, filepat):
         import re
-        redact_rule.__init__(self,line)
+
+        redact_rule.__init__(self, line)
         # convert fileglobbing to regular expression
         self.filepat_re = convert_fileglob_to_re(filepat)
-        print("adding rule to redact path "+self.filepat_re.pattern)
-    def should_redact(self,fileobject):
+        print("adding rule to redact path " + self.filepat_re.pattern)
+
+    def should_redact(self, fileobject):
         return self.filepat_re.search(fileobject.filename())
 
+
 class redact_rule_filename(redact_rule):
-    def __init__(self,line,filename):
-        redact_rule.__init__(self,line)
+    def __init__(self, line, filename):
+        redact_rule.__init__(self, line)
         self.filename = filename
-        print("adding rule to redact filename "+self.filename)
-    def should_redact(self,fileobject):
+        print("adding rule to redact filename " + self.filename)
+
+    def should_redact(self, fileobject):
         was = os.path.sep
-        os.path.sep = '/'                       # Force Unix filename conventions
+        os.path.sep = "/"  # Force Unix filename conventions
         ret = self.filename == os.path.basename(fileobject.filename())
         os.path.sep = was
         return ret
 
+
 class redact_rule_dirname(redact_rule):
-    def __init__(self,line,dirname):
-        redact_rule.__init__(self,line)
+    def __init__(self, line, dirname):
+        redact_rule.__init__(self, line)
         self.dirname = dirname
-    def should_redact(self,fileobject):
+
+    def should_redact(self, fileobject):
         was = os.path.sep
-        os.path.sep = '/'                      # Force Unix filename conventions
+        os.path.sep = "/"  # Force Unix filename conventions
         ret = self.dirname == os.path.dirname(fileobject.filename())
         os.path.sep = was
         return ret
 
+
 class redact_rule_contains(redact_rule):
-    def __init__(self,line,text):
-        redact_rule.__init__(self,line)
+    def __init__(self, line, text):
+        redact_rule.__init__(self, line)
         self.text = text
-    def should_redact(self,fileobject):
+
+    def should_redact(self, fileobject):
         return self.text in fileobject.contents()
+
 
 class redact_rule_string(redact_rule):
-    def __init__(self,line,text):
-        redact_rule.__init__(self,line)
+    def __init__(self, line, text):
+        redact_rule.__init__(self, line)
         self.text = text
-        self.complete = False           # doesn't redact the entire file
+        self.complete = False  # doesn't redact the entire file
 
-    def should_redact(self,fileobject):
+    def should_redact(self, fileobject):
         return self.text in fileobject.contents()
-    def runs_to_redact(self,fi):
+
+    def runs_to_redact(self, fi):
         """Overridden to return the byte runs of just the given text"""
         ret = []
         tlen = len(self.text)
         for run in fi.byte_runs():
-            (file_offset,run_len,img_offset) = run
+            (file_offset, run_len, img_offset) = run
 
             run_content = fi.content_for_run(run)
             offset = 0
             # Now find all the places inside "run"
             # where the text "self.text" appears
-            print("looking for '{}' in '{}'".format(self.text,run))
-            while offset>=0:
-                offset = run.find(self.text,offset)
-                if offset>=0:
-                    ret.append((file_offset+offset,tlen,img_offset+offset))
-                    offset += 1         #
+            print("looking for '{}' in '{}'".format(self.text, run))
+            while offset >= 0:
+                offset = run.find(self.text, offset)
+                if offset >= 0:
+                    ret.append((file_offset + offset, tlen, img_offset + offset))
+                    offset += 1  #
         return ret
 
+
 """Not actually a redact rule, but rather a rule for global ignores"""
-class ignore_rule():
+
+
+class ignore_rule:
     def __init__(self):
         self.ignore_patterns = []
-    def ignore(self,ignore):
+
+    def ignore(self, ignore):
         """Ignores specified files based on a regex"""
         self.ignore_patterns.append(re.compile(convert_fileglob_to_re(ignore)))
         return self
+
     def should_ignore(self, fi):
         for ig in self.ignore_patterns:
             if ig.search(fi.filename()):
                 return True
         return False
 
+
 ################################################################
-class redact_action():
+class redact_action:
     """Instances of this class are objects that specify how a redaction should be done."""
-    def redact(self,rule,fileobject,rc):
+
+    def redact(self, rule, fileobject, rc):
         """Performs the redaction"""
-        raise ValueError("redact method of redact_action super class should not be called")
+        raise ValueError(
+            "redact method of redact_action super class should not be called"
+        )
+
 
 class redact_action_fill(redact_action):
-    """ Perform redaction by filling"""
-    def __init__(self,val):
+    """Perform redaction by filling"""
+
+    def __init__(self, val):
         self.fillvalue = val
-    def redact(self,rule,fi,rc):
+
+    def redact(self, rule, fi, rc):
         for run in rule.runs_to_redact(fi):
             print("   Current run %s " % run)
             rc.imagefile.seek(run.img_offset)
             runlen = run.len
-            print("\tFile info - \n\t\tname: %s  \n\t\tclosed: %s \n\t\tposition: %d \n\t\tmode: %s" % ("\\"))
-            (rc.imagefile.name, rc.imagefile.closed, rc.imagefile.tell(), rc.imagefile.mode)
-            print("   Filling at offset {}, {} bytes with pattern {}".format(run.img_offset,runlen,hex(self.fillvalue)))
+            print(
+                "\tFile info - \n\t\tname: %s  \n\t\tclosed: %s \n\t\tposition: %d \n\t\tmode: %s"
+                % ("\\")
+            )
+            (
+                rc.imagefile.name,
+                rc.imagefile.closed,
+                rc.imagefile.tell(),
+                rc.imagefile.mode,
+            )
+            print(
+                "   Filling at offset {}, {} bytes with pattern {}".format(
+                    run.img_offset, runlen, hex(self.fillvalue)
+                )
+            )
             if rc.commit:
                 rc.imagefile.seek(run.img_offset)
                 rc.imagefile.write(chr(self.fillvalue) * run.len)
                 print("   >>COMMIT\n")
 
+
 class redact_action_encrypt(redact_action):
-    """ Perform redaction by encrypting"""
-    def redact(self,rule,fileobject,rc):
+    """Perform redaction by encrypting"""
+
+    def redact(self, rule, fileobject, rc):
         for run in rule.runs_to_redact(fileobject):
-            print("   encrypting at offset {}, {} bytes with cipher".format(run.img_offset,run.bytes))
+            print(
+                "   encrypting at offset {}, {} bytes with cipher".format(
+                    run.img_offset, run.bytes
+                )
+            )
             raise ValueError("Didn't write this yet")
 
+
 class redact_action_fuzz(redact_action):
-    """ Perform redaction by fuzzing x86 instructions """
-    def redact(self,rule,fileobject,rc):
-        '''
+    """Perform redaction by fuzzing x86 instructions"""
+
+    def redact(self, rule, fileobject, rc):
+        """
         The net effect of this function is that bytes 127-255 are "fuzzed" over
         the range of 159-191, with each series of four bytes
         (e.g. 128-131) to one byte value (e.g. 160).
-        '''
+        """
+
         def fuzz(ch):
             o = ord(ch)
-            if(o<127):
+            if o < 127:
                 r = ch
             else:
-                r = chr(((o>>2)+128)%256)
+                r = chr(((o >> 2) + 128) % 256)
             return r
-        print("Redacting with FUZZ: ",fileobject)
+
+        print("Redacting with FUZZ: ", fileobject)
         for run in rule.runs_to_redact(fileobject):
             try:
-                print("   Fuzzing at offset: %d, can fuzz up to %d bytes " % (run.img_offset,run.len))
+                print(
+                    "   Fuzzing at offset: %d, can fuzz up to %d bytes "
+                    % (run.img_offset, run.len)
+                )
                 rc.imagefile.seek(run.img_offset)
 
                 # Previously redacted only first 10 bytes, now redacts entire sequence
-                #first_ten_bytes = rc.imagefile.read(10)
+                # first_ten_bytes = rc.imagefile.read(10)
                 run_bytes = rc.imagefile.read(run.len)
 
-                print("\tFile info - \n\t\tname: %s  \n\t\tclosed: %s \n\t\tposition: %d \n\t\tmode: %s" % "\\")
-                print(rc.imagefile.name, rc.imagefile.closed, rc.imagefile.tell(), rc.imagefile.mode)
+                print(
+                    "\tFile info - \n\t\tname: %s  \n\t\tclosed: %s \n\t\tposition: %d \n\t\tmode: %s"
+                    % "\\"
+                )
+                print(
+                    rc.imagefile.name,
+                    rc.imagefile.closed,
+                    rc.imagefile.tell(),
+                    rc.imagefile.mode,
+                )
                 print("    Fuzzing %d bytes - should be %d" % (len(run_bytes), run.len))
                 newbytes = "".join([fuzz(x) for x in run_bytes])
-                #debug
+                # debug
                 print("new: %i old: %i" % (len(newbytes), run.len))
-                assert(len(newbytes)==run.len)
+                assert len(newbytes) == run.len
                 if rc.commit:
                     rc.imagefile.seek(run.img_offset)
                     rc.imagefile.write(newbytes)
@@ -264,94 +332,101 @@ class redact_action_fuzz(redact_action):
 ################################################################
 class RedactConfig:
     """Class to read and parse a redaction config file"""
-    def __init__(self,fn):
+
+    def __init__(self, fn):
         self.cmds = []
         self.commit = False
         self.filename = None
         self.xmlfile = None
         self.ignore_rule = ignore_rule()
-        for line in open(fn,"r"):
-            if line[0] in '#;': continue       # comment line
+        for line in open(fn, "r"):
+            if line[0] in "#;":
+                continue  # comment line
             line = line.strip()
-            if line=="": continue
+            if line == "":
+                continue
             atoms = line.split(" ")
-            while "" in atoms: atoms.remove("") # take care of extra spaces
+            while "" in atoms:
+                atoms.remove("")  # take care of extra spaces
             cmd = atoms[0].lower()
             rule = None
             action = None
 
             # First look for simple commands
 
-            if cmd=='key':
+            if cmd == "key":
                 self.key = atoms[1]
                 continue
 
-            if cmd=="commit":
+            if cmd == "commit":
                 self.commit = True
                 continue
 
-            if cmd=="imagefile":
-                self.imagefile = open(atoms[1],"r+b")
+            if cmd == "imagefile":
+                self.imagefile = open(atoms[1], "r+b")
                 continue
 
-            if cmd=="xmlfile":
-                self.xmlfile = open(atoms[1],"r")
+            if cmd == "xmlfile":
+                self.xmlfile = open(atoms[1], "r")
                 continue
 
-            if cmd=='ignore':
+            if cmd == "ignore":
                 self.ignore_rule.ignore(atoms[1])
                 continue
 
             # Now look for commands that are rules
 
-            if cmd=='md5':
-                rule = redact_rule_md5(line,atoms[1])
-            if cmd=='sha1':
-                rule = redact_rule_sha1(line,atoms[1])
-            if cmd=='filename':
-                rule = redact_rule_filename(line,atoms[1])
-            if cmd=='filepat':
-                rule = redact_rule_filepat(line,atoms[1])
-            if cmd=='contains':
-                rule = redact_rule_contains(line,atoms[1])
-            if cmd=='string':
-                rule = redact_rule_string(line,atoms[1])
+            if cmd == "md5":
+                rule = redact_rule_md5(line, atoms[1])
+            if cmd == "sha1":
+                rule = redact_rule_sha1(line, atoms[1])
+            if cmd == "filename":
+                rule = redact_rule_filename(line, atoms[1])
+            if cmd == "filepat":
+                rule = redact_rule_filepat(line, atoms[1])
+            if cmd == "contains":
+                rule = redact_rule_contains(line, atoms[1])
+            if cmd == "string":
+                rule = redact_rule_string(line, atoms[1])
 
             if rule:
-                if atoms[2].lower()=='fill':
+                if atoms[2].lower() == "fill":
                     action = redact_action_fill(eval(atoms[3]))
-                if atoms[2].lower()=='encrypt':
+                if atoms[2].lower() == "encrypt":
                     action = redact_action_encrypt()
-                if atoms[2].lower()=='fuzz':
+                if atoms[2].lower() == "fuzz":
                     action = redact_action_fuzz()
 
-
             if not rule or not action:
-                print("atoms:",atoms)
-                print("rule:",rule)
-                print("action:",action)
+                print("atoms:", atoms)
+                print("rule:", rule)
+                print("action:", action)
                 raise ValueError("Cannot parse: '%s'" % line)
-            self.cmds.append((rule,action))
+            self.cmds.append((rule, action))
 
     def need_md5(self):
-        for (rule,action) in self.cmds:
-            if rule.__class__==redact_rule_md5: return True
+        for rule, action in self.cmds:
+            if rule.__class__ == redact_rule_md5:
+                return True
         return False
 
     def need_sha1(self):
-        for (rule,action) in self.cmds:
-            if rule.__class__==redact_rule_sha1: return True
+        for rule, action in self.cmds:
+            if rule.__class__ == redact_rule_sha1:
+                return True
         return False
 
     def fiwalk_opts(self):
         "Returns the options that fiwalk needs given the redaction requested."
         opts = "-x"
-        if self.need_sha1(): opts = opts+"1"
-        if self.need_md5():  opts = opts+"m"
+        if self.need_sha1():
+            opts = opts + "1"
+        if self.need_md5():
+            opts = opts + "m"
         return opts
 
-    def process_file(self,fileinfo):
-        for (rule,action) in self.cmds:
+    def process_file(self, fileinfo):
+        for rule, action in self.cmds:
             if rule.should_redact(fileinfo):
                 print("Processing file: %s" % fileinfo.filename())
 
@@ -360,12 +435,12 @@ class RedactConfig:
                     return
 
                 print("")
-                print("Redacting ",fileinfo.filename())
-                print("Reason:",str(rule))
-                print("Action:",action)
-                action.redact(rule,fileinfo,self)
+                print("Redacting ", fileinfo.filename())
+                print("Reason:", str(rule))
+                print("Action:", action)
+                action.redact(rule, fileinfo, self)
                 if rule.complete:
-                    return                  # only need to redact once!
+                    return  # only need to redact once!
 
     def close_files(self):
         if self.imagefile and self.imagefile.closed == False:
@@ -375,17 +450,19 @@ class RedactConfig:
             print("Closing file: %s" % self.xmlfile.name)
             self.xmlfile.close()
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     import sys
     import time
     from optparse import OptionParser
     from subprocess import PIPE, Popen
+
     global options
 
     parser = OptionParser()
     parser.usage = "%prog [options] config-file"
-    parser.add_option("-d","--debug",help="prints debugging info",dest="debug")
-    (options,args) = parser.parse_args()
+    parser.add_option("-d", "--debug", help="prints debugging info", dest="debug")
+    (options, args) = parser.parse_args()
 
     t0 = time.time()
     # Read the redaction configuration file
@@ -395,9 +472,11 @@ if __name__=="__main__":
         print("Error: a filename must be specified in the redaction config file")
         sys.exit(1)
 
-    fiwalk.fiwalk_using_sax(imagefile=rc.imagefile,xmlfile=rc.xmlfile,callback=rc.process_file)
+    fiwalk.fiwalk_using_sax(
+        imagefile=rc.imagefile, xmlfile=rc.xmlfile, callback=rc.process_file
+    )
     t1 = time.time()
 
     rc.close_files()
 
-    print("Time to run: %d seconds" % (t1-t0))
+    print("Time to run: %d seconds" % (t1 - t0))

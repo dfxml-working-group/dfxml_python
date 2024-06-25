@@ -1,4 +1,3 @@
-
 # This software was developed at the National Institute of Standards
 # and Technology by employees of the Federal Government in the course
 # of their official duties. Pursuant to title 17 Section 105 of the
@@ -19,8 +18,7 @@ import sys
 import dfxml
 import dfxml.objects as Objects
 
-if __name__=="__main__":
-
+if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     _logger = logging.getLogger(os.path.basename(__file__))
 
@@ -32,7 +30,9 @@ if __name__=="__main__":
     dobj = Objects.DFXMLObject()
     dobj.add_creator_library(lobj)
     dobj.add_creator_library("libfoo", "1.2.3")
-    dobj.add_creator_library("Python", ".".join(map(str, sys.version_info[0:3]))) #A bit of a bend, but gets the major version information out.
+    dobj.add_creator_library(
+        "Python", ".".join(map(str, sys.version_info[0:3]))
+    )  # A bit of a bend, but gets the major version information out.
     try:
         dobj.add_creator_library("libbar", None)
     except ValueError:

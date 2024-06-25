@@ -26,7 +26,7 @@ Process:
 import sys
 import time
 
-if sys.version_info < (3,1):
+if sys.version_info < (3, 1):
     raise RuntimeError("rdifference.py requires Python 3.1 or above")
 
 import dfxml
@@ -44,48 +44,54 @@ def ptime(t):
     else:
         return str(t.iso8601())
 
+
 def dprint(x):
     "Debug print"
     global options
-    if options.debug: print(x)
+    if options.debug:
+        print(x)
+
 
 #
 # This program keeps track of the current and previous TCP connections in a single
 # object called "FlowState". Another way to do that would have been to have
 # the instance built from the XML file and then have another function that compares
 # them.
-#        
+#
+
 
 class FlowState:
-    def __init__(self,fname):
+    def __init__(self, fname):
         self.options = options
         self.connections = set()
         self.process(fname)
-        
-    def process(self,fname):
-        self.fname = fname
-        dfxml.read_dfxml(xmlfile=open(fname,'rb'), callback=self.process_fi)
 
-    def process_fi(self,fi):
+    def process(self, fname):
+        self.fname = fname
+        dfxml.read_dfxml(xmlfile=open(fname, "rb"), callback=self.process_fi)
+
+    def process_fi(self, fi):
         self.connections.add(fi)
 
     def report(self):
         dfxml_html.header()
-        dfxml_html.h1("DFXML file:"+self.current_fname)
-        dfxml_html.table(['Total Connections',str(len(self.connections))])
+        dfxml_html.h1("DFXML file:" + self.current_fname)
+        dfxml_html.table(["Total Connections", str(len(self.connections))])
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     from copy import deepcopy
     from optparse import OptionParser
+
     global options
 
     parser = OptionParser()
-    parser.usage = '%prog [options] file1 file2 (files MUST be tcpflow DFXML files)'
-    parser.add_option("-d","--debug",help="debug",action='store_true')
+    parser.usage = "%prog [options] file1 file2 (files MUST be tcpflow DFXML files)"
+    parser.add_option("-d", "--debug", help="debug", action="store_true")
 
-    (options,args) = parser.parse_args()
+    (options, args) = parser.parse_args()
 
-    if len(args)!=2:
+    if len(args) != 2:
         parser.print_help()
         sys.exit(1)
 

@@ -53,11 +53,12 @@ tmphash = hashlib.sha512()
 tmphash.update(TEST_BYTE_STRING_5)
 TEST_HASH_5 = tmphash.hexdigest()
 
+
 def _test_file_in_non_fs_levels_deep(
-  include_disk_image : bool,
-  include_partition_system : bool,
-  include_partition : bool,
-  include_file_system : bool
+    include_disk_image: bool,
+    include_partition_system: bool,
+    include_partition: bool,
+    include_file_system: bool,
 ) -> None:
     """
     This test follows a simple, vertical storage layer stack, but adds a file at each layer.
@@ -71,7 +72,7 @@ def _test_file_in_non_fs_levels_deep(
     fobj_dobj.sha512 = TEST_HASH_1
     dobj.append(fobj_dobj)
 
-    appender_stack : typing.List[Objects.AbstractParentObject] = [dobj]
+    appender_stack: typing.List[Objects.AbstractParentObject] = [dobj]
 
     if include_disk_image:
         # Add disk image to top-level document.
@@ -156,6 +157,7 @@ def _test_file_in_non_fs_levels_deep(
         raise
     os.remove(tmp_filename)
 
+
 def test_file_in_non_fs_levels_deep() -> None:
     for include_disk_image in [True, False]:
         for include_partition_system in [True, False]:
@@ -163,23 +165,26 @@ def test_file_in_non_fs_levels_deep() -> None:
                 for include_file_system in [True, False]:
                     try:
                         _test_file_in_non_fs_levels_deep(
-                          include_disk_image,
-                          include_partition_system,
-                          include_partition,
-                          include_file_system
+                            include_disk_image,
+                            include_partition_system,
+                            include_partition,
+                            include_file_system,
                         )
                     except:
                         _logger.debug("include_disk_image = %r." % include_disk_image)
-                        _logger.debug("include_partition_system = %r." % include_partition_system)
+                        _logger.debug(
+                            "include_partition_system = %r." % include_partition_system
+                        )
                         _logger.debug("include_partition = %r." % include_partition)
                         _logger.debug("include_file_system = %r." % include_file_system)
                         raise
 
+
 def _test_file_in_non_fs_levels_flat(
-  include_disk_image : bool,
-  include_partition_system : bool,
-  include_partition : bool,
-  include_file_system : bool
+    include_disk_image: bool,
+    include_partition_system: bool,
+    include_partition: bool,
+    include_file_system: bool,
 ) -> None:
     """
     This test follows a simple, horizontal storage layer stack (every container attached to top document object), and adds a file for each container.
@@ -264,6 +269,7 @@ def _test_file_in_non_fs_levels_flat(
         raise
     os.remove(tmp_filename)
 
+
 def test_file_in_non_fs_levels_flat() -> None:
     for include_disk_image in [True, False]:
         for include_partition_system in [True, False]:
@@ -271,17 +277,20 @@ def test_file_in_non_fs_levels_flat() -> None:
                 for include_file_system in [True, False]:
                     try:
                         _test_file_in_non_fs_levels_flat(
-                          include_disk_image,
-                          include_partition_system,
-                          include_partition,
-                          include_file_system
+                            include_disk_image,
+                            include_partition_system,
+                            include_partition,
+                            include_file_system,
                         )
                     except:
                         _logger.debug("include_disk_image = %r." % include_disk_image)
-                        _logger.debug("include_partition_system = %r." % include_partition_system)
+                        _logger.debug(
+                            "include_partition_system = %r." % include_partition_system
+                        )
                         _logger.debug("include_partition = %r." % include_partition)
                         _logger.debug("include_file_system = %r." % include_file_system)
                         raise
+
 
 def test_solaris_ps_in_partition() -> None:
     dobj = Objects.DFXMLObject()
@@ -330,6 +339,7 @@ def test_solaris_ps_in_partition() -> None:
         raise
     os.remove(tmp_filename)
 
+
 def test_partition_in_partition() -> None:
     dobj = Objects.DFXMLObject()
 
@@ -355,6 +365,7 @@ def test_partition_in_partition() -> None:
         raise
     os.remove(tmp_filename)
 
+
 def test_hfsplus_in_hfs() -> None:
     dobj = Objects.DFXMLObject()
     vobj_outer = Objects.VolumeObject()
@@ -377,6 +388,7 @@ def test_hfsplus_in_hfs() -> None:
         _logger.debug("tmp_filename = %r." % tmp_filename)
         raise
     os.remove(tmp_filename)
+
 
 def test_disk_image_in_file_system() -> None:
     dobj = Objects.DFXMLObject()

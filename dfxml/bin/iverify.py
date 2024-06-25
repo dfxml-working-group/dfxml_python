@@ -10,9 +10,11 @@ from dfxml import fiwalk
 present = []
 not_present = []
 
+
 def process_fi(fi):
-    print("process file",fi.filename())
-    if fi.filesize()==0: return
+    print("process file", fi.filename())
+    if fi.filesize() == 0:
+        return
     try:
         if fi.file_present():
             present.append(fi)
@@ -21,20 +23,21 @@ def process_fi(fi):
             not_present.append(fi)
             return
     except ValueError(e):
-        sys.stderr.write(str(e)+"\n")
+        sys.stderr.write(str(e) + "\n")
 
-        
+
 def main():
     import sys
     from optparse import OptionParser
     from subprocess import PIPE, Popen
+
     global options
 
     parser = OptionParser()
-    parser.add_option("-d","--debug",help="prints debugging info",dest="debug")
-    parser.add_option("-g","--ground",help="ground truth XML file",dest="ground")
-    parser.usage = '%prog [options] image.iso'
-    (options,args) = parser.parse_args()
+    parser.add_option("-d", "--debug", help="prints debugging info", dest="debug")
+    parser.add_option("-g", "--ground", help="ground truth XML file", dest="ground")
+    parser.usage = "%prog [options] image.iso"
+    (options, args) = parser.parse_args()
 
     if not options.ground:
         parser.print_help()
@@ -43,13 +46,13 @@ def main():
     # Read the XML file
     reader = fiwalk.fileobject_reader()
     reader.set_imagefilename(args[0])
-    reader.process_xml_stream(open(options.ground,"r"),process_fi)
+    reader.process_xml_stream(open(options.ground, "r"), process_fi)
 
-    if len(present)==0:
+    if len(present) == 0:
         print("None of the files are present in the image")
         sys.exit(0)
 
-    if len(not_present)==0:
+    if len(not_present) == 0:
         print("All of the files are present in the image")
         sys.exit(0)
 
@@ -66,5 +69,5 @@ def main():
 
 
 ################################################################
-if __name__=="__main__":
+if __name__ == "__main__":
     main()

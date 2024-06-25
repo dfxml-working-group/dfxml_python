@@ -1,4 +1,3 @@
-
 # This software was developed at the National Institute of Standards
 # and Technology in whole or in part by employees of the Federal
 # Government in the course of their official duties. Pursuant to
@@ -32,7 +31,7 @@ def test_all():
 
     co.name_type = "v"
 
-    #Test value-type tolerance of data_type: should be null, strs and ints.
+    # Test value-type tolerance of data_type: should be null, strs and ints.
 
     co.data_type = None
     co.data_type = 0
@@ -45,7 +44,5 @@ def test_all():
     assert failed
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     test_all()
-
-    
