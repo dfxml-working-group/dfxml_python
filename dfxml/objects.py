@@ -152,13 +152,15 @@ def _intcast(val: typing.Optional[typing.Any]) -> typing.Optional[int]:
     )
 
 
-def _read_differential_annotations(annodict, element, annoset):
+def _read_differential_annotations(
+    annodict: typing.Dict[str, str], element, annoset: typing.Set[str]
+) -> None:
     """
     Uses the shorthand-to-attribute mappings of annodict to translate attributes of element into annoset.
     """
     # _logger.debug("annoset, before: %r." % annoset)
     # Start with inverting the dictionary.
-    _d = {annodict[k].replace("delta:", ""): k for k in annodict}
+    _d = {annodict[k].replace("{%s}" % dfxml.XMLNS_DELTA, ""): k for k in annodict}
     # _logger.debug("Inverted dictionary: _d = %r" % _d)
     for attr in element.attrib:
         # _logger.debug("Looking for differential annotations: %r" % element.attrib)
@@ -473,7 +475,7 @@ class DFXMLObject(AbstractParentObject):
         _logger.debug("self.diff_file_ignores = %r." % self.diff_file_ignores)
         for diff_file_ignore in sorted(self.diff_file_ignores):
             self.add_namespace("delta", dfxml.XMLNS_DELTA)
-            tmpel0 = ET.Element("delta:file_ignore")
+            tmpel0 = ET.Element("{%s}file_ignore" % dfxml.XMLNS_DELTA)
             tmpel0.text = diff_file_ignore
             outel.append(tmpel0)
 
@@ -2304,11 +2306,11 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
         "volumes",
     ]
 
-    _diff_attr_names = {
-        "new": "delta:new_volume",
-        "deleted": "delta:deleted_volume",
-        "modified": "delta:modified_volume",
-        "matched": "delta:matched",
+    _diff_attr_names: typing.Dict[str, str] = {
+        "new": "{%s}new_volume" % dfxml.XMLNS_DELTA,
+        "deleted": "{%s}deleted_volume" % dfxml.XMLNS_DELTA,
+        "modified": "{%s}modified_volume" % dfxml.XMLNS_DELTA,
+        "matched": "{%s}matched" % dfxml.XMLNS_DELTA,
     }
 
     # TODO There may be need in the future to compare the annotations as well.  It complicates make_differential_dfxml too much for now.
@@ -2457,9 +2459,13 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
         This subroutine implements a re-serialization implementation decision: elements in extension namespaces can appear only at the end of the volume XML child list, per the DFXML Schema.  All of the externals are put into the end of the element in to_partial_Element.
         """
         retval: typing.List[ET.Element] = []
+        # _logger.debug("len(volume_element) = %d.", len(volume_element))
 
         # Find all non-DFXML-namespaced elements by working from back of list of child elements, stopping when list is empty, or when a DFXML-namespaced element is encountered.
         while len(volume_element) > 0:
+            # _logger.debug("volume_element[-1] = %s.", volume_element[-1])
+            # _logger.debug("volume_element[-1].tag = %s.", volume_element[-1].tag)
+            # _logger.debug("_qsplit(volume_element[-1].tag) = %s.", _qsplit(volume_element[-1].tag))
             if _qsplit(volume_element[-1].tag)[0] in [None, dfxml.XMLNS_DFXML, ""]:
                 break
             else:
@@ -2480,6 +2486,8 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
         if not errorel is None:
             retval.insert(0, errorel)
 
+        # _logger.debug("len(volume_element) = %d.", len(volume_element))
+        # _logger.debug("len(retval) = %d.", len(retval))
         return retval
 
     def print_dfxml(self, output_fh=sys.stdout):
@@ -2573,7 +2581,7 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
                 tmpel.text = str(value)
                 _keep = True
             if prop in self.diffs:
-                tmpel.attrib["delta:changed_property"] = "1"
+                tmpel.attrib["{%s}changed_property" % dfxml.XMLNS_DELTA] = "1"
                 diffs_whittle_set.remove(prop)
                 _keep = True
             if _keep:
@@ -2604,22 +2612,22 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
         # Output the one Boolean property.
         _append_bool("allocated_only")
 
+        # Output the error property (which will be popped and re-appended after the file list in to_Element).
+        _append_str("error")
+
         # Output the original volume's properties.
         if not self.original_volume is None or "original_volume" in diffs_whittle_set:
             # Skip FileObject list, if any.
             if self.original_volume is None:
-                tmpel = ET.Element("delta:original_volume")
+                tmpel = ET.Element("{%s}original_volume" % dfxml.XMLNS_DELTA)
             else:
                 tmpel = self.original_volume.to_partial_Element()
-                tmpel.tag = "delta:original_volume"
+                tmpel.tag = "{%s}original_volume" % dfxml.XMLNS_DELTA
 
             if "original_volume" in diffs_whittle_set:
-                tmpel.attrib["delta:changed_property"] = "1"
+                tmpel.attrib["{%s}changed_property" % dfxml.XMLNS_DELTA] = "1"
 
             outel.append(tmpel)
-
-        # Output the error property (which will be popped and re-appended after the file list in to_Element).
-        _append_str("error")
 
         for e in self.externals:
             outel.append(e)
@@ -2641,13 +2649,12 @@ class VolumeObject(AbstractParentObject, AbstractChildObject, AbstractGeometricO
         self._allocated_only = _boolcast(val)
 
     @property
-    def annos(self):
+    def annos(self) -> typing.Set[str]:
         """Set of differential annotations.  Expected members are the keys of this class's _diff_attr_names dictionary."""
         return self._annos
 
     @annos.setter
-    def annos(self, val):
-        _typecheck(val, set)
+    def annos(self, val: typing.Set[str]) -> None:
         self._annos = val
 
     @property
@@ -2773,10 +2780,10 @@ class HiveObject(AbstractParentObject, AbstractChildObject, AbstractGeometricObj
     # No child_objects property.  (This implementation doesn't support Objects attached to cells.)
 
     _diff_attr_names = {
-        "new": "delta:new_hive",
-        "deleted": "delta:deleted_hive",
-        "modified": "delta:modified_hive",
-        "matched": "delta:matched",
+        "new": "{%s}new_hive" % dfxml.XMLNS_DELTA,
+        "deleted": "{%s}deleted_hive" % dfxml.XMLNS_DELTA,
+        "modified": "{%s}modified_hive" % dfxml.XMLNS_DELTA,
+        "matched": "{%s}matched" % dfxml.XMLNS_DELTA,
     }
 
     _incomparable_properties = set(["annos"])
@@ -3186,12 +3193,12 @@ class FileObject(AbstractChildObject, AbstractGeometricObject):
     )
 
     _diff_attr_names = {
-        "new": "delta:new_file",
-        "deleted": "delta:deleted_file",
-        "renamed": "delta:renamed_file",
-        "changed": "delta:changed_file",
-        "modified": "delta:modified_file",
-        "matched": "delta:matched",
+        "new": "{%s}new_file" % dfxml.XMLNS_DELTA,
+        "deleted": "{%s}deleted_file" % dfxml.XMLNS_DELTA,
+        "renamed": "{%s}renamed_file" % dfxml.XMLNS_DELTA,
+        "changed": "{%s}changed_file" % dfxml.XMLNS_DELTA,
+        "modified": "{%s}modified_file" % dfxml.XMLNS_DELTA,
+        "matched": "{%s}matched" % dfxml.XMLNS_DELTA,
     }
 
     def __init__(self, *args, **kwargs) -> None:
@@ -3562,12 +3569,12 @@ class FileObject(AbstractChildObject, AbstractGeometricObject):
 
         def _anno_change(el):
             if el.tag in self.diffs:
-                el.attrib["delta:changed_property"] = "1"
+                el.attrib["{%s}changed_property" % dfxml.XMLNS_DELTA] = "1"
                 diffs_whittle_set.remove(el.tag)
 
         def _anno_hash(el):
             if el.attrib["type"] in self.diffs:
-                el.attrib["delta:changed_property"] = "1"
+                el.attrib["{%s}changed_property" % dfxml.XMLNS_DELTA] = "1"
                 diffs_whittle_set.remove(el.attrib["type"])
 
         def _anno_byte_runs(el):
@@ -3576,7 +3583,7 @@ class FileObject(AbstractChildObject, AbstractGeometricObject):
             else:
                 prop = "data_brs"
             if prop in self.diffs:
-                el.attrib["delta:changed_property"] = "1"
+                el.attrib["{%s}changed_property" % dfxml.XMLNS_DELTA] = "1"
                 # _logger.debug("diffs_whittle_set = %r." % diffs_whittle_set)
                 diffs_whittle_set.remove(prop)
 
@@ -3710,7 +3717,9 @@ class FileObject(AbstractChildObject, AbstractGeometricObject):
         _append_hash("sha256", self.sha256)
         _append_hash("sha384", self.sha384)
         _append_hash("sha512", self.sha512)
-        _append_object("original_fileobject", self.original_fileobject, "delta:")
+        _append_object(
+            "original_fileobject", self.original_fileobject, "{%s}" % dfxml.XMLNS_DELTA
+        )
 
         if len(diffs_whittle_set) > 0:
             _logger.warning(
@@ -4229,11 +4238,11 @@ class CellObject(AbstractChildObject, AbstractGeometricObject):
     ]
 
     _diff_attr_names = {
-        "new": "delta:new_cell",
-        "deleted": "delta:deleted_cell",
-        "changed": "delta:changed_cell",
-        "modified": "delta:modified_cell",
-        "matched": "delta:matched",
+        "new": "{%s}new_cell" % dfxml.XMLNS_DELTA,
+        "deleted": "{%s}deleted_cell" % dfxml.XMLNS_DELTA,
+        "changed": "{%s}changed_cell" % dfxml.XMLNS_DELTA,
+        "modified": "{%s}modified_cell" % dfxml.XMLNS_DELTA,
+        "matched": "{%s}matched" % dfxml.XMLNS_DELTA,
     }
 
     # TODO There may be need in the future to compare the annotations as well.
@@ -4402,11 +4411,11 @@ class CellObject(AbstractChildObject, AbstractGeometricObject):
 
         def _anno_change(el):
             if el.tag in self.diffs:
-                el.attrib["delta:changed_property"] = "1"
+                el.attrib["{%s}changed_property" % dfxml.XMLNS_DELTA] = "1"
                 diffs_whittle_set.remove(el.tag)
             # Do an additional check for data_encoding, which is serialized as an attribute.
             if el.tag == "data" and "data_encoding" in self.diffs:
-                el.attrib["delta:changed_property"] = "1"
+                el.attrib["{%s}changed_property" % dfxml.XMLNS_DELTA] = "1"
                 diffs_whittle_set.remove("data_encoding")
 
         def _append_bool(name, value):
