@@ -1,5 +1,6 @@
 # DFXML
 [![Build Status](https://github.com/dfxml-working-group/dfxml_python/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/dfxml-working-group/dfxml_python/actions/workflows/continuous-integration.yml/)
+[![codecov](https://codecov.io/gh/dfxml-working-group/dfxml_python/graph/badge.svg?token=GkcwmlalR0)](https://codecov.io/gh/dfxml-working-group/dfxml_python)
 
 Welcome to the Digital Forensics XML (DFXML) git repository housing the Python codebase.
 
