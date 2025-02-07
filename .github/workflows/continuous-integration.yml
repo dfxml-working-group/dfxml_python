@@ -8,7 +8,7 @@ on: [push, pull_request]
 
 env:
   COVERAGE_OS: ubuntu-latest
-  COVERAGE_PYTHON_VERSION: 3.12
+  COVERAGE_PYTHON_VERSION: 3.13
 
 jobs:
   build:
@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: ['ubuntu-latest', 'macos-latest']
-        python-version: ['3.8','3.12']
+        python-version: ['3.9','3.13']
 
     steps:
       - name: Checkout
