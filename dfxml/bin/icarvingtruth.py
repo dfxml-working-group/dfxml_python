@@ -7,7 +7,7 @@ Outputs: List of all the files and partial files in the last file.
 Process:
 
 1. Read current disk image. Map out all allocated files. Add each fileinfo to the ground truth.
-2. Read all of the previous disk images (or XML files). 
+2. Read all of the previous disk images (or XML files).
    - If the a previously allocated file is present in the current image, add it to the ground truth.
 3. Read all of the previous disk images.
    - For all of the sectors not used in the final version, note which sectors of the original files survive.
